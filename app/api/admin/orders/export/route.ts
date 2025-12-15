@@ -5,7 +5,7 @@ import { verifyAuth } from '@/lib/auth'
 // Helper to check admin
 async function checkAdmin(request: NextRequest) {
   const user = await verifyAuth(request)
-  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
+  if (!user || (user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'seller')) {
     return null
   }
   return user

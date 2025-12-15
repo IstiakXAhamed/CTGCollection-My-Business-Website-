@@ -13,7 +13,9 @@ import {
   UserCog,
   Ban,
   CheckCircle,
-  Trash2
+  Trash2,
+  Store,
+  BadgeCheck
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -26,10 +28,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { useToast } from '@/hooks/use-toast'
+import RoleBadge from '@/components/RoleBadge'
 
 const roleConfig: Record<string, { icon: any, color: string, label: string }> = {
   superadmin: { icon: ShieldCheck, color: 'bg-purple-100 text-purple-800', label: 'Super Admin' },
-  admin: { icon: Shield, color: 'bg-blue-100 text-blue-800', label: 'Admin' },
+  admin: { icon: Shield, color: 'bg-indigo-100 text-indigo-800', label: 'Admin' },
+  seller: { icon: BadgeCheck, color: 'bg-blue-100 text-blue-800', label: 'Seller' },
   customer: { icon: UserIcon, color: 'bg-gray-100 text-gray-800', label: 'Customer' }
 }
 
@@ -41,7 +45,7 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState('all')
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
-  const [dialogAction, setDialogAction] = useState<'promote' | 'demote' | 'delete' | 'toggle'>('promote')
+  const [dialogAction, setDialogAction] = useState<'promote_admin' | 'promote_seller' | 'demote' | 'delete' | 'toggle'>('promote_admin')
   const { toast } = useToast()
 
   useEffect(() => {
@@ -189,23 +193,20 @@ export default function AdminUsersPage() {
           <option value="all">All Roles</option>
           <option value="superadmin">Super Admin</option>
           <option value="admin">Admin</option>
+          <option value="seller">Seller</option>
           <option value="customer">Customer</option>
         </select>
       </div>
 
       {/* Role Legend */}
-      <div className="flex gap-4 text-sm">
-        {Object.entries(roleConfig).map(([role, config]) => {
-          const Icon = config.icon
-          return (
-            <div key={role} className="flex items-center gap-2">
-              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${config.color}`}>
-                <Icon className="w-3 h-3 inline mr-1" />
-                {config.label}
-              </span>
-            </div>
-          )
-        })}
+      <div className="flex gap-4 text-sm flex-wrap">
+        <div className="flex items-center gap-2">
+           <span className="text-muted-foreground">Badges:</span>
+           <RoleBadge role="superadmin" size="sm" />
+           <RoleBadge role="admin" size="sm" />
+           <RoleBadge role="seller" size="sm" />
+           <RoleBadge role="customer" size="sm" />
+        </div>
       </div>
 
       {/* Users Table */}
@@ -236,11 +237,9 @@ export default function AdminUsersPage() {
                           <p className="text-sm text-muted-foreground">{user.email}</p>
                         </div>
                       </td>
+
                       <td className="py-4 px-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${roleInfo.color}`}>
-                          <Icon className="w-3 h-3 inline mr-1" />
-                          {roleInfo.label}
-                        </span>
+                        <RoleBadge role={user.role} tier={user.loyaltyPoints?.tier?.name} size="sm" />
                       </td>
                       <td className="py-4 px-4">
                         <span className="text-sm">{user._count?.orders || 0}</span>
@@ -261,24 +260,36 @@ export default function AdminUsersPage() {
                             {user.role !== 'superadmin' && (
                               <>
                                 {user.role === 'customer' ? (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => openDialog(user, 'promote')}
-                                    className="text-blue-600"
-                                  >
-                                    <Shield className="w-4 h-4 mr-1" />
-                                    Make Admin
-                                  </Button>
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => openDialog(user, 'promote_admin')}
+                                      className="text-indigo-600"
+                                      title="Make Admin"
+                                    >
+                                      <Shield className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => openDialog(user, 'promote_seller')}
+                                      className="text-blue-600"
+                                      title="Make Seller"
+                                    >
+                                      <BadgeCheck className="w-4 h-4" />
+                                    </Button>
+                                  </>
                                 ) : (
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={() => openDialog(user, 'demote')}
                                     className="text-orange-600"
+                                    title="Demote to Customer"
                                   >
                                     <UserIcon className="w-4 h-4 mr-1" />
-                                    Remove Admin
+                                    Demote
                                   </Button>
                                 )}
                                 <Button
@@ -323,14 +334,16 @@ export default function AdminUsersPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {dialogAction === 'promote' && 'Promote to Admin'}
-              {dialogAction === 'demote' && 'Remove Admin Privileges'}
+              {dialogAction === 'promote_admin' && 'Promote to Admin'}
+              {dialogAction === 'promote_seller' && 'Promote to Seller'}
+              {dialogAction === 'demote' && 'Remove Privileges'}
               {dialogAction === 'toggle' && (selectedUser?.isActive !== false ? 'Deactivate User' : 'Activate User')}
               {dialogAction === 'delete' && 'Delete User'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {dialogAction === 'promote' && `Make ${selectedUser?.name} an admin? They will be able to manage products, orders, and categories.`}
-              {dialogAction === 'demote' && `Remove admin privileges from ${selectedUser?.name}? They will become a regular customer.`}
+              {dialogAction === 'promote_admin' && `Make ${selectedUser?.name} an Admin? They will have full access except superadmin features.`}
+              {dialogAction === 'promote_seller' && `Make ${selectedUser?.name} a Seller? They will have restricted access (Orders, Products, Messages only).`}
+              {dialogAction === 'demote' && `Remove privileges from ${selectedUser?.name}? They will become a regular customer.`}
               {dialogAction === 'toggle' && (selectedUser?.isActive !== false 
                 ? `Deactivate ${selectedUser?.name}? They won't be able to login.`
                 : `Activate ${selectedUser?.name}? They will be able to login again.`
@@ -342,7 +355,8 @@ export default function AdminUsersPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (dialogAction === 'promote') handleRoleChange(selectedUser.id, 'admin')
+                if (dialogAction === 'promote_admin') handleRoleChange(selectedUser.id, 'admin')
+                else if (dialogAction === 'promote_seller') handleRoleChange(selectedUser.id, 'seller')
                 else if (dialogAction === 'demote') handleRoleChange(selectedUser.id, 'customer')
                 else if (dialogAction === 'toggle') handleToggleActive(selectedUser.id, selectedUser.isActive === false)
                 else if (dialogAction === 'delete') handleDelete(selectedUser.id)

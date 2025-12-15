@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyAuth } from '@/lib/auth'
+import { verifyAuth, createToken, setAuthCookie } from '@/lib/auth'
+import { notifyRoleChange, notifyAccountDeactivated, notifyAccountReactivated } from '@/lib/notifications'
+import { sendRoleChangeEmail, sendAccountDeactivatedEmail, sendAccountReactivatedEmail, sendAccountDeletedEmail } from '@/lib/email'
 
 // Helper to check if user is superadmin
 async function checkSuperAdmin(request: NextRequest) {
@@ -60,21 +62,20 @@ export async function GET(request: NextRequest) {
           createdById: true,
           createdAt: true,
           _count: { select: { orders: true } },
-          ...(includeLoyalty ? {
-            loyaltyPoints: {
-              select: {
-                tierId: true,
-                totalPoints: true,
-                tier: {
-                  select: {
-                    id: true,
-                    displayName: true,
-                    color: true
-                  }
+          loyaltyPoints: {
+            select: {
+              totalPoints: true,
+              tierId: true,
+              tier: {
+                select: {
+                  id: true,
+                  name: true,
+                  displayName: true,
+                  color: true
                 }
               }
             }
-          } : {})
+          }
         },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
@@ -119,7 +120,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Only allow valid roles
-    if (!['customer', 'admin'].includes(role)) {
+    if (!['customer', 'admin', 'seller'].includes(role)) {
       return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
     }
 
@@ -131,6 +132,33 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Send notification and email for role change
+    try {
+      await notifyRoleChange(userId, targetUser.role, role)
+      await sendRoleChangeEmail(targetUser.email, {
+        customerName: targetUser.name || 'Valued Customer',
+        oldRole: targetUser.role,
+        newRole: role
+      })
+    } catch (notifyError) {
+      console.error('Failed to send role change notification/email:', notifyError)
+    }
+
+    // If user is being promoted to admin/seller, create new JWT token for them
+    // This allows them to access admin panel immediately without re-login
+    let newToken = null
+    if ((role === 'admin' || role === 'seller') && (targetUser.role !== 'admin' && targetUser.role !== 'seller')) {
+      try {
+        newToken = await createToken({
+          userId: updatedUser.id,
+          email: updatedUser.email,
+          role: updatedUser.role
+        })
+      } catch (tokenError) {
+        console.error('Failed to create new token:', tokenError)
+      }
+    }
+
     return NextResponse.json({ 
       success: true, 
       user: {
@@ -138,7 +166,9 @@ export async function POST(request: NextRequest) {
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role
-      }
+      },
+      newToken, // Send new token to frontend if role was promoted
+      message: newToken ? 'Role updated. Please refresh the page to access admin features.' : 'Role updated successfully'
     })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -184,6 +214,33 @@ export async function PUT(request: NextRequest) {
       data: updateData
     })
 
+    // Send notification and email for status and role changes
+    try {
+      // Role change notification/email
+      if (role && role !== targetUser.role) {
+        await notifyRoleChange(userId, targetUser.role, role)
+        await sendRoleChangeEmail(targetUser.email, {
+          customerName: targetUser.name || 'Valued Customer',
+          oldRole: targetUser.role,
+          newRole: role
+        })
+      }
+      
+      // Deactivation notification/email
+      if (isActive === false && targetUser.isActive !== false) {
+        await notifyAccountDeactivated(userId)
+        await sendAccountDeactivatedEmail(targetUser.email, targetUser.name || 'Valued Customer')
+      }
+      
+      // Reactivation notification/email
+      if (isActive === true && targetUser.isActive === false) {
+        await notifyAccountReactivated(userId)
+        await sendAccountReactivatedEmail(targetUser.email, targetUser.name || 'Valued Customer')
+      }
+    } catch (notifyError) {
+      console.error('Failed to send status change notification/email:', notifyError)
+    }
+
     return NextResponse.json({ success: true, user: updatedUser })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -218,6 +275,13 @@ export async function DELETE(request: NextRequest) {
     // Cannot delete superadmin
     if (targetUser.role === 'superadmin') {
       return NextResponse.json({ error: 'Cannot delete superadmin account' }, { status: 403 })
+    }
+
+    // Send email BEFORE deleting the user (so we have their email)
+    try {
+      await sendAccountDeletedEmail(targetUser.email, targetUser.name || 'Valued Customer')
+    } catch (emailError) {
+      console.error('Failed to send account deleted email:', emailError)
     }
 
     await prisma.user.delete({ where: { id: userId } })

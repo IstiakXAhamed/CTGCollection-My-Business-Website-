@@ -62,6 +62,7 @@ export async function clearAuthCookie() {
 
 // Verify authentication from request (for API routes)
 // Returns user object with consistent 'id' field (mapped from JWT's 'userId')
+// IMPORTANT: Always fetches fresh role from database to support dynamic role changes
 export async function verifyAuth(request: NextRequest) {
   try {
     const token = request.cookies.get('token')?.value
@@ -71,15 +72,31 @@ export async function verifyAuth(request: NextRequest) {
     const payload = await verifyToken(token)
     if (!payload) return null
     
-    // Return consistent user object with 'id' field
-    // JWT stores userId, but we expose it as 'id' for API consistency
+    // Import prisma dynamically to avoid circular dependency
+    const { prisma } = await import('./prisma')
+    
+    // Fetch fresh user data from database to get current role
+    // This enables automatic role sync without requiring re-login
+    const dbUser = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: { id: true, email: true, role: true, name: true, isActive: true }
+    })
+    
+    if (!dbUser) return null
+    
+    // Check if user is active
+    if (dbUser.isActive === false) return null
+    
+    // Return user with FRESH role from database, not stale JWT role
     return {
-      id: payload.userId,
-      userId: payload.userId, // Keep for backwards compatibility
-      email: payload.email,
-      role: payload.role
+      id: dbUser.id,
+      userId: dbUser.id, // Keep for backwards compatibility
+      email: dbUser.email,
+      name: dbUser.name,
+      role: dbUser.role // Fresh role from database!
     }
   } catch (error) {
+    console.error('verifyAuth error:', error)
     return null
   }
 }

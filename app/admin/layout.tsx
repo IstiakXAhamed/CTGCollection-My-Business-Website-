@@ -20,10 +20,13 @@ import {
   Palette,
   Crown,
   Gift,
-  Megaphone
+  Megaphone,
+  BadgeCheck,
+  Shield
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AdminNotificationBell from '@/components/AdminNotificationBell'
+import RoleBadge from '@/components/RoleBadge'
 
 // Menu items - filtered by role
 const getMenuItems = (role: string) => {
@@ -146,16 +149,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </div>
             <div>
               <h1 className="text-xl font-bold">CTG Collection</h1>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                {isSuperAdmin ? (
-                  <>
-                    <ShieldCheck className="w-3 h-3 text-purple-600" />
-                    <span className="text-purple-600 font-semibold">Super Admin</span>
-                  </>
-                ) : (
-                  'Admin Panel'
-                )}
-              </p>
+              <div className="mt-1">
+                <RoleBadge role={isSuperAdmin ? 'superadmin' : user?.role || 'admin'} size="sm" />
+              </div>
             </div>
           </div>
 
@@ -204,24 +200,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             })}
           </nav>
           
-          {/* Role Badge */}
-          <div className="p-4 border-t mt-4">
-            <div className={`p-3 rounded-lg ${isSuperAdmin ? 'bg-purple-50' : 'bg-blue-50'}`}>
-              <div className="flex items-center gap-2">
-                {isSuperAdmin ? (
-                  <ShieldCheck className="w-5 h-5 text-purple-600" />
-                ) : (
-                  <Users className="w-5 h-5 text-blue-600" />
-                )}
-                <div>
-                  <p className={`text-sm font-semibold ${isSuperAdmin ? 'text-purple-800' : 'text-blue-800'}`}>
-                    {isSuperAdmin ? 'Super Admin' : 'Admin'}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            {/* Role Badge */}
+            <div className="p-4 border-t mt-4">
+              <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50/50">
+                <div className="flex-1 min-w-0">
+                  <RoleBadge role={user?.role} size="sm" className="mb-1" />
+                  <p className="text-xs text-muted-foreground truncate font-medium">{user?.email}</p>
                 </div>
               </div>
             </div>
-          </div>
+
         </aside>
 
         {/* Main Content */}

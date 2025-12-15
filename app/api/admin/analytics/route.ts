@@ -5,7 +5,7 @@ import { verifyAuth } from '@/lib/auth'
 export async function GET(request: NextRequest) {
   try {
     const user = await verifyAuth(request)
-    if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
+    if (!user || (user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'seller')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

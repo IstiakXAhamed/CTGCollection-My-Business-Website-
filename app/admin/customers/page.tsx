@@ -279,12 +279,14 @@ export default function CustomersPage() {
               onClick={() => setShowTierModal(false)}
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              className="fixed left-4 right-4 top-[15%] md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-full md:max-w-md bg-white rounded-xl shadow-2xl z-50 overflow-hidden"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed left-1/2 -translate-x-1/2 w-[90vw] max-w-md bg-white rounded-xl shadow-2xl z-50"
+              style={{ top: '60px', maxHeight: 'calc(100vh - 80px)' }}
             >
-              <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-xl">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   <Crown className="w-5 h-5" />
                   Assign Membership Tier
@@ -294,9 +296,11 @@ export default function CustomersPage() {
                 </button>
               </div>
               
-              <div className="p-6">
-                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600">Assigning tier to:</p>
+              {/* Scrollable Content */}
+              <div className="p-6 space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+                {/* User Info at top */}
+                <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
+                  <p className="text-xs text-gray-500 mb-1">Assigning tier to:</p>
                   <p className="font-semibold">{selectedUser.name}</p>
                   <p className="text-sm text-gray-500">{selectedUser.email}</p>
                   {selectedUser.loyaltyPoints?.tier && (
@@ -308,57 +312,60 @@ export default function CustomersPage() {
                   )}
                 </div>
 
-                <div className="space-y-2">
+                {/* Tier Selection */}
+                <div>
                   <p className="font-semibold text-sm text-gray-700 mb-3">Select Tier:</p>
-                  
-                  {/* No Tier Option */}
-                  <button
-                    onClick={() => assignTier(null)}
-                    disabled={updating}
-                    className="w-full p-3 border-2 rounded-lg text-left hover:border-gray-400 hover:bg-gray-50 transition flex items-center justify-between"
-                  >
-                    <div>
-                      <span className="font-medium text-gray-600">No Tier</span>
-                      <p className="text-xs text-gray-400">Remove membership tier</p>
-                    </div>
-                    {!selectedUser.loyaltyPoints?.tierId && (
-                      <Check className="w-5 h-5 text-green-600" />
-                    )}
-                  </button>
-
-                  {/* Tier Options */}
-                  {tiers.map((tier) => (
+                  <div className="space-y-2">
+                    {/* No Tier Option */}
                     <button
-                      key={tier.id}
-                      onClick={() => assignTier(tier.id)}
+                      onClick={() => assignTier(null)}
                       disabled={updating}
-                      className="w-full p-3 border-2 rounded-lg text-left hover:border-gray-400 transition flex items-center justify-between"
-                      style={{ 
-                        borderColor: selectedUser.loyaltyPoints?.tierId === tier.id ? tier.color : undefined,
-                        backgroundColor: selectedUser.loyaltyPoints?.tierId === tier.id ? `${tier.color}10` : undefined
-                      }}
+                      className="w-full p-3 border-2 rounded-lg text-left hover:border-gray-400 hover:bg-gray-50 transition flex items-center justify-between"
                     >
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-8 h-8 rounded-full flex items-center justify-center"
-                          style={{ backgroundColor: tier.color }}
-                        >
-                          <Crown className="w-4 h-4 text-white" />
-                        </div>
-                        <div>
-                          <span className="font-medium">{tier.displayName}</span>
-                          <p className="text-xs text-gray-500">Min spend: ৳{tier.minSpending.toLocaleString()}</p>
-                        </div>
+                      <div>
+                        <span className="font-medium text-gray-600">No Tier</span>
+                        <p className="text-xs text-gray-400">Remove membership tier</p>
                       </div>
-                      {selectedUser.loyaltyPoints?.tierId === tier.id && (
+                      {!selectedUser.loyaltyPoints?.tierId && (
                         <Check className="w-5 h-5 text-green-600" />
                       )}
                     </button>
-                  ))}
+
+                    {/* Tier Options */}
+                    {tiers.map((tier) => (
+                      <button
+                        key={tier.id}
+                        onClick={() => assignTier(tier.id)}
+                        disabled={updating}
+                        className="w-full p-3 border-2 rounded-lg text-left hover:border-gray-400 transition flex items-center justify-between"
+                        style={{ 
+                          borderColor: selectedUser.loyaltyPoints?.tierId === tier.id ? tier.color : undefined,
+                          backgroundColor: selectedUser.loyaltyPoints?.tierId === tier.id ? `${tier.color}10` : undefined
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="w-8 h-8 rounded-full flex items-center justify-center"
+                            style={{ backgroundColor: tier.color }}
+                          >
+                            <Crown className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <span className="font-medium">{tier.displayName}</span>
+                            <p className="text-xs text-gray-500">Min spend: ৳{tier.minSpending.toLocaleString()}</p>
+                          </div>
+                        </div>
+                        {selectedUser.loyaltyPoints?.tierId === tier.id && (
+                          <Check className="w-5 h-5 text-green-600" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
+                {/* Loading State */}
                 {updating && (
-                  <div className="mt-4 flex items-center justify-center gap-2 text-blue-600">
+                  <div className="flex items-center justify-center gap-2 text-blue-600 py-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Updating...</span>
                   </div>

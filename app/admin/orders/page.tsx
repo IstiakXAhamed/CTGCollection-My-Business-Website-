@@ -28,6 +28,7 @@ const statusOptions = ['pending', 'confirmed', 'processing', 'shipped', 'deliver
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([])
+  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 })
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
@@ -37,15 +38,23 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     fetchOrders()
-  }, [])
+  }, [pagination.page, pagination.limit])
 
   const fetchOrders = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/orders', { credentials: 'include' })
+      const queryParams = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        search: searchQuery // Pass search query if needed by backend (backend needs update for search but pagination is key here)
+      })
+      const res = await fetch(`/api/admin/orders?${queryParams}`, { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
         setOrders(data.orders || [])
+        if (data.pagination) {
+          setPagination(prev => ({ ...prev, ...data.pagination }))
+        }
       }
     } catch (error) {
       console.error('Failed to fetch orders:', error)
@@ -316,6 +325,34 @@ export default function AdminOrdersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-between mt-4 pb-8">
+        <div className="text-sm text-gray-500">
+          Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} orders
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+            disabled={pagination.page <= 1 || loading}
+          >
+            Previous
+          </Button>
+          <div className="flex items-center gap-2 px-2">
+             <span className="text-sm font-medium">Page {pagination.page} of {pagination.totalPages || 1}</span>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setPagination(prev => ({ ...prev, page: Math.min(prev.totalPages || 1, prev.page + 1) }))}
+            disabled={pagination.page >= (pagination.totalPages || 1) || loading}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
+import { sendTierUpdateEmail } from '@/lib/email'
+import { notifyTierChange } from '@/lib/notifications'
 
-// POST - Assign tier to user (Superadmin only)
+// POST - Assign tier to user (Superadmin and Admin only)
 export async function POST(request: NextRequest) {
   try {
     const user = await verifyAuth(request)
     
-    if (!user || user.role !== 'superadmin') {
-      return NextResponse.json({ error: 'Unauthorized - Superadmin access required' }, { status: 403 })
+    if (!user || (user.role !== 'superadmin' && user.role !== 'admin')) {
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 })
     }
 
     const { userId, tierId } = await request.json()
@@ -43,7 +45,7 @@ export async function POST(request: NextRequest) {
         data: { 
           tierId: tierId || null,
           tierUpdatedAt: new Date()
-        }
+        } as any
       })
     } else {
       // Create new loyalty points record with tier
@@ -69,6 +71,31 @@ export async function POST(request: NextRequest) {
         }
       }
     })
+
+    // Send email notification
+    if (updatedUser && tierId) {
+      // Find tier name
+      const tier = updatedUser.loyaltyPoints?.tier
+      if (tier && updatedUser.email) {
+        // We can define standard benefits or fetch from DB if available
+        // For now using generic placeholder or based on tier name
+        const standardBenefits: Record<string, string[]> = {
+          'Bronze': ['Earn 1 point per $1', 'Birthday Bonus'],
+          'Silver': ['Earn 1.5 points per $1', 'Birthday Bonus', 'Free Shipping'],
+          'Gold': ['Earn 2 points per $1', 'Priority Support', 'Free Shipping', 'Exclusive Deals'],
+          'Platinum': ['Earn 3 points per $1', 'Dedicated Manager', 'Free Shipping', 'VIP Access']
+        }
+        
+        await sendTierUpdateEmail(updatedUser.email, {
+          customerName: updatedUser.name,
+          tierName: tier.name,
+          benefits: standardBenefits[tier.name] || ['Exclusive member perks']
+        })
+        
+        // Also send in-app notification
+        await notifyTierChange(userId, tier.displayName || tier.name)
+      }
+    }
 
     return NextResponse.json({
       success: true,

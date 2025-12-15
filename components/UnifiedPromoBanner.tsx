@@ -14,6 +14,30 @@ export interface PromoBanner {
   icon: string
   enabled: boolean
   order: number
+  // Size options
+  size?: 'compact' | 'normal' | 'large'
+  fontSize?: 'sm' | 'base' | 'lg' | 'xl'
+  padding?: 'tight' | 'normal' | 'relaxed'
+}
+
+// Size presets
+export const SIZE_PRESETS = {
+  compact: { py: 'py-2', height: 'min-h-[40px]' },
+  normal: { py: 'py-3', height: 'min-h-[50px]' },
+  large: { py: 'py-4', height: 'min-h-[65px]' }
+}
+
+export const FONT_SIZE_PRESETS = {
+  sm: 'text-xs sm:text-sm',
+  base: 'text-sm sm:text-base',
+  lg: 'text-base sm:text-lg',
+  xl: 'text-lg sm:text-xl'
+}
+
+export const PADDING_PRESETS = {
+  tight: 'px-3',
+  normal: 'px-4 sm:px-6',
+  relaxed: 'px-6 sm:px-8'
 }
 
 // Gradient presets with names
@@ -200,6 +224,11 @@ export default function UnifiedPromoBanner() {
   const currentBanner = banners[currentIndex]
   const currentCountdown = countdown[currentBanner.id]
   const gradient = GRADIENT_PRESETS[currentBanner.preset as keyof typeof GRADIENT_PRESETS] || GRADIENT_PRESETS.sunset
+  
+  // Apply size presets
+  const sizeClass = SIZE_PRESETS[currentBanner.size || 'normal']
+  const fontSizeClass = FONT_SIZE_PRESETS[currentBanner.fontSize || 'base']
+  const paddingClass = PADDING_PRESETS[currentBanner.padding || 'normal']
 
   return (
     <div 
@@ -223,7 +252,7 @@ export default function UnifiedPromoBanner() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 py-4 md:py-5 relative">
+      <div className={`max-w-7xl mx-auto ${paddingClass} ${sizeClass.py} relative ${sizeClass.height} flex items-center`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentBanner.id}
@@ -231,7 +260,7 @@ export default function UnifiedPromoBanner() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -15, scale: 0.98 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="flex items-center justify-center gap-4 flex-wrap"
+            className={`flex items-center justify-center gap-4 flex-wrap w-full ${fontSizeClass}`}
           >
             {/* Animated Icon */}
             <motion.span

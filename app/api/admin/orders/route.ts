@@ -4,8 +4,8 @@ import { verifyAuth } from '@/lib/auth'
 
 async function checkAdmin(request: NextRequest) {
   const user = await verifyAuth(request)
-  // Allow both admin and superadmin roles
-  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
+  // Allow admin, superadmin, and seller roles
+  if (!user || (user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'seller')) {
     return null
   }
   return user

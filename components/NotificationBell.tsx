@@ -235,10 +235,17 @@ export default function NotificationBell() {
                 notifications.map((notif) => {
                   const Icon = typeIcons[notif.type] || Bell
                   const colorClass = typeColors[notif.type] || typeColors.general
+                  
+                  const handleNotificationClick = () => {
+                    if (!notif.isRead) {
+                      markAsRead(notif.id)
+                    }
+                    setIsOpen(false)
+                  }
+                  
                   const content = (
                     <div 
                       className={`p-4 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition ${!notif.isRead ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''}`}
-                      onClick={() => !notif.isRead && markAsRead(notif.id)}
                     >
                       <div className="flex items-start gap-3">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${colorClass}`}>
@@ -268,11 +275,13 @@ export default function NotificationBell() {
                   )
 
                   return notif.link ? (
-                    <Link key={notif.id} href={notif.link} onClick={() => setIsOpen(false)}>
+                    <Link key={notif.id} href={notif.link} onClick={handleNotificationClick}>
                       {content}
                     </Link>
                   ) : (
-                    <div key={notif.id}>{content}</div>
+                    <div key={notif.id} onClick={handleNotificationClick}>
+                      {content}
+                    </div>
                   )
                 })
               )}

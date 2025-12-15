@@ -48,6 +48,14 @@ export async function POST(request: Request) {
       )
     }
     
+    // Check if account is deactivated
+    if (user.isActive === false) {
+      return NextResponse.json(
+        { message: 'Your account has been deactivated. Please contact support.' },
+        { status: 403 }
+      )
+    }
+    
     // Check if email is verified (required for non-admin users)
     if (!user.emailVerified && user.role === 'customer') {
       return NextResponse.json(

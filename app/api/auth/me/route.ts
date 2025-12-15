@@ -12,19 +12,40 @@ export async function GET(request: Request) {
 
     // Verify token
     const { verifyToken } = await import('@/lib/auth')
+    const { prisma } = await import('@/lib/prisma')
     const user = await verifyToken(token)
 
-    if (!user) {
+    // Get fresh user data including loyalty tier
+    // Token payload uses userId, but we check both just in case
+    const userId = user.userId || user.id
+    
+    if (!userId) {
+       return NextResponse.json({ authenticated: false }, { status: 401 })
+    }
+
+    const freshUser = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        loyaltyPoints: {
+          include: {
+            tier: true
+          }
+        }
+      }
+    })
+
+    if (!freshUser) {
       return NextResponse.json({ authenticated: false }, { status: 401 })
     }
 
     return NextResponse.json({
       authenticated: true,
       user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
+        id: freshUser.id,
+        name: freshUser.name,
+        email: freshUser.email,
+        role: freshUser.role,
+        tier: freshUser.loyaltyPoints?.tier?.name || 'bronze'
       }
     })
   } catch (error) {

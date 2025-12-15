@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import Link from 'next/link'
-import { PromoBanner, GRADIENT_PRESETS, ICON_OPTIONS } from '@/components/UnifiedPromoBanner'
+import { PromoBanner, GRADIENT_PRESETS, ICON_OPTIONS, SIZE_PRESETS, FONT_SIZE_PRESETS, PADDING_PRESETS } from '@/components/UnifiedPromoBanner'
 
 export default function AdminBannersPage() {
   const [banners, setBanners] = useState<PromoBanner[]>([])
@@ -360,6 +360,73 @@ export default function AdminBannersPage() {
                           <opt.icon className="w-5 h-5" />
                         </button>
                       ))}
+                    </div>
+                  </div>
+
+                  {/* Size Controls */}
+                  <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-semibold text-gray-700">Size Controls</h4>
+                    
+                    <div className="grid grid-cols-3 gap-4">
+                      {/* Banner Height */}
+                      <div className="space-y-2">
+                        <Label className="text-xs">Banner Height</Label>
+                        <div className="flex flex-col gap-1">
+                          {(['compact', 'normal', 'large'] as const).map((size) => (
+                            <button
+                              key={size}
+                              onClick={() => updateBanner(editingBanner.id, { size })}
+                              className={`py-1 px-2 text-xs rounded border transition capitalize ${
+                                (editingBanner.size || 'normal') === size
+                                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              {size}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Font Size */}
+                      <div className="space-y-2">
+                        <Label className="text-xs">Text Size</Label>
+                        <div className="flex flex-col gap-1">
+                          {(['sm', 'base', 'lg', 'xl'] as const).map((fs) => (
+                            <button
+                              key={fs}
+                              onClick={() => updateBanner(editingBanner.id, { fontSize: fs })}
+                              className={`py-1 px-2 text-xs rounded border transition uppercase ${
+                                (editingBanner.fontSize || 'base') === fs
+                                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              {fs}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Padding */}
+                      <div className="space-y-2">
+                        <Label className="text-xs">Padding</Label>
+                        <div className="flex flex-col gap-1">
+                          {(['tight', 'normal', 'relaxed'] as const).map((pad) => (
+                            <button
+                              key={pad}
+                              onClick={() => updateBanner(editingBanner.id, { padding: pad })}
+                              className={`py-1 px-2 text-xs rounded border transition capitalize ${
+                                (editingBanner.padding || 'normal') === pad
+                                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              {pad}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
 

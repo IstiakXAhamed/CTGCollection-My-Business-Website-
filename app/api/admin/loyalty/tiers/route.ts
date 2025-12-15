@@ -7,13 +7,13 @@ export async function GET(request: NextRequest) {
   try {
     const user = await verifyAuth(request)
     
-    if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
+    if (!user || (user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'seller')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
     const tiers = await prisma.loyaltyTier.findMany({
       where: { isActive: true },
-      orderBy: { sortOrder: 'asc' },
+      orderBy: { minSpending: 'asc' },
       select: {
         id: true,
         name: true,

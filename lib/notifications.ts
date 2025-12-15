@@ -213,3 +213,58 @@ export async function notifyPromotion(userId: string, title: string, message: st
     `/shop`
   )
 }
+
+// ============= ACCOUNT STATUS NOTIFICATIONS =============
+
+export async function notifyRoleChange(userId: string, oldRole: string, newRole: string) {
+  const roleLabels: Record<string, string> = {
+    customer: 'Customer',
+    seller: 'Seller',
+    admin: 'Admin',
+    superadmin: 'Super Admin'
+  }
+  
+  const newRoleLabel = roleLabels[newRole] || newRole
+  const isPromotion = ['admin', 'seller', 'superadmin'].includes(newRole) && oldRole === 'customer'
+  
+  await createUserNotification(
+    userId,
+    'account',
+    isPromotion ? '🎊 Congratulations! Role Upgraded' : '📋 Account Role Updated',
+    isPromotion 
+      ? `You have been promoted to ${newRoleLabel}! Welcome to the team.`
+      : `Your account role has been changed to ${newRoleLabel}.`,
+    `/dashboard`
+  )
+}
+
+export async function notifyTierChange(userId: string, tierName: string) {
+  await createUserNotification(
+    userId,
+    'loyalty',
+    '🏆 Membership Tier Updated!',
+    `Congratulations! You are now a ${tierName} member. Enjoy exclusive benefits!`,
+    `/dashboard/loyalty`
+  )
+}
+
+export async function notifyAccountDeactivated(userId: string) {
+  await createUserNotification(
+    userId,
+    'account',
+    '⚠️ Account Deactivated',
+    'Your account has been temporarily deactivated. Please contact support for assistance.',
+    null
+  )
+}
+
+export async function notifyAccountReactivated(userId: string) {
+  await createUserNotification(
+    userId,
+    'account',
+    '✅ Account Reactivated',
+    'Great news! Your account has been reactivated. Welcome back!',
+    `/dashboard`
+  )
+}
+

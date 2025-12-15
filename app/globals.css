@@ -49,6 +49,417 @@
   }
 }
 
+/* Real Fire Animation */
+@keyframes fire-flicker {
+  0% { background-position: 0% 50%; box-shadow: 0 0 5px rgba(255, 69, 0, 0.5), 0 -5px 10px rgba(255, 140, 0, 0.3); }
+  50% { background-position: 100% 50%; box-shadow: 0 0 15px rgba(255, 69, 0, 0.8), 0 -8px 20px rgba(255, 69, 0, 0.5); }
+  100% { background-position: 0% 50%; box-shadow: 0 0 5px rgba(255, 69, 0, 0.5), 0 -5px 10px rgba(255, 140, 0, 0.3); }
+}
+
+/* Real Gold Sparkle */
+@keyframes gold-shimmer {
+  0% { background-position: -200% center; box-shadow: 0 0 5px #fbbf24; }
+  50% { box-shadow: 0 0 15px #f59e0b, 0 0 25px #fbbf24; }
+  100% { background-position: 200% center; box-shadow: 0 0 5px #fbbf24; }
+}
+
+/* Realistic Water */
+@keyframes water-wave {
+  0% { transform: translateY(0) scale(1.0); background-position: 0% 50%; }
+  50% { transform: translateY(-1px) scale(1.02); background-position: 100% 50%; }
+  100% { transform: translateY(0) scale(1.0); background-position: 0% 50%; }
+}
+
+/* Pearl Shimmer */
+@keyframes pearl-shine {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.animate-fire {
+  background: linear-gradient(-45deg, #ef4444, #f97316, #ef4444, #7f1d1d);
+  background-size: 300% 300%;
+  animation: fire-flicker 2s ease infinite;
+  border-color: #f87171;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.animate-gold {
+  background: linear-gradient(110deg, #fef3c7 10%, #fbbf24 30%, #fffbeb 50%, #fbbf24 70%, #fef3c7 90%);
+  background-size: 200% auto;
+  animation: gold-shimmer 2.5s linear infinite;
+  border-color: #fbbf24;
+  text-shadow: 0 1px 1px rgba(180,83,9,0.2);
+  color: #78350f !important;
+}
+
+.animate-water {
+  background: linear-gradient(90deg, #bae6fd, #7dd3fc, #38bdf8, #bae6fd);
+  background-size: 300% 100%;
+  animation: water-wave 3s ease-in-out infinite;
+  border-color: #38bdf8;
+  color: #0c4a6e !important;
+}
+
+.animate-rainbow {
+  background: linear-gradient(90deg, #f3f4f6, #e5e7eb, #f3f4f6, #f9fafb);
+  background-size: 200% 100%;
+  animation: pearl-shine 3s linear infinite;
+  border-color: #e5e7eb;
+}
+
+/* --- High-Quality Animation Presets for Banners & UI --- */
+
+/* Fade In Up */
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Scale In */
+@keyframes scale-in {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Float (Gentle Hover) */
+@keyframes float-y {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+
+/* Gentle Pulse with Shadow */
+@keyframes pulse-soft {
+  0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.2); }
+  70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+}
+
+/* Shimmer Slide (Glass Effect) */
+@keyframes shimmer-slide {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* Neon Glow Pulse */
+@keyframes neon-pulse {
+  0% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.5), 0 0 10px rgba(56, 189, 248, 0.3); }
+  50% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.8), 0 0 20px rgba(56, 189, 248, 0.5); }
+  100% { box-shadow: 0 0 5px rgba(56, 189, 248, 0.5), 0 0 10px rgba(56, 189, 248, 0.3); }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float {
+  animation: float-y 4s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s infinite;
+}
+
+.animate-shimmer-fast {
+  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.4) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer-slide 2s infinite linear;
+}
+
+.animate-neon {
+  animation: neon-pulse 2s infinite ease-in-out;
+}
+
+/* Staggered Delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* --- Loyalty Tier Animations --- */
+
+/* Diamond: Atomic/3D Spin */
+@keyframes atomic-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes diamond-pulse {
+  0%, 100% { box-shadow: 0 0 5px #b9f2ff, 0 0 10px #b9f2ff; }
+  50% { box-shadow: 0 0 20px #b9f2ff, 0 0 30px #00e5ff; }
+}
+
+.animate-diamond-tier {
+  background: linear-gradient(135deg, #e0faff, #86e4ff);
+  animation: diamond-pulse 2s infinite;
+  border-color: #00e5ff;
+  color: #006064;
+}
+.animate-diamond-icon {
+  animation: atomic-spin 4s linear infinite;
+  color: #00838f !important;
+}
+
+/* Platinum: Metallic Shine */
+@keyframes platinum-shine {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+.animate-platinum-tier {
+  background: linear-gradient(90deg, #e5e7eb, #ffffff, #9ca3af);
+  background-size: 200% auto;
+  animation: platinum-shine 3s linear infinite;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+/* Gold: Rich Pulse */
+@keyframes gold-pulse {
+  0%, 100% { box-shadow: 0 0 2px #fcd34d; }
+  50% { box-shadow: 0 0 8px #f59e0b; }
+}
+.animate-gold-tier {
+  background: linear-gradient(135deg, #fefce8, #fef9c3);
+  border-color: #eab308;
+  color: #854d0e;
+  animation: gold-pulse 2s infinite;
+}
+
+/* Silver: Subtle Shimmer */
+.animate-silver-tier {
+  background: linear-gradient(135deg, #f9fafb, #e5e7eb);
+  border-color: #9ca3af;
+  color: #4b5563;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Bronze: Warm Glow */
+.animate-bronze-tier {
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border-color: #fdba74;
+  color: #9a3412;
+}
+
+/* Diamond: Prismatic Rainbow Glow */
+@keyframes diamond-glow {
+  0% { 
+    box-shadow: 0 0 5px #06b6d4, 0 0 10px rgba(6, 182, 212, 0.5);
+    border-color: #06b6d4;
+  }
+  25% { 
+    box-shadow: 0 0 8px #8b5cf6, 0 0 15px rgba(139, 92, 246, 0.5);
+    border-color: #8b5cf6;
+  }
+  50% { 
+    box-shadow: 0 0 10px #ec4899, 0 0 20px rgba(236, 72, 153, 0.5);
+    border-color: #ec4899;
+  }
+  75% { 
+    box-shadow: 0 0 8px #3b82f6, 0 0 15px rgba(59, 130, 246, 0.5);
+    border-color: #3b82f6;
+  }
+  100% { 
+    box-shadow: 0 0 5px #06b6d4, 0 0 10px rgba(6, 182, 212, 0.5);
+    border-color: #06b6d4;
+  }
+}
+
+@keyframes diamond-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes diamond-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+.animate-diamond-tier {
+  background: linear-gradient(135deg, #ecfeff, #cffafe, #e0f2fe);
+  animation: diamond-glow 3s ease-in-out infinite;
+  position: relative;
+}
+
+.animate-diamond-tier::before {
+  content: '💎';
+  position: absolute;
+  right: -8px;
+  top: -8px;
+  font-size: 14px;
+  animation: diamond-spin 4s linear infinite, diamond-pulse 2s ease-in-out infinite;
+}
+
+/* Platinum: Sleek Metallic */
+@keyframes platinum-shine {
+  0%, 100% { box-shadow: 0 0 3px #9ca3af; }
+  50% { box-shadow: 0 0 10px #e5e7eb, 0 0 15px rgba(229, 231, 235, 0.5); }
+}
+
+.animate-platinum-tier {
+  background: linear-gradient(135deg, #f9fafb, #e5e7eb, #d1d5db);
+  animation: platinum-shine 2.5s ease-in-out infinite;
+}
+
+/* =====================================
+   PREMIUM TIER PRESETS (10 Total)
+   ===================================== */
+
+/* 6. Emerald: Nature's Radiance */
+@keyframes emerald-pulse {
+  0%, 100% { box-shadow: 0 0 5px #10b981, 0 0 10px rgba(16, 185, 129, 0.4); }
+  50% { box-shadow: 0 0 15px #059669, 0 0 25px rgba(5, 150, 105, 0.6); }
+}
+
+.animate-emerald-tier {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5, #a7f3d0);
+  border-color: #10b981;
+  color: #065f46;
+  animation: emerald-pulse 2.5s ease-in-out infinite;
+  position: relative;
+}
+
+.animate-emerald-tier::before {
+  content: '🌿';
+  position: absolute;
+  right: -6px;
+  top: -6px;
+  font-size: 12px;
+  animation: diamond-pulse 3s ease-in-out infinite;
+}
+
+/* 7. Ruby: Fiery Passion */
+@keyframes ruby-blaze {
+  0%, 100% { box-shadow: 0 0 5px #dc2626, 0 0 10px rgba(220, 38, 38, 0.4); }
+  33% { box-shadow: 0 0 12px #ef4444, 0 0 20px rgba(239, 68, 68, 0.5); }
+  66% { box-shadow: 0 0 8px #b91c1c, 0 0 15px rgba(185, 28, 28, 0.5); }
+}
+
+.animate-ruby-tier {
+  background: linear-gradient(135deg, #fef2f2, #fecaca, #fca5a5);
+  border-color: #dc2626;
+  color: #7f1d1d;
+  animation: ruby-blaze 2s ease-in-out infinite;
+  position: relative;
+}
+
+.animate-ruby-tier::before {
+  content: '❤️‍🔥';
+  position: absolute;
+  right: -8px;
+  top: -8px;
+  font-size: 12px;
+  animation: diamond-pulse 2s ease-in-out infinite;
+}
+
+/* 8. Sapphire: Ocean Depths */
+@keyframes sapphire-wave {
+  0%, 100% { 
+    box-shadow: 0 0 5px #2563eb, 0 0 10px rgba(37, 99, 235, 0.4);
+    transform: translateY(0);
+  }
+  50% { 
+    box-shadow: 0 0 15px #1d4ed8, 0 0 25px rgba(29, 78, 216, 0.6);
+    transform: translateY(-1px);
+  }
+}
+
+.animate-sapphire-tier {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe, #bfdbfe);
+  border-color: #2563eb;
+  color: #1e3a8a;
+  animation: sapphire-wave 3s ease-in-out infinite;
+  position: relative;
+}
+
+.animate-sapphire-tier::before {
+  content: '💠';
+  position: absolute;
+  right: -6px;
+  top: -6px;
+  font-size: 12px;
+  animation: diamond-spin 6s linear infinite;
+}
+
+/* 9. Obsidian: Dark Mystery */
+@keyframes obsidian-shadow {
+  0%, 100% { 
+    box-shadow: 0 0 5px #1f2937, 0 0 10px rgba(31, 41, 55, 0.5), inset 0 0 5px rgba(255,255,255,0.1);
+  }
+  50% { 
+    box-shadow: 0 0 15px #111827, 0 0 25px rgba(17, 24, 39, 0.7), inset 0 0 10px rgba(255,255,255,0.2);
+  }
+}
+
+.animate-obsidian-tier {
+  background: linear-gradient(135deg, #374151, #1f2937, #111827);
+  border-color: #6b7280;
+  color: #f9fafb;
+  animation: obsidian-shadow 3s ease-in-out infinite;
+  position: relative;
+}
+
+.animate-obsidian-tier::before {
+  content: '🖤';
+  position: absolute;
+  right: -6px;
+  top: -6px;
+  font-size: 12px;
+  animation: diamond-pulse 2.5s ease-in-out infinite;
+}
+
+/* 10. Legendary: Ultimate Glory */
+@keyframes legendary-rainbow {
+  0% { 
+    box-shadow: 0 0 8px #f59e0b, 0 0 15px rgba(245, 158, 11, 0.5);
+    border-color: #f59e0b;
+  }
+  20% { 
+    box-shadow: 0 0 10px #ef4444, 0 0 20px rgba(239, 68, 68, 0.5);
+    border-color: #ef4444;
+  }
+  40% { 
+    box-shadow: 0 0 12px #8b5cf6, 0 0 25px rgba(139, 92, 246, 0.5);
+    border-color: #8b5cf6;
+  }
+  60% { 
+    box-shadow: 0 0 10px #06b6d4, 0 0 20px rgba(6, 182, 212, 0.5);
+    border-color: #06b6d4;
+  }
+  80% { 
+    box-shadow: 0 0 8px #10b981, 0 0 15px rgba(16, 185, 129, 0.5);
+    border-color: #10b981;
+  }
+  100% { 
+    box-shadow: 0 0 8px #f59e0b, 0 0 15px rgba(245, 158, 11, 0.5);
+    border-color: #f59e0b;
+  }
+}
+
+@keyframes legendary-crown-float {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-3px) rotate(5deg); }
+}
+
+.animate-legendary-tier {
+  background: linear-gradient(135deg, #fef3c7, #fde68a, #fcd34d);
+  animation: legendary-rainbow 4s ease-in-out infinite;
+  position: relative;
+}
+
+.animate-legendary-tier::before {
+  content: '👑';
+  position: absolute;
+  right: -8px;
+  top: -10px;
+  font-size: 16px;
+  animation: legendary-crown-float 2s ease-in-out infinite, diamond-pulse 3s ease-in-out infinite;
+}
+
 @layer base {
   * {
     @apply border-border;

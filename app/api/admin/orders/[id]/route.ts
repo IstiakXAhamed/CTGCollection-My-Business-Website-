@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
 import { saveReceiptToFile, generateReceiptHTML, getOrderForReceipt } from '@/lib/receipt'
-import { sendReceiptEmail, sendShippingNotification } from '@/lib/email'
+import { sendReceiptEmail, sendShippingNotification, sendOrderStatusUpdate, sendLoyaltyUpdateEmail } from '@/lib/email'
 import { notifyOrderShipped, notifyOrderDelivered, notifyOrderCancelled } from '@/lib/notifications'
+import { calculateTierForUser } from '@/lib/tier-calculator'
 
 async function checkAdmin(request: NextRequest) {
   const user = await verifyAuth(request)
-  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
+  if (!user || (user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'seller')) {
     return null
   }
   return user
@@ -189,6 +190,64 @@ export async function PUT(
       if (existingOrder.userId) {
         try {
           await notifyOrderDelivered(existingOrder.userId, order.id)
+
+          // Award Loyalty Points
+          try {
+            const settings = await prisma.loyaltySettings.findFirst() as any
+            if (settings && settings.isEnabled && settings.pointsPerTaka > 0) {
+              const pointsEarned = Math.floor(existingOrder.total * settings.pointsPerTaka)
+              if (pointsEarned > 0) {
+                 await prisma.loyaltyPoints.upsert({
+                  where: { userId: existingOrder.userId },
+                  create: {
+                    userId: existingOrder.userId,
+                    totalPoints: pointsEarned,
+                    lifetimePoints: pointsEarned,
+                    lifetimeSpent: existingOrder.total
+                  } as any,
+                  update: {
+                    totalPoints: { increment: pointsEarned },
+                    lifetimePoints: { increment: pointsEarned },
+                    lifetimeSpent: { increment: existingOrder.total }
+                  } as any
+                })
+
+                const loyalty = await prisma.loyaltyPoints.findUnique({ where: { userId: existingOrder.userId } })
+                if (loyalty) {
+                  await prisma.pointsTransaction.create({
+                    data: {
+                      userId: existingOrder.userId,
+                      loyaltyId: loyalty.id,
+                      points: pointsEarned,
+                      type: 'earned',
+                      description: `Points earned from order #${order.orderNumber}`,
+                      orderId: order.id
+                    } as any
+                  })
+                  
+                  // Auto-calculate and update tier based on lifetime spending
+                  try {
+                    await calculateTierForUser(existingOrder.userId)
+                  } catch (tierError) {
+                    console.error('Failed to calculate tier:', tierError)
+                  }
+
+                  const user = await prisma.user.findUnique({ where: { id: existingOrder.userId } })
+                  if (user) {
+                    await sendLoyaltyUpdateEmail(user.email, {
+                      customerName: user.name,
+                      type: 'Points Earned',
+                      points: pointsEarned,
+                      message: `You earned points for your recent order!`
+                    })
+                  }
+                }
+              }
+            }
+          } catch (lpError) {
+            console.error('Loyalty points error:', lpError)
+          }
+
         } catch (e) {
           console.log('Notification error (non-blocking):', e)
         }
@@ -220,6 +279,22 @@ export async function PUT(
           } catch (e) {
             // Ignore JSON parse errors
           }
+        }
+      }
+    }
+
+    // Handle generic status update email
+    if (status && status !== existingOrder.status && sendEmail !== false) {
+      // Don't duplicate for shipped as it has handled above (check logic)
+      if (status !== 'shipped' && status !== 'paid') {
+        const recipientEmail = order.user?.email || existingOrder.guestEmail
+        if (recipientEmail) {
+          await sendOrderStatusUpdate(recipientEmail, {
+            orderNumber: order.orderNumber,
+            customerName: order.address?.name || order.user?.name || 'Customer',
+            status: status,
+            message: notes
+          })
         }
       }
     }

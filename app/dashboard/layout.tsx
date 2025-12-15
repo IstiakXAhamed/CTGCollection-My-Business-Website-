@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { User, Package, MapPin, Heart, Settings, LogOut, Loader2, Shield, ArrowLeft, Crown } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import RoleBadge from '@/components/RoleBadge'
 
 const menuItems = [
   { icon: User, label: 'Profile', href: '/dashboard/profile' },
@@ -76,7 +77,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <Card className="p-6 sticky top-20">
               {/* User Info */}
               <div className="mb-6 pb-4 border-b">
-                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
                     {user.name?.charAt(0).toUpperCase() || 'U'}
                   </div>
@@ -86,13 +87,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   </div>
                 </div>
                 
-                {/* Admin Badge and Link */}
-                {(user.role === 'admin' || user.role === 'superadmin') && (
-                  <div className="mt-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Shield className="w-4 h-4 text-purple-600" />
-                      <span className="text-sm font-semibold text-purple-600 capitalize">{user.role}</span>
-                    </div>
+                {/* Role/Tier Badge for ALL users */}
+                <div className="mt-3">
+                  <RoleBadge role={user.role} tier={user.tier} size="sm" />
+                </div>
+                
+                {/* Admin/Seller Link to Panel */}
+                {(user.role === 'admin' || user.role === 'superadmin' || user.role === 'seller') && (
+                  <div className="mt-3">
                     <Link href="/admin">
                       <Button variant="outline" size="sm" className="w-full gap-2 text-purple-600 border-purple-200 hover:bg-purple-50">
                         <ArrowLeft className="w-4 h-4" />

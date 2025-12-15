@@ -7,7 +7,6 @@ import LiveChat from "@/components/LiveChat";
 import UnifiedPromoBanner from "@/components/UnifiedPromoBanner";
 import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "@/components/Providers";
-// Premium Global Components (appear on all pages)
 import { WhatsAppChat } from "@/components/WhatsAppChat";
 import FloatingActions from "@/components/FloatingActions";
 import { CompareBar } from "@/components/ProductComparison";
@@ -72,5 +71,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-
