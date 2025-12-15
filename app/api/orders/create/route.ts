@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
+import { notifyNewOrder, notifyOrderConfirmed } from '@/lib/notifications'
 
 export async function POST(request: NextRequest) {
   try {
@@ -172,6 +173,19 @@ export async function POST(request: NextRequest) {
         status: 'pending',
       },
     })
+
+    // Send notifications
+    try {
+      // Notify admins about new order
+      await notifyNewOrder(order.id, shippingDetails.name, order.total)
+      
+      // Notify customer if logged in
+      if (userId) {
+        await notifyOrderConfirmed(userId, order.id)
+      }
+    } catch (notifyError) {
+      console.log('Notification error (non-blocking):', notifyError)
+    }
 
     return NextResponse.json({
       success: true,

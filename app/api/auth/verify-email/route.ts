@@ -4,7 +4,9 @@ import { verifyCode } from '@/lib/verification'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, code } = await request.json()
+    const body = await request.json()
+    const email = body.email?.toLowerCase().trim()
+    const code = body.code
 
     if (!email || !code) {
       return NextResponse.json(

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { hashPassword, createToken, setAuthCookie } from '@/lib/auth'
 import { registerSchema } from '@/lib/validations'
 import { createVerificationCode, sendVerificationEmail } from '@/lib/verification'
+import { notifyWelcome, notifyNewRegistration } from '@/lib/notifications'
 
 export async function POST(request: Request) {
   try {
@@ -10,10 +11,11 @@ export async function POST(request: Request) {
     
     // Validate input
     const validatedData = registerSchema.parse(body)
+    const normalizedEmail = validatedData.email.toLowerCase().trim()
     
-    // Check if user already exists
+    // Check if user already exists (case-insensitive)
     const existingUser = await prisma.user.findUnique({
-      where: { email: validatedData.email }
+      where: { email: normalizedEmail }
     })
     
     if (existingUser) {
@@ -34,7 +36,7 @@ export async function POST(request: Request) {
     const user = await prisma.user.create({
       data: {
         name: validatedData.name,
-        email: validatedData.email,
+        email: normalizedEmail, // Store lowercase email
         password: hashedPassword,
         phone: validatedData.phone || null,
         role: isFirstUser ? 'superadmin' : 'customer',
@@ -53,6 +55,16 @@ export async function POST(request: Request) {
     if (!isFirstUser) {
       const code = await createVerificationCode(user.email, 'email_verify', user.id)
       await sendVerificationEmail(user.email, code, 'email_verify')
+    }
+    
+    // Send notifications
+    try {
+      // Welcome notification for new user
+      await notifyWelcome(user.id, user.name)
+      // Notify admins about new registration
+      await notifyNewRegistration(user.name, user.email)
+    } catch (e) {
+      console.log('Notification error (non-blocking):', e)
     }
     
     return NextResponse.json(

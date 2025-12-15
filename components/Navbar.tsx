@@ -135,8 +135,8 @@ export default function Navbar() {
 
           {/* Actions - Fixed width */}
           <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
-            {/* Notifications - Only show when logged in */}
-            {user && <NotificationBell />}
+            {/* Notifications - Only show for customers (admin has own bell in admin layout) */}
+            {user && user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'seller' && <NotificationBell />}
             
             <Button variant="ghost" size="icon" className="hidden sm:flex" asChild>
               <Link href="/dashboard/wishlist">

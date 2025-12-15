@@ -10,15 +10,17 @@ export async function POST(request: Request) {
     
     // Check if this is a 2FA verification request
     if (body.verify2FA && body.email && body.code) {
-      return handle2FAVerification(body.email, body.code)
+      return handle2FAVerification(body.email.toLowerCase().trim(), body.code)
     }
     
     // Validate input
     const validatedData = loginSchema.parse(body)
+    const rememberMe = body.rememberMe === true
+    const normalizedEmail = validatedData.email.toLowerCase().trim()
     
-    // Find user
+    // Find user (case-insensitive email)
     const user = await prisma.user.findUnique({
-      where: { email: validatedData.email }
+      where: { email: normalizedEmail }
     })
     
     if (!user) {
@@ -58,6 +60,28 @@ export async function POST(request: Request) {
       )
     }
     
+    // Check if unified login is disabled and user is admin
+    // If request is NOT from admin login page, block admin login
+    const isAdminLoginPage = body.isAdminLogin === true
+    if ((user.role === 'admin' || user.role === 'superadmin') && !isAdminLoginPage) {
+      // Check site settings for unified login
+      try {
+        const settings = await (prisma.siteSettings as any).findUnique({
+          where: { id: 'main' },
+          select: { unifiedLogin: true }
+        }) as { unifiedLogin?: boolean } | null
+        
+        if (settings && settings.unifiedLogin === false) {
+          return NextResponse.json(
+            { message: 'Administrators must use the admin login page at /admin/login' },
+            { status: 403 }
+          )
+        }
+      } catch (e) {
+        // If settings don't exist yet, allow unified login (default)
+      }
+    }
+    
     // Check if 2FA is enabled
     if (user.twoFactorEnabled) {
       // Send 2FA code
@@ -90,12 +114,13 @@ export async function POST(request: Request) {
       token,
     })
 
-    // Set HTTP-only cookie
+    // Set HTTP-only cookie - session or persistent based on rememberMe
     response.cookies.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      // If rememberMe selected: 7 days, otherwise: session only (no maxAge)
+      ...(rememberMe ? { maxAge: 60 * 60 * 24 * 7 } : {}),
       path: '/',
     })
     

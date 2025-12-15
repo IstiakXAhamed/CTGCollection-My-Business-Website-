@@ -4,7 +4,8 @@ import { createVerificationCode, sendVerificationEmail } from '@/lib/verificatio
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json()
+    const body = await request.json()
+    const email = body.email?.toLowerCase().trim()
 
     if (!email) {
       return NextResponse.json(
@@ -13,7 +14,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user exists and is not verified
+    // Check if user exists and is not verified (case-insensitive)
     const user = await prisma.user.findUnique({
       where: { email },
       select: { id: true, emailVerified: true, name: true }

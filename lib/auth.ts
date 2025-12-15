@@ -61,6 +61,7 @@ export async function clearAuthCookie() {
 }
 
 // Verify authentication from request (for API routes)
+// Returns user object with consistent 'id' field (mapped from JWT's 'userId')
 export async function verifyAuth(request: NextRequest) {
   try {
     const token = request.cookies.get('token')?.value
@@ -68,7 +69,16 @@ export async function verifyAuth(request: NextRequest) {
     if (!token) return null
     
     const payload = await verifyToken(token)
-    return payload
+    if (!payload) return null
+    
+    // Return consistent user object with 'id' field
+    // JWT stores userId, but we expose it as 'id' for API consistency
+    return {
+      id: payload.userId,
+      userId: payload.userId, // Keep for backwards compatibility
+      email: payload.email,
+      role: payload.role
+    }
   } catch (error) {
     return null
   }

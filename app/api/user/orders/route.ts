@@ -5,9 +5,12 @@ import { verifyAuth } from '@/lib/auth'
 export async function GET(request: NextRequest) {
   try {
     const user = await verifyAuth(request)
-    if (!user) {
+    if (!user || !user.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // CRITICAL: Use user.userId from JWT payload, NOT user.id
+    const userId = user.userId
 
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
@@ -16,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     const [orders, total] = await Promise.all([
       prisma.order.findMany({
-        where: { userId: user.id },
+        where: { userId: userId }, // Filter by this user only
         include: {
           items: {
             include: {
@@ -31,7 +34,7 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit
       }),
-      prisma.order.count({ where: { userId: user.id } })
+      prisma.order.count({ where: { userId: userId } }) // Count only this user's orders
     ])
 
     const ordersWithImages = orders.map(order => ({

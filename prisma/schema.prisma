@@ -661,5 +661,8 @@ model SiteSettings {
   pointsPerTaka     Float    @default(0.01)
   pointsValue       Float    @default(0.1)
   
+  // Login Settings
+  unifiedLogin      Boolean  @default(true) // true = single login page auto-detects role, false = separate admin login
+  
   updatedAt         DateTime @updatedAt
 }

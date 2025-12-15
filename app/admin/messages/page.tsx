@@ -369,10 +369,10 @@ export default function AdminMessagesPage() {
               onClick={() => setShowReplyModal(false)}
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-2xl bg-white rounded-xl shadow-xl z-50 overflow-hidden"
+              initial={{ opacity: 0, scale: 0.95, y: -20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -20 }}
+              className="fixed left-4 right-4 top-[10%] md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-full md:max-w-2xl bg-white rounded-xl shadow-2xl z-50 overflow-hidden max-h-[80vh]"
             >
               <div className="flex items-center justify-between p-4 border-b bg-gray-50">
                 <h3 className="text-lg font-bold">Reply to {selectedMessage.name}</h3>
@@ -381,7 +381,7 @@ export default function AdminMessagesPage() {
                 </button>
               </div>
               
-              <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
                 <div className="bg-gray-50 rounded-lg p-3 text-sm">
                   <p className="font-semibold">Original message:</p>
                   <p className="text-gray-600">{selectedMessage.message.substring(0, 200)}...</p>

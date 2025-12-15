@@ -23,25 +23,38 @@ import {
   Megaphone
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import AdminNotificationBell from '@/components/AdminNotificationBell'
 
-// Menu items - some are superadmin only
-const getMenuItems = (isSuperAdmin: boolean) => [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
-  { icon: Package, label: 'Products', href: '/admin/products' },
-  { icon: FolderTree, label: 'Categories', href: '/admin/categories' },
-  { icon: ShoppingCart, label: 'Orders', href: '/admin/orders' },
-  { icon: Users, label: 'Customers', href: '/admin/customers' },
-  ...(isSuperAdmin ? [{ icon: UserCog, label: 'User Management', href: '/admin/users' }] : []),
-  { icon: Tag, label: 'Coupons', href: '/admin/coupons' },
-  { icon: Crown, label: 'Loyalty & Referrals', href: '/admin/loyalty' },
-  { icon: Megaphone, label: 'Announcements', href: '/admin/announcements' },
-  { icon: Package, label: 'Inventory History', href: '/admin/inventory' },
-  { icon: Palette, label: 'Banners', href: '/admin/banners' },
-  { icon: Mail, label: 'Messages', href: '/admin/messages' },
-  { icon: MessageCircle, label: 'Live Chat', href: '/admin/chat' },
-  { icon: Settings, label: 'Site Settings', href: '/admin/site-settings' },
-  { icon: Settings, label: 'App Settings', href: '/admin/settings' },
-]
+// Menu items - filtered by role
+const getMenuItems = (role: string) => {
+  const isSuperAdmin = role === 'superadmin'
+  const isSeller = role === 'seller'
+  
+  return [
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
+    { icon: Package, label: 'Products', href: '/admin/products' },
+    { icon: FolderTree, label: 'Categories', href: '/admin/categories' },
+    { icon: ShoppingCart, label: 'Orders', href: '/admin/orders' },
+    { icon: Users, label: 'Customers', href: '/admin/customers' },
+    // Superadmin only
+    ...(isSuperAdmin ? [{ icon: UserCog, label: 'User Management', href: '/admin/users' }] : []),
+    // Hide coupons from seller
+    ...(!isSeller ? [{ icon: Tag, label: 'Coupons', href: '/admin/coupons' }] : []),
+    // Loyalty - admin/superadmin only
+    ...(!isSeller ? [{ icon: Crown, label: 'Loyalty & Referrals', href: '/admin/loyalty' }] : []),
+    { icon: Megaphone, label: 'Announcements', href: '/admin/announcements' },
+    { icon: Package, label: 'Inventory History', href: '/admin/inventory' },
+    // Technical pages - admin/superadmin only
+    ...(!isSeller ? [{ icon: Palette, label: 'Banners', href: '/admin/banners' }] : []),
+    { icon: Mail, label: 'Messages', href: '/admin/messages' },
+    { icon: MessageCircle, label: 'Live Chat', href: '/admin/chat' },
+    // Settings - admin/superadmin only
+    ...(!isSeller ? [
+      { icon: Settings, label: 'Site Settings', href: '/admin/site-settings' },
+      { icon: Settings, label: 'App Settings', href: '/admin/settings' },
+    ] : []),
+  ]
+}
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
@@ -66,9 +79,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       if (res.ok) {
         const data = await res.json()
         if (data.authenticated && data.user) {
-          // Check if user has admin or superadmin role
-          if (data.user.role !== 'admin' && data.user.role !== 'superadmin') {
-            // Not admin, redirect to home
+          // Check if user has admin, superadmin, or seller role
+          if (data.user.role !== 'admin' && data.user.role !== 'superadmin' && data.user.role !== 'seller') {
+            // Not authorized, redirect to home
             router.push('/')
             return
           }
@@ -120,7 +133,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
 
   const isSuperAdmin = user?.role === 'superadmin'
-  const menuItems = getMenuItems(isSuperAdmin)
+  const menuItems = getMenuItems(user?.role || 'admin')
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -150,6 +163,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <span className="text-sm text-muted-foreground hidden sm:block">
               Welcome, <span className="font-semibold">{user?.name}</span>
             </span>
+            <AdminNotificationBell />
             <Button variant="outline" asChild>
               <Link href="/" target="_blank">View Store</Link>
             </Button>

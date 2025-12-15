@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
 import { saveReceiptToFile, generateReceiptHTML, getOrderForReceipt } from '@/lib/receipt'
 import { sendReceiptEmail, sendShippingNotification } from '@/lib/email'
+import { notifyOrderShipped, notifyOrderDelivered, notifyOrderCancelled } from '@/lib/notifications'
 
 async function checkAdmin(request: NextRequest) {
   const user = await verifyAuth(request)
@@ -164,19 +165,48 @@ export async function PUT(
     }
 
     // Handle shipping notification
-    if (status === 'shipped' && existingOrder.status !== 'shipped' && trackingNumber) {
+    if (status === 'shipped' && existingOrder.status !== 'shipped') {
       const recipientEmail = order.user?.email || existingOrder.guestEmail
       if (recipientEmail && sendEmail !== false) {
         try {
-          await sendShippingNotification(recipientEmail, order.orderNumber, trackingNumber)
+          await sendShippingNotification(recipientEmail, order.orderNumber, trackingNumber || '')
         } catch (e) {
           console.error('Failed to send shipping email:', e)
         }
       }
+      // In-app notification for logged in users
+      if (existingOrder.userId) {
+        try {
+          await notifyOrderShipped(existingOrder.userId, order.id, trackingNumber)
+        } catch (e) {
+          console.log('Notification error (non-blocking):', e)
+        }
+      }
     }
 
-    // If order is cancelled, restore stock
+    // Handle delivered notification
+    if (status === 'delivered' && existingOrder.status !== 'delivered') {
+      if (existingOrder.userId) {
+        try {
+          await notifyOrderDelivered(existingOrder.userId, order.id)
+        } catch (e) {
+          console.log('Notification error (non-blocking):', e)
+        }
+      }
+    }
+
+    // If order is cancelled, restore stock and notify customer
     if (status === 'cancelled' && existingOrder.status !== 'cancelled') {
+      // Notify customer about cancellation
+      if (existingOrder.userId) {
+        try {
+          await notifyOrderCancelled(existingOrder.userId, order.id, notes)
+        } catch (e) {
+          console.log('Notification error (non-blocking):', e)
+        }
+      }
+      
+      // Restore stock
       for (const item of order.items) {
         if (item.variantInfo) {
           try {

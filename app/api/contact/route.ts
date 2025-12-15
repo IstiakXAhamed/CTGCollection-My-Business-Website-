@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { notifyNewContactMessage } from '@/lib/notifications'
 
 // POST - Submit contact form (public)
 export async function POST(request: NextRequest) {
@@ -26,6 +27,13 @@ export async function POST(request: NextRequest) {
         message
       }
     })
+
+    // Notify admins about new contact message
+    try {
+      await notifyNewContactMessage(name, subject)
+    } catch (e) {
+      console.log('Notification error (non-blocking):', e)
+    }
 
     return NextResponse.json({ 
       success: true, 

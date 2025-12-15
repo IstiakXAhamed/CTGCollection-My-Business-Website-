@@ -277,6 +277,41 @@ export default function SiteSettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Login Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">🔐 Login Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div>
+              <p className="font-semibold">Unified Login Page</p>
+              <p className="text-sm text-muted-foreground">
+                When ON: Single login page auto-detects if user is admin/customer and redirects accordingly.
+                <br />
+                When OFF: Admins must use the separate /admin/login page.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSettings((prev: any) => ({ ...prev, unifiedLogin: !prev.unifiedLogin }))}
+              className={`relative w-14 h-8 rounded-full transition-colors ${
+                settings.unifiedLogin ? 'bg-blue-600' : 'bg-gray-300'
+              }`}
+            >
+              <span
+                className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${
+                  settings.unifiedLogin ? 'translate-x-6' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            💡 Tip: The /admin/login page always works as a backup for administrators.
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Save Button */}
       <div className="flex justify-end">
         <Button onClick={saveSettings} disabled={saving} size="lg" className="gap-2">

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
+import { notifyNewChatMessage } from '@/lib/notifications'
 
 // GET messages for a session
 export async function GET(
@@ -115,6 +116,15 @@ export async function POST(
     })
 
     console.log(`[CHAT] Session:${sessionId.substring(0,10)}... | ${senderType} (${actualSenderName}): ${message}`)
+
+    // Notify admins when customer sends a message
+    if (senderType === 'customer') {
+      try {
+        await notifyNewChatMessage(actualSenderName || 'Guest', sessionId)
+      } catch (e) {
+        console.log('Notification error (non-blocking):', e)
+      }
+    }
 
     return NextResponse.json({ message: newMessage })
   } catch (error: any) {

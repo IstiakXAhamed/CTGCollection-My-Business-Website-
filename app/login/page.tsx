@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, Lock } from 'lucide-react'
+import { Mail, Lock, CheckSquare, Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,6 +17,7 @@ export default function LoginPage() {
     email: '',
     password: '',
   })
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const registered = searchParams.get('registered')
@@ -31,7 +32,7 @@ export default function LoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, rememberMe }),
       })
 
       const data = await res.json()
@@ -44,7 +45,6 @@ export default function LoginPage() {
 
       // Check if 2FA is required
       if (data.requires2FA) {
-        // TODO: Show 2FA modal or redirect to 2FA page
         setError('Please enter the 2FA code sent to your email')
         return
       }
@@ -58,14 +58,11 @@ export default function LoginPage() {
       useAuthStore.getState().setUser(data.user)
 
       // Redirect based on role
-      if (data.user.role === 'admin') {
-        router.push('/admin')
+      if (data.user.role === 'admin' || data.user.role === 'superadmin') {
+        window.location.href = '/admin'
       } else {
-        router.push('/')
+        window.location.href = '/'
       }
-      
-      // Force reload to update navbar
-      window.location.href = data.user.role === 'admin' ? '/admin' : '/'
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -138,7 +135,19 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setRememberMe(!rememberMe)}
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                >
+                  {rememberMe ? (
+                    <CheckSquare className="w-4 h-4 text-blue-600" />
+                  ) : (
+                    <Square className="w-4 h-4" />
+                  )}
+                  Remember me
+                </button>
                 <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
                   Forgot password?
                 </Link>
@@ -148,16 +157,6 @@ export default function LoginPage() {
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
-
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm font-semibold mb-2">Demo Accounts:</p>
-              <p className="text-xs text-muted-foreground">
-                <strong>Admin:</strong> admin@ctgcollection.com / admin123
-              </p>
-              <p className="text-xs text-muted-foreground">
-                <strong>Customer:</strong> customer@example.com / customer123
-              </p>
-            </div>
 
             <div className="mt-6 text-center text-sm">
               <span className="text-muted-foreground">Don't have an account? </span>

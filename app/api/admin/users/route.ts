@@ -45,6 +45,8 @@ export async function GET(request: NextRequest) {
       ]
     }
 
+    const includeLoyalty = searchParams.get('includeLoyalty') === 'true'
+    
     const [users, total] = await Promise.all([
       prisma.user.findMany({
         where,
@@ -57,7 +59,22 @@ export async function GET(request: NextRequest) {
           isActive: true,
           createdById: true,
           createdAt: true,
-          _count: { select: { orders: true } }
+          _count: { select: { orders: true } },
+          ...(includeLoyalty ? {
+            loyaltyPoints: {
+              select: {
+                tierId: true,
+                totalPoints: true,
+                tier: {
+                  select: {
+                    id: true,
+                    displayName: true,
+                    color: true
+                  }
+                }
+              }
+            }
+          } : {})
         },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,

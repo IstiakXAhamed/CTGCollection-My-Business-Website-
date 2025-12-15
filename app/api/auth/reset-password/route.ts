@@ -2,33 +2,35 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
-// POST - Reset password with token
+// POST - Reset password with verification code
 export async function POST(request: NextRequest) {
   try {
-    const { email, token, newPassword } = await request.json()
+    const body = await request.json()
+    const { code, token, newPassword } = body
+    const email = body.email?.toLowerCase().trim()
+    const resetCode = code || token // Support both code and token
 
-    if (!email || !token || !newPassword) {
-      return NextResponse.json({ error: 'Email, token, and new password are required' }, { status: 400 })
+    if (!email || !resetCode || !newPassword) {
+      return NextResponse.json({ error: 'Email, verification code, and new password are required' }, { status: 400 })
     }
 
     if (newPassword.length < 6) {
       return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 })
     }
 
-    // Find valid reset token
-    const verificationCode = await prisma.verificationCode.findFirst({
+    // Find valid reset code
+    const verification = await prisma.verificationCode.findFirst({
       where: {
         email,
-        code: token,
+        code: resetCode,
         type: 'password_reset',
-        used: false,
         expiresAt: { gt: new Date() }
       }
     })
 
-    if (!verificationCode) {
+    if (!verification) {
       return NextResponse.json({ 
-        error: 'Invalid or expired reset link. Please request a new one.' 
+        error: 'Invalid or expired verification code. Please request a new one.' 
       }, { status: 400 })
     }
 
@@ -41,13 +43,7 @@ export async function POST(request: NextRequest) {
       data: { password: hashedPassword }
     })
 
-    // Mark token as used
-    await prisma.verificationCode.update({
-      where: { id: verificationCode.id },
-      data: { used: true }
-    })
-
-    // Delete all reset tokens for this email (cleanup)
+    // Delete all reset codes for this email (cleanup)
     await prisma.verificationCode.deleteMany({
       where: { email, type: 'password_reset' }
     })
