@@ -254,7 +254,7 @@ export async function notifyAccountDeactivated(userId: string) {
     'account',
     '⚠️ Account Deactivated',
     'Your account has been temporarily deactivated. Please contact support for assistance.',
-    null
+    undefined
   )
 }
 
