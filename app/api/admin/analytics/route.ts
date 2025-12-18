@@ -63,11 +63,11 @@ export async function GET(request: NextRequest) {
     // Get products
     const totalProducts = await prisma.product.count()
     
-    const lowStockProducts = await (prisma.variant.count as any)({
+    const lowStockProducts = await (prisma.productVariant.count as any)({
       where: { stock: { lte: 5, gt: 0 } }
     })
 
-    const outOfStockProducts = await (prisma.variant.count as any)({
+    const outOfStockProducts = await (prisma.productVariant.count as any)({
       where: { stock: 0 }
     })
 
