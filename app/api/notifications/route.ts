@@ -115,22 +115,3 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
-
-// Utility function to create notifications (for use in other APIs)
-export async function createNotification(
-  userId: string,
-  type: string,
-  title: string,
-  message: string,
-  link?: string
-) {
-  try {
-    await prisma.notification.create({
-      data: { userId, type, title, message, link }
-    })
-    return true
-  } catch (error) {
-    console.error('Failed to create notification:', error)
-    return false
-  }
-}
