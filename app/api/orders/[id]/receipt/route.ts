@@ -41,13 +41,28 @@ export async function GET(
     const format = searchParams.get('format')
     
     if (format === 'html') {
-      // Return raw HTML for client-side PDF generation
-      const orderData = await getOrderForReceipt(order.id)
-      if (!orderData) {
-        return NextResponse.json({ error: 'Order data not found' }, { status: 404 })
+      try {
+        // Return raw HTML for client-side PDF generation
+        console.log('Generating HTML receipt for order:', params.id)
+        const orderData = await getOrderForReceipt(order.id)
+        
+        if (!orderData) {
+          console.error('Order data not found for receipt generation')
+          return NextResponse.json({ error: 'Order data not found' }, { status: 404 })
+        }
+        
+        const html = await generateReceiptHTML(orderData)
+        console.log('HTML receipt generated, length:', html?.length || 0)
+        
+        if (!html) {
+          return NextResponse.json({ error: 'Failed to generate receipt HTML' }, { status: 500 })
+        }
+        
+        return NextResponse.json({ html })
+      } catch (htmlError: any) {
+        console.error('Error generating HTML receipt:', htmlError)
+        return NextResponse.json({ error: htmlError.message || 'Failed to generate receipt' }, { status: 500 })
       }
-      const html = await generateReceiptHTML(orderData)
-      return NextResponse.json({ html })
     }
 
     // Default: generate and save receipt file, return URL
