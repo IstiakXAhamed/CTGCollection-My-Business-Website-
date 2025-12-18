@@ -102,16 +102,20 @@ export default function AdminOrderDetailPage() {
   const downloadReceipt = async () => {
     setDownloadingReceipt(true)
     try {
-      const res = await fetch(`/api/orders/${orderId}/receipt`, { credentials: 'include' })
+      // Fetch the HTML receipt from API
+      const res = await fetch(`/api/orders/${orderId}/receipt?format=html`, { credentials: 'include' })
       const data = await res.json()
       
-      if (res.ok && data.receiptUrl) {
-        window.open(data.receiptUrl, '_blank')
+      if (res.ok && data.html) {
+        // Dynamically import the PDF client utility
+        const { downloadPDFFromHTML } = await import('@/lib/pdf-client')
+        await downloadPDFFromHTML(data.html, `Receipt-${order.orderNumber || orderId.slice(0, 8)}.pdf`)
       } else {
         alert(data.error || 'Receipt not available. Confirm payment first.')
       }
     } catch (error) {
-      alert('Failed to download receipt')
+      console.error('Failed to generate receipt:', error)
+      alert('Failed to generate receipt')
     } finally {
       setDownloadingReceipt(false)
     }

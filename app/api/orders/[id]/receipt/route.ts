@@ -36,8 +36,21 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // ALWAYS regenerate receipt with CURRENT selected template
-    // This ensures template changes take effect immediately
+    // Check if HTML format is requested (for client-side PDF generation)
+    const { searchParams } = new URL(request.url)
+    const format = searchParams.get('format')
+    
+    if (format === 'html') {
+      // Return raw HTML for client-side PDF generation
+      const orderData = await getOrderForReceipt(order.id)
+      if (!orderData) {
+        return NextResponse.json({ error: 'Order data not found' }, { status: 404 })
+      }
+      const html = await generateReceiptHTML(orderData)
+      return NextResponse.json({ html })
+    }
+
+    // Default: generate and save receipt file, return URL
     const receiptUrl = await saveReceiptToFile(order.id)
 
     if (!receiptUrl) {

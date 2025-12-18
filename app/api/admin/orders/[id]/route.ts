@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
-import { saveReceiptToFile, generateReceiptHTML, getOrderForReceipt } from '@/lib/receipt'
-import { sendReceiptEmail, sendShippingNotification, sendOrderStatusUpdate, sendLoyaltyUpdateEmail } from '@/lib/email'
+import { saveReceiptToFile } from '@/lib/receipt'
+import { sendShippingNotification, sendOrderStatusUpdate, sendLoyaltyUpdateEmail } from '@/lib/email'
 import { notifyOrderShipped, notifyOrderDelivered, notifyOrderCancelled } from '@/lib/notifications'
 import { calculateTierForUser } from '@/lib/tier-calculator'
 
@@ -116,7 +116,7 @@ export async function PUT(
         })
       }
 
-      // Send receipt email with HTML attachment
+      // Send confirmation email with PDF receipt using SELECTED template
       const recipientEmail = order.user?.email || existingOrder.guestEmail
       console.log('=== RECEIPT EMAIL DEBUG ===')
       console.log('Recipient email:', recipientEmail)
@@ -125,28 +125,31 @@ export async function PUT(
       
       if (recipientEmail && sendEmail !== false) {
         try {
-          // Get receipt HTML for attachment
-          console.log('Getting order for receipt...')
-          const receiptOrder = await getOrderForReceipt(order.id)
-          console.log('Receipt order found:', !!receiptOrder)
+          // Import cloud PDF generator (uses selected template)
+          const { generateTemplatedPDF } = await import('@/lib/pdf-cloud')
+          const { sendOrderConfirmationWithPDF } = await import('@/lib/email')
           
-          const receiptHtml = receiptOrder ? await generateReceiptHTML(receiptOrder) : undefined
-          console.log('Receipt HTML generated:', !!receiptHtml, 'Length:', receiptHtml?.length || 0)
+          console.log('Generating templated PDF for email attachment...')
+          const pdfBuffer = await generateTemplatedPDF(order.id)
+          console.log('PDF generated:', !!pdfBuffer, 'Size:', pdfBuffer?.length || 0, 'bytes')
           
-          console.log('Calling sendReceiptEmail with:', {
+          // Send order confirmation with PDF attachment
+          emailSent = await sendOrderConfirmationWithPDF({
             to: recipientEmail,
             orderNumber: order.orderNumber,
             customerName: order.address.name,
-            hasReceiptPath: !!receiptUrl,
-            hasReceiptHtml: !!receiptHtml
-          })
-          
-          emailSent = await sendReceiptEmail({
-            to: recipientEmail,
-            orderNumber: order.orderNumber,
-            customerName: order.address.name,
-            receiptPath: receiptUrl || undefined,
-            receiptHtml: receiptHtml
+            items: order.items.map((item: any) => ({
+              name: item.product.name,
+              quantity: item.quantity,
+              price: item.price
+            })),
+            subtotal: order.subtotal,
+            shipping: order.shippingCost,
+            discount: order.discount || 0,
+            total: order.total,
+            address: `${order.address.address}, ${order.address.city}, ${order.address.district}`,
+            paymentMethod: order.paymentMethod,
+            pdfBuffer: pdfBuffer || undefined
           })
           
           console.log('Email sent result:', emailSent)
