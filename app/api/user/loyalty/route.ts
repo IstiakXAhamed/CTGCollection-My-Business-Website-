@@ -33,19 +33,46 @@ export async function GET(request: NextRequest) {
     })
 
     if (!loyalty) {
-      // Get default tier (lowest)
-      const defaultTier = await prisma.loyaltyTier.findFirst({
-        where: { isActive: true },
-        orderBy: { minSpending: 'asc' }
+      // Get user's total spending from orders to determine initial tier
+      const orderTotal = await prisma.order.aggregate({
+        where: { 
+          userId: user.id,
+          status: 'delivered'
+        },
+        _sum: { total: true }
       })
+      const totalSpent = orderTotal._sum.total || 0
+
+      // Find appropriate tier based on spending (lowest tier they qualify for or default)
+      const tiers = await prisma.loyaltyTier.findMany({
+        where: { isActive: true },
+        orderBy: { minSpending: 'desc' }
+      })
+      
+      // Find highest tier user qualifies for
+      let assignedTier = null
+      for (const tier of tiers) {
+        if (totalSpent >= tier.minSpending) {
+          assignedTier = tier
+          break
+        }
+      }
+      
+      // If no tier qualifies, get the lowest tier (Bronze)
+      if (!assignedTier) {
+        assignedTier = await prisma.loyaltyTier.findFirst({
+          where: { isActive: true },
+          orderBy: { minSpending: 'asc' }
+        })
+      }
 
       loyalty = await prisma.loyaltyPoints.create({
         data: {
           userId: user.id,
-          tierId: defaultTier?.id || null,
+          tierId: assignedTier?.id || null,
           totalPoints: 0,
           lifetimePoints: 0,
-          lifetimeSpent: 0,
+          lifetimeSpent: totalSpent,
           redeemedPoints: 0
         },
         include: {

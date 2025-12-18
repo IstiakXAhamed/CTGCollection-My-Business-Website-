@@ -4,13 +4,13 @@ import { verifyAuth } from '@/lib/auth'
 import { sendTierUpdateEmail } from '@/lib/email'
 import { notifyTierChange } from '@/lib/notifications'
 
-// POST - Assign tier to user (Superadmin and Admin only)
+// POST - Assign tier to user (Superadmin ONLY)
 export async function POST(request: NextRequest) {
   try {
     const user = await verifyAuth(request)
     
-    if (!user || (user.role !== 'superadmin' && user.role !== 'admin')) {
-      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 })
+    if (!user || user.role !== 'superadmin') {
+      return NextResponse.json({ error: 'Unauthorized - Super Admin access required' }, { status: 403 })
     }
 
     const { userId, tierId } = await request.json()

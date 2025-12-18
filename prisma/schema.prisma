@@ -45,6 +45,12 @@ model User {
   referredBy        Referral?   @relation("ReferredRelation")
   questions         ProductQuestion[]
   answers           ProductAnswer[]
+  sellerProducts    Product[]   @relation("SellerProducts")  // Products this seller owns
+
+  // Performance indexes
+  @@index([role])
+  @@index([createdAt])
+  @@index([isActive])
 }
 
 model Address {
@@ -87,6 +93,7 @@ model Product {
   slug          String    @unique
   description   String
   categoryId    String
+  sellerId      String?   // Nullable: seller who owns this product
   basePrice     Float
   salePrice     Float?
   images        String    // JSON array of image URLs
@@ -100,6 +107,7 @@ model Product {
   updatedAt     DateTime  @updatedAt
   
   category      Category        @relation(fields: [categoryId], references: [id])
+  seller        User?           @relation("SellerProducts", fields: [sellerId], references: [id])
   variants      ProductVariant[]
   reviews       Review[]
   wishlists     Wishlist[]
@@ -107,6 +115,14 @@ model Product {
   cartItems     CartItem[]
   questions     ProductQuestion[]
   flashSales    FlashSaleProduct[]
+
+  // Performance indexes
+  @@index([categoryId])
+  @@index([sellerId])
+  @@index([isActive, isFeatured])
+  @@index([isActive, isBestseller])
+  @@index([createdAt])
+  @@index([basePrice])
 }
 
 model ProductVariant {
@@ -168,6 +184,7 @@ model Order {
   paymentConfirmedAt DateTime? // When admin confirmed payment
   receiptSentAt   DateTime?   // When receipt email was sent
   receiptUrl      String?     // URL/path to generated PDF receipt
+  verificationCode String?   @unique // 6-char unique code for receipt verification
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   
@@ -175,6 +192,14 @@ model Order {
   address         Address   @relation(fields: [addressId], references: [id])
   items           OrderItem[]
   payment         Payment?
+
+  // Performance indexes
+  @@index([userId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@index([verificationCode])
 }
 
 model OrderItem {
@@ -227,7 +252,11 @@ model Review {
   userId        String
   rating        Int      // 1-5
   comment       String?
+  photos        String?  // JSON array of photo URLs
   isApproved    Boolean  @default(false)
+  adminReply    String?  // Admin/seller reply to the review
+  adminReplyAt  DateTime? // When admin replied
+  adminReplyBy  String?  // Admin ID who replied
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   
@@ -665,4 +694,15 @@ model SiteSettings {
   unifiedLogin      Boolean  @default(true) // true = single login page auto-detects role, false = separate admin login
   
   updatedAt         DateTime @updatedAt
+}
+
+// Site Settings - Key-Value Store for misc settings
+model SiteSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([key])
 }

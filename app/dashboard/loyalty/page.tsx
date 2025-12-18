@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Crown, Star, Gift, Copy, Check, Share2, TrendingUp,
@@ -10,15 +10,21 @@ import {
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/utils'
+import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 
 export default function CustomerLoyaltyPage() {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
 
+  const memoizedFetch = useCallback(() => fetchLoyalty(), [])
+
   useEffect(() => {
     fetchLoyalty()
   }, [])
+
+  // Auto-refresh every 30 seconds
+  useAutoRefresh(memoizedFetch)
 
   const fetchLoyalty = async () => {
     try {
@@ -73,11 +79,11 @@ export default function CustomerLoyaltyPage() {
       >
         <div 
           className="w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-4"
-          style={{ backgroundColor: tier?.color || '#CD7F32' }}
+          style={{ backgroundColor: tier?.color || '#6B7280' }}
         >
           <Crown className="w-12 h-12 text-white" />
         </div>
-        <h1 className="text-3xl font-bold mb-2">{tier?.displayName || 'Bronze'} Member</h1>
+        <h1 className="text-3xl font-bold mb-2">{tier?.displayName || 'Loyalty Program'} Member</h1>
         <p className="text-gray-600">You're part of our exclusive loyalty program!</p>
       </motion.div>
 

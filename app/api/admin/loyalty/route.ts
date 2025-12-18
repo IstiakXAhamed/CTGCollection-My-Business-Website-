@@ -5,7 +5,7 @@ import { verifyAuth } from '@/lib/auth'
 // Check admin access
 async function checkAdmin(request: NextRequest) {
   const user = await verifyAuth(request)
-  if (!user || (user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'seller')) {
+  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
     return null
   }
   return user
@@ -132,81 +132,162 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { action } = body
 
+    // Premium tier presets - 10 tiers with correct values
+    const premiumTiers = [
+      { name: 'bronze', displayName: 'Bronze', color: '#CD7F32', icon: 'bronze', minSpending: 0, discountPercent: 0, pointsMultiplier: 1, birthdayBonus: 50, freeShipping: false, prioritySupport: false, earlyAccess: false, exclusiveDeals: false, sortOrder: 1 },
+      { name: 'silver', displayName: 'Silver', color: '#C0C0C0', icon: 'silver', minSpending: 5000, discountPercent: 3, pointsMultiplier: 1.5, birthdayBonus: 100, freeShipping: false, prioritySupport: false, earlyAccess: false, exclusiveDeals: false, sortOrder: 2 },
+      { name: 'gold', displayName: 'Gold', color: '#FFD700', icon: 'gold', minSpending: 15000, discountPercent: 5, pointsMultiplier: 2, birthdayBonus: 200, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: false, sortOrder: 3 },
+      { name: 'platinum', displayName: 'Platinum', color: '#8C8C8C', icon: 'platinum', minSpending: 35000, discountPercent: 8, pointsMultiplier: 2.5, birthdayBonus: 350, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 4 },
+      { name: 'diamond', displayName: 'Diamond', color: '#B9F2FF', icon: 'diamond', minSpending: 60000, discountPercent: 12, pointsMultiplier: 3, birthdayBonus: 500, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 5 },
+      { name: 'emerald', displayName: 'Emerald', color: '#50C878', icon: 'emerald', minSpending: 100000, discountPercent: 15, pointsMultiplier: 3.5, birthdayBonus: 750, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 6 },
+      { name: 'ruby', displayName: 'Ruby', color: '#E0115F', icon: 'ruby', minSpending: 150000, discountPercent: 18, pointsMultiplier: 4, birthdayBonus: 1000, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 7 },
+      { name: 'sapphire', displayName: 'Sapphire', color: '#0F52BA', icon: 'sapphire', minSpending: 250000, discountPercent: 22, pointsMultiplier: 5, birthdayBonus: 1500, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 8 },
+      { name: 'obsidian', displayName: 'Obsidian', color: '#1C1C1C', icon: 'obsidian', minSpending: 400000, discountPercent: 25, pointsMultiplier: 6, birthdayBonus: 2000, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 9 },
+      { name: 'legendary', displayName: 'Legendary', color: '#FFD700', icon: 'legendary', minSpending: 750000, discountPercent: 30, pointsMultiplier: 10, birthdayBonus: 5000, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 10 }
+    ]
+
     if (action === 'seed_tiers') {
       // Check if tiers exist
       const existingTiers = await prisma.loyaltyTier.count()
       if (existingTiers > 0) {
-        return NextResponse.json({ error: 'Tiers already exist. Delete them first.' }, { status: 400 })
+        return NextResponse.json({ error: 'Tiers already exist. Use reset_tiers to recreate them.' }, { status: 400 })
       }
 
-      // Create default tiers
-      const defaultTiers = [
-        {
-          name: 'bronze',
-          displayName: 'Bronze',
-          minSpending: 0,
-          discountPercent: 0,
-          freeShipping: false,
-          freeShippingMin: 2000,
-          pointsMultiplier: 1,
-          prioritySupport: false,
-          earlyAccess: false,
-          exclusiveDeals: false,
-          birthdayBonus: 50,
-          color: '#CD7F32',
-          sortOrder: 1
-        },
-        {
-          name: 'silver',
-          displayName: 'Silver',
-          minSpending: 5000,
-          discountPercent: 3,
-          freeShipping: false,
-          freeShippingMin: 1500,
-          pointsMultiplier: 1.5,
-          prioritySupport: false,
-          earlyAccess: false,
-          exclusiveDeals: false,
-          birthdayBonus: 100,
-          color: '#C0C0C0',
-          sortOrder: 2
-        },
-        {
-          name: 'gold',
-          displayName: 'Gold',
-          minSpending: 15000,
-          discountPercent: 5,
-          freeShipping: true,
-          freeShippingMin: 1000,
-          pointsMultiplier: 2,
-          prioritySupport: true,
-          earlyAccess: true,
-          exclusiveDeals: false,
-          birthdayBonus: 200,
-          color: '#FFD700',
-          sortOrder: 3
-        },
-        {
-          name: 'platinum',
-          displayName: 'Platinum',
-          minSpending: 50000,
-          discountPercent: 10,
-          freeShipping: true,
-          freeShippingMin: null, // Always free
-          pointsMultiplier: 3,
-          prioritySupport: true,
-          earlyAccess: true,
-          exclusiveDeals: true,
-          birthdayBonus: 500,
-          color: '#E5E4E2',
-          sortOrder: 4
-        }
-      ]
-
-      await prisma.loyaltyTier.createMany({ data: defaultTiers })
+      await prisma.loyaltyTier.createMany({ data: premiumTiers })
 
       const tiers = await prisma.loyaltyTier.findMany({ orderBy: { sortOrder: 'asc' } })
-      return NextResponse.json({ success: true, message: 'Default tiers created', tiers })
+      return NextResponse.json({ success: true, message: 'Premium tiers created', tiers })
+    }
+
+    if (action === 'reset_tiers') {
+      // Delete all existing tiers (this will fail if users have tier assignments)
+      // First, remove all tier assignments from loyalty points
+      await prisma.loyaltyPoints.updateMany({ data: { tierId: null } })
+      
+      // Delete all tiers
+      await prisma.loyaltyTier.deleteMany({})
+      
+      // Create premium tiers
+      await prisma.loyaltyTier.createMany({ data: premiumTiers })
+
+      const tiers = await prisma.loyaltyTier.findMany({ orderBy: { sortOrder: 'asc' } })
+      return NextResponse.json({ success: true, message: 'Tiers reset to premium defaults', tiers })
+    }
+
+    // FIX ONLY minSpending values - keeps all other settings and assignments!
+    if (action === 'fix_tier_values') {
+      const correctValues: Record<string, number> = {
+        'bronze': 0,
+        'silver': 5000,
+        'gold': 15000,
+        'platinum': 35000,
+        'diamond': 60000,
+        'emerald': 100000,
+        'ruby': 150000,
+        'sapphire': 250000,
+        'obsidian': 400000,
+        'legendary': 750000
+      }
+
+      const updates = []
+      for (const [name, minSpending] of Object.entries(correctValues)) {
+        updates.push(
+          prisma.loyaltyTier.updateMany({
+            where: { name },
+            data: { minSpending }
+          })
+        )
+      }
+      
+      await Promise.all(updates)
+
+      const tiers = await prisma.loyaltyTier.findMany({ orderBy: { sortOrder: 'asc' } })
+      return NextResponse.json({ success: true, message: 'Tier minSpending values fixed!', tiers })
+    }
+
+    // FIX sortOrder to ensure sequential logical order based on Price
+    if (action === 'fix_tier_order') {
+      // Get all tiers
+      const allTiers = await prisma.loyaltyTier.findMany()
+
+      // Sort in memory by minSpending (Lowest Price -> Highest Price)
+      // This guarantees: Bronze (5000) -> Silver (15000) -> Gold (40000)
+      allTiers.sort((a, b) => a.minSpending - b.minSpending)
+
+      const updates = []
+      
+      // Assign sortOrder 1, 2, 3... based on price rank
+      for (let i = 0; i < allTiers.length; i++) {
+        const tier = allTiers[i]
+        updates.push(
+          prisma.loyaltyTier.update({
+            where: { id: tier.id },
+            data: { sortOrder: i + 1 }
+          })
+        )
+      }
+      
+      if (updates.length > 0) {
+        await prisma.$transaction(updates)
+      }
+
+      const tiers = await prisma.loyaltyTier.findMany({ 
+        orderBy: [
+          { sortOrder: 'asc' },
+          { minSpending: 'asc' }
+        ] 
+      })
+      return NextResponse.json({ success: true, message: 'Tier order fixed by price!', tiers })
+    }
+
+    // FIX Mismatched Names (e.g. Name is 'silver' but DisplayName is 'Bronze')
+    if (action === 'fix_tier_names') {
+      const allTiers = await prisma.loyaltyTier.findMany()
+
+      const correctMetadata: Record<string, { displayName: string, color: string, icon: string }> = {
+        'bronze': { displayName: 'Bronze', color: '#CD7F32', icon: 'bronze' },
+        'silver': { displayName: 'Silver', color: '#C0C0C0', icon: 'silver' },
+        'gold': { displayName: 'Gold', color: '#FFD700', icon: 'gold' },
+        'platinum': { displayName: 'Platinum', color: '#8C8C8C', icon: 'platinum' },
+        'diamond': { displayName: 'Diamond', color: '#B9F2FF', icon: 'diamond' },
+        'emerald': { displayName: 'Emerald', color: '#50C878', icon: 'emerald' },
+        'ruby': { displayName: 'Ruby', color: '#E0115F', icon: 'ruby' },
+        'sapphire': { displayName: 'Sapphire', color: '#0F52BA', icon: 'sapphire' },
+        'obsidian': { displayName: 'Obsidian', color: '#1C1C1C', icon: 'obsidian' },
+        'legendary': { displayName: 'Legendary', color: '#FFD700', icon: 'legendary' },
+        'crown': { displayName: 'Legendary', color: '#FFD700', icon: 'legendary' }
+      }
+
+      const updates = []
+      
+      for (const tier of allTiers) {
+        // Normalize name to lowercase for lookup (e.g. "Bronze" -> "bronze")
+        const normalizedName = tier.name.toLowerCase()
+        const meta = correctMetadata[normalizedName]
+        
+        if (meta) {
+          updates.push(
+            prisma.loyaltyTier.update({
+              where: { id: tier.id },
+              data: { 
+                displayName: meta.displayName,
+                color: meta.color,
+                icon: meta.icon,
+                // OPTIONAL: Standardize the internal name to lowercase too? 
+                // Let's do it to prevent future case-sensitivity issues
+                name: normalizedName 
+              }
+            })
+          )
+        }
+      }
+      
+      if (updates.length > 0) {
+        await prisma.$transaction(updates)
+      }
+
+      const tiers = await prisma.loyaltyTier.findMany({ orderBy: { sortOrder: 'asc' } })
+      return NextResponse.json({ success: true, message: 'Tier names and badges synced (Case Insensitive)!', tiers })
     }
 
     if (action === 'create_tier') {
@@ -239,6 +320,7 @@ export async function POST(request: NextRequest) {
           exclusiveDeals: tier.exclusiveDeals || false,
           birthdayBonus: tier.birthdayBonus || 0,
           color: tier.color || '#CD7F32',
+          icon: tier.icon || 'medal',
           isActive: tier.isActive ?? true,
           sortOrder
         }

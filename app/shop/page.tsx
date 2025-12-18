@@ -30,10 +30,18 @@ function ShopContent() {
   const featuredParam = searchParams.get('featured')
   const saleParam = searchParams.get('sale')
   const categoryParam = searchParams.get('category')
+  const searchParam = searchParams.get('search')
 
   // Determine page mode
   const isFeatured = featuredParam === 'true'
   const isSale = saleParam === 'true'
+
+  // Initialize search query from URL param
+  useEffect(() => {
+    if (searchParam) {
+      setSearchQuery(searchParam)
+    }
+  }, [searchParam])
 
   useEffect(() => {
     fetchProducts()

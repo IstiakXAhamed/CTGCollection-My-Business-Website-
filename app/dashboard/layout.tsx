@@ -7,6 +7,7 @@ import { User, Package, MapPin, Heart, Settings, LogOut, Loader2, Shield, ArrowL
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import RoleBadge from '@/components/RoleBadge'
+import RoleSwitcher from '@/components/RoleSwitcher'
 
 const menuItems = [
   { icon: User, label: 'Profile', href: '/dashboard/profile' },
@@ -92,8 +93,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   <RoleBadge role={user.role} tier={user.tier} size="sm" />
                 </div>
                 
-                {/* Admin/Seller Link to Panel */}
-                {(user.role === 'admin' || user.role === 'superadmin' || user.role === 'seller') && (
+                {/* Role Switcher for role-switched SuperAdmins */}
+                {(user.originalRole === 'superadmin' || user.isRoleSwitched) && (
+                  <div className="mt-3">
+                    <RoleSwitcher currentRole={user.role} />
+                  </div>
+                )}
+                
+                {/* Admin/Seller Link to Panel - also show for role-switched users */}
+                {(user.role === 'admin' || user.role === 'superadmin' || user.role === 'seller' || user.originalRole === 'superadmin') && (
                   <div className="mt-3">
                     <Link href="/admin">
                       <Button variant="outline" size="sm" className="w-full gap-2 text-purple-600 border-purple-200 hover:bg-purple-50">

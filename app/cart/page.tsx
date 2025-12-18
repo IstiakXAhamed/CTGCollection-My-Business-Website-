@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
+import { useCartStore } from '@/store/cart'
 
 interface CartItem {
   id: string
@@ -23,56 +24,50 @@ interface CartItem {
 }
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [couponCode, setCouponCode] = useState('')
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
+  const [items, setItems] = useState<CartItem[]>([])
 
+  // Load cart from localStorage on mount
   useEffect(() => {
+    // Small delay to allow Zustand persist to rehydrate from localStorage
+    const loadCart = () => {
+      const storeItems = useCartStore.getState().items
+      console.log('Cart items from store:', storeItems.length, storeItems)
+      setItems(storeItems)
+      setMounted(true)
+    }
+    
+    // Try immediately first
     loadCart()
+    
+    // Also try after a small delay in case persist hasn't hydrated yet
+    const timeout = setTimeout(loadCart, 100)
+    
+    // Subscribe to store changes for updates
+    const unsubscribe = useCartStore.subscribe((state) => {
+      console.log('Cart store updated:', state.items.length)
+      setItems(state.items)
+    })
+    
+    return () => {
+      clearTimeout(timeout)
+      unsubscribe()
+    }
   }, [])
 
-  const loadCart = async () => {
-    try {
-      const { useCartStore } = await import('@/store/cart')
-      const items = useCartStore.getState().items
-      setCartItems(items)
-    } catch (error) {
-      console.error('Failed to load cart:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const updateQuantity = async (itemId: string, newQuantity: number) => {
+  const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return
-    try {
-      const { useCartStore } = await import('@/store/cart')
-      useCartStore.getState().updateQuantity(itemId, newQuantity)
-      setCartItems(useCartStore.getState().items)
-    } catch (error) {
-      console.error('Failed to update quantity:', error)
-    }
+    useCartStore.getState().updateQuantity(itemId, newQuantity)
   }
 
-  const removeItem = async (itemId: string) => {
-    try {
-      const { useCartStore } = await import('@/store/cart')
-      useCartStore.getState().removeItem(itemId)
-      setCartItems(useCartStore.getState().items)
-    } catch (error) {
-      console.error('Failed to remove item:', error)
-    }
+  const handleRemoveItem = (itemId: string) => {
+    useCartStore.getState().removeItem(itemId)
   }
 
-  const clearCart = async () => {
-    try {
-      const { useCartStore } = await import('@/store/cart')
-      useCartStore.getState().clearCart()
-      setCartItems([])
-    } catch (error) {
-      console.error('Failed to clear cart:', error)
-    }
+  const handleClearCart = () => {
+    useCartStore.getState().clearCart()
   }
 
   const applyCoupon = async () => {
@@ -99,7 +94,7 @@ export default function CartPage() {
     }
   }
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const shippingCost = subtotal >= 2000 ? 0 : (subtotal > 0 ? 100 : 0)
   
   let discount = 0
@@ -113,7 +108,7 @@ export default function CartPage() {
   
   const total = Math.max(0, subtotal - discount + shippingCost)
 
-  if (loading) {
+  if (!mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
@@ -131,11 +126,11 @@ export default function CartPage() {
         >
           <h1 className="text-4xl font-bold mb-2">Shopping Cart</h1>
           <p className="text-muted-foreground">
-            {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in your cart
+            {items.length} {items.length === 1 ? 'item' : 'items'} in your cart
           </p>
         </motion.div>
 
-        {cartItems.length === 0 ? (
+        {items.length === 0 ? (
           <Card className="p-12 text-center">
             <ShoppingCart className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
@@ -152,13 +147,13 @@ export default function CartPage() {
             <div className="lg:col-span-2 space-y-4">
               {/* Clear Cart Button */}
               <div className="flex justify-end mb-4">
-                <Button variant="outline" size="sm" onClick={clearCart} className="text-red-600 hover:bg-red-50">
+                <Button variant="outline" size="sm" onClick={handleClearCart} className="text-red-600 hover:bg-red-50">
                   <Trash2 className="w-4 h-4 mr-2" />
                   Clear Cart
                 </Button>
               </div>
 
-              {cartItems.map((item, index) => (
+              {items.map((item, index) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, x: -20 }}
@@ -200,7 +195,7 @@ export default function CartPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => handleRemoveItem(item.id)}
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -208,7 +203,7 @@ export default function CartPage() {
 
                           <div className="flex items-center border-2 rounded-lg">
                             <button
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                               className="p-2 hover:bg-gray-100 transition"
                               disabled={item.quantity <= 1}
                             >
@@ -216,7 +211,7 @@ export default function CartPage() {
                             </button>
                             <span className="px-4 font-semibold">{item.quantity}</span>
                             <button
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                               className="p-2 hover:bg-gray-100 transition"
                             >
                               <Plus className="w-4 h-4" />

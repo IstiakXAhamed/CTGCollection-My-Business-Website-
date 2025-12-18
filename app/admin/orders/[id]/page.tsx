@@ -117,6 +117,24 @@ export default function AdminOrderDetailPage() {
     }
   }
 
+  const downloadPremiumReceipt = async () => {
+    setDownloadingReceipt(true)
+    try {
+      const res = await fetch(`/api/orders/${orderId}/receipt-premium`, { credentials: 'include' })
+      const data = await res.json()
+      
+      if (res.ok && data.receiptUrl) {
+        window.open(data.receiptUrl, '_blank')
+      } else {
+        alert(data.error || 'Premium receipt not available.')
+      }
+    } catch (error) {
+      alert('Failed to download premium receipt')
+    } finally {
+      setDownloadingReceipt(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -155,17 +173,16 @@ export default function AdminOrderDetailPage() {
           </div>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {/* Download Receipt Button */}
+          {/* Single glowing blue Download Receipt button */}
           <Button 
             onClick={downloadReceipt}
             disabled={downloadingReceipt}
-            variant="outline"
-            className="text-blue-600"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all"
           >
             {downloadingReceipt ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             ) : (
-              <FileDown className="w-4 h-4 mr-2" />
+              <span className="mr-2">📄</span>
             )}
             Download Receipt
           </Button>

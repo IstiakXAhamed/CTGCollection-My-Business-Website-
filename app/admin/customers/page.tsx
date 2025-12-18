@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Users as UsersIcon, ChevronLeft, ChevronRight, Loader2, Crown, X, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 
 interface User {
   id: string
@@ -38,6 +39,7 @@ export default function CustomersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [showTierModal, setShowTierModal] = useState(false)
   const [updating, setUpdating] = useState(false)
+  const [currentUserRole, setCurrentUserRole] = useState<string>('')
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 50,
@@ -45,9 +47,26 @@ export default function CustomersPage() {
     totalPages: 1
   })
 
+  const fetchAllData = useCallback(async () => {
+    await fetchUsers(pagination.page)
+    await fetchTiers()
+  }, [pagination.page])
+
+  // Auto-refresh every 30 seconds
+  useAutoRefresh(fetchAllData)
+
   useEffect(() => {
     fetchUsers(pagination.page)
     fetchTiers()
+    // Get current user role (use active role, not realRole for role-switching)
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+          // Use the active role (which respects role switching)
+          setCurrentUserRole(data.user.role)
+        }
+      })
   }, [pagination.page])
 
   const fetchUsers = async (page = 1) => {
@@ -181,7 +200,9 @@ export default function CustomersPage() {
                       <th className="text-left py-3 px-4">Role</th>
                       <th className="text-left py-3 px-4">Membership Tier</th>
                       <th className="text-left py-3 px-4">Joined</th>
-                      <th className="text-left py-3 px-4">Actions</th>
+                      {currentUserRole === 'superadmin' && (
+                        <th className="text-left py-3 px-4">Actions</th>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
@@ -213,20 +234,22 @@ export default function CustomersPage() {
                         <td className="py-4 px-4 text-sm text-muted-foreground">
                           {new Date(user.createdAt).toLocaleDateString()}
                         </td>
-                        <td className="py-4 px-4">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-1"
-                            onClick={() => {
-                              setSelectedUser(user)
-                              setShowTierModal(true)
-                            }}
-                          >
-                            <Crown className="w-4 h-4" />
-                            Set Tier
-                          </Button>
-                        </td>
+                        {currentUserRole === 'superadmin' && (
+                          <td className="py-4 px-4">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1"
+                              onClick={() => {
+                                setSelectedUser(user)
+                                setShowTierModal(true)
+                              }}
+                            >
+                              <Crown className="w-4 h-4" />
+                              Set Tier
+                            </Button>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>

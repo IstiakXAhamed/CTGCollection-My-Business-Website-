@@ -12,6 +12,54 @@ async function checkAdmin(request: NextRequest) {
   return user
 }
 
+// GET Products (with seller filtering)
+export async function GET(request: NextRequest) {
+  try {
+    const admin = await checkAdmin(request)
+    if (!admin) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '20')
+    const skip = (page - 1) * limit
+
+    // Sellers only see their own products, admins see all
+    const whereClause = admin.role === 'seller' 
+      ? { sellerId: admin.id }
+      : {}
+
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where: whereClause,
+        include: {
+          category: true,
+          variants: true,
+          seller: { select: { id: true, name: true, email: true } }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit
+      }),
+      prisma.product.count({ where: whereClause })
+    ])
+
+    return NextResponse.json({
+      products,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    })
+  } catch (error: any) {
+    console.error('Get products error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
+
 // CREATE Product
 export async function POST(request: NextRequest) {
   try {
@@ -41,6 +89,7 @@ export async function POST(request: NextRequest) {
         slug,
         description,
         categoryId,
+        sellerId: admin.id, // Set seller to the logged-in user
         basePrice: parseFloat(basePrice),
         salePrice: salePrice ? parseFloat(salePrice) : null,
         images: JSON.stringify(images),
@@ -58,7 +107,8 @@ export async function POST(request: NextRequest) {
       },
       include: {
         category: true,
-        variants: true
+        variants: true,
+        seller: { select: { id: true, name: true, email: true } }
       }
     })
 
@@ -68,3 +118,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
+

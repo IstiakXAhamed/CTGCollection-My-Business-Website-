@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Package, ShoppingCart, Users, DollarSign, TrendingUp, AlertCircle, RefreshCw } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -19,11 +20,16 @@ export default function AdminDashboard() {
   const [lowStockProducts, setLowStockProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchStats()
-    fetchRecentOrders()
-    fetchLowStockProducts()
+  const fetchAllData = useCallback(async () => {
+    await Promise.all([fetchStats(), fetchRecentOrders(), fetchLowStockProducts()])
   }, [])
+
+  useEffect(() => {
+    fetchAllData()
+  }, [fetchAllData])
+
+  // Auto-refresh every 30 seconds and on tab focus
+  useAutoRefresh(fetchAllData, { interval: 30000 })
 
   const fetchStats = async () => {
     try {

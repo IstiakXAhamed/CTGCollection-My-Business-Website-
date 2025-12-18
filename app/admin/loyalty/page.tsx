@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { 
   Crown, Star, Settings, Users, Gift, TrendingUp, 
   Edit2, Save, X, RefreshCw, DollarSign, Percent,
-  Truck, Clock, Sparkles, Award, Plus, Trash2
+  Truck, Clock, Sparkles, Award, Plus, Trash2, Check
 } from 'lucide-react'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,6 +28,7 @@ interface LoyaltyTier {
   exclusiveDeals: boolean
   birthdayBonus: number
   color: string
+  icon?: string | null
   isActive: boolean
   _count?: { members: number }
 }
@@ -41,6 +43,20 @@ interface LoyaltySettings {
   minimumRedeemPoints: number
 }
 
+// Icon options for tier badges - matching premium animations
+const TIER_ICONS = [
+  { name: 'bronze', label: 'Bronze', emoji: '🛡️' },
+  { name: 'silver', label: 'Silver', emoji: '🛡️' },
+  { name: 'gold', label: 'Gold', emoji: '👑' },
+  { name: 'platinum', label: 'Platinum', emoji: '👑' },
+  { name: 'diamond', label: 'Diamond', emoji: '💎' },
+  { name: 'emerald', label: 'Emerald', emoji: '🌿' },
+  { name: 'ruby', label: 'Ruby', emoji: '❤️‍🔥' },
+  { name: 'sapphire', label: 'Sapphire', emoji: '💠' },
+  { name: 'obsidian', label: 'Obsidian', emoji: '🖤' },
+  { name: 'legendary', label: 'Legendary', emoji: '👑' }
+]
+
 const defaultTierForm = {
   name: '',
   displayName: '',
@@ -54,6 +70,7 @@ const defaultTierForm = {
   exclusiveDeals: false,
   birthdayBonus: 0,
   color: '#CD7F32',
+  icon: 'medal' as string | null,
   isActive: true
 }
 
@@ -71,9 +88,14 @@ export default function AdminLoyaltyPage() {
   const [tierForm, setTierForm] = useState(defaultTierForm)
   const [tierSaving, setTierSaving] = useState(false)
 
+  const memoizedFetchData = useCallback(() => fetchData(), [])
+  
   useEffect(() => {
     fetchData()
   }, [])
+
+  // Auto-refresh every 30 seconds
+  useAutoRefresh(memoizedFetchData)
 
   const fetchData = async () => {
     setLoading(true)
@@ -93,7 +115,7 @@ export default function AdminLoyaltyPage() {
   }
 
   const seedTiers = async () => {
-    if (!confirm('Create default loyalty tiers (Bronze, Silver, Gold, Platinum)?')) return
+    if (!confirm('Create 10 premium loyalty tiers (Bronze to Legendary)?')) return
     try {
       const res = await fetch('/api/admin/loyalty', {
         method: 'POST',
@@ -103,13 +125,56 @@ export default function AdminLoyaltyPage() {
       })
       if (res.ok) {
         await fetchData()
-        alert('Default tiers created!')
+        alert('Premium tiers created!')
       } else {
         const data = await res.json()
         alert(data.error || 'Failed to create tiers')
       }
     } catch (err) {
       alert('Failed to seed tiers')
+    }
+  }
+
+  const resetTiers = async () => {
+    if (!confirm('⚠️ WARNING: This will DELETE all existing tiers and recreate 10 premium tiers with correct values.\n\nAll customer tier assignments will be removed.\n\nContinue?')) return
+    try {
+      const res = await fetch('/api/admin/loyalty', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ action: 'reset_tiers' })
+      })
+      if (res.ok) {
+        await fetchData()
+        alert('✅ Tiers reset to premium defaults! All 10 tiers recreated with correct values.')
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to reset tiers')
+      }
+    } catch (err) {
+      alert('Failed to reset tiers')
+    }
+  }
+
+  // Fix sortOrder ONLY - sorts by minSpending (lowest to highest)
+  const fixTierOrder = async () => {
+    if (!confirm('This will reorder tiers by their Min Spending values.\n\nLowest spending tier will appear first.\n\nFix order now?')) return
+    try {
+      const res = await fetch('/api/admin/loyalty', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ action: 'fix_tier_order' })
+      })
+      if (res.ok) {
+        await fetchData()
+        alert('✅ Tiers reordered by spending! Lowest first.')
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to fix tier order')
+      }
+    } catch (err) {
+      alert('Failed to fix tier order')
     }
   }
 
@@ -149,6 +214,7 @@ export default function AdminLoyaltyPage() {
       exclusiveDeals: tier.exclusiveDeals,
       birthdayBonus: tier.birthdayBonus,
       color: tier.color,
+      icon: tier.icon || 'bronze',
       isActive: tier.isActive
     })
     setEditingTierId(tier.id)
@@ -264,6 +330,46 @@ export default function AdminLoyaltyPage() {
                 </button>
               </div>
 
+              {/* Preset Templates - only show when creating new tier */}
+              {!editingTierId && (
+                <div className="mb-6">
+                  <Label className="mb-2 block">Quick Presets</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { name: 'bronze', displayName: 'Bronze', color: '#CD7F32', icon: 'bronze', minSpending: 0, discountPercent: 0, pointsMultiplier: 1, birthdayBonus: 50 },
+                      { name: 'silver', displayName: 'Silver', color: '#C0C0C0', icon: 'silver', minSpending: 5000, discountPercent: 3, pointsMultiplier: 1.5, birthdayBonus: 100 },
+                      { name: 'gold', displayName: 'Gold', color: '#FFD700', icon: 'gold', minSpending: 15000, discountPercent: 5, pointsMultiplier: 2, birthdayBonus: 200, freeShipping: true, prioritySupport: true, earlyAccess: true },
+                      { name: 'platinum', displayName: 'Platinum', color: '#8C8C8C', icon: 'platinum', minSpending: 35000, discountPercent: 8, pointsMultiplier: 2.5, birthdayBonus: 350, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true },
+                      { name: 'diamond', displayName: 'Diamond', color: '#B9F2FF', icon: 'diamond', minSpending: 60000, discountPercent: 12, pointsMultiplier: 3, birthdayBonus: 500, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true },
+                      { name: 'emerald', displayName: 'Emerald', color: '#50C878', icon: 'emerald', minSpending: 100000, discountPercent: 15, pointsMultiplier: 3.5, birthdayBonus: 750, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true },
+                      { name: 'ruby', displayName: 'Ruby', color: '#E0115F', icon: 'ruby', minSpending: 150000, discountPercent: 18, pointsMultiplier: 4, birthdayBonus: 1000, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true },
+                      { name: 'sapphire', displayName: 'Sapphire', color: '#0F52BA', icon: 'sapphire', minSpending: 250000, discountPercent: 22, pointsMultiplier: 5, birthdayBonus: 1500, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true },
+                      { name: 'obsidian', displayName: 'Obsidian', color: '#1C1C1C', icon: 'obsidian', minSpending: 400000, discountPercent: 25, pointsMultiplier: 6, birthdayBonus: 2000, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true },
+                      { name: 'legendary', displayName: 'Legendary', color: '#FFD700', icon: 'legendary', minSpending: 750000, discountPercent: 30, pointsMultiplier: 10, birthdayBonus: 5000, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true }
+                    ].map((preset) => (
+                      <button
+                        key={preset.name}
+                        type="button"
+                        onClick={() => setTierForm({
+                          ...defaultTierForm,
+                          ...preset,
+                          freeShipping: preset.freeShipping || false,
+                          prioritySupport: preset.prioritySupport || false,
+                          earlyAccess: preset.earlyAccess || false,
+                          exclusiveDeals: preset.exclusiveDeals || false,
+                          isActive: true
+                        })}
+                        className="px-3 py-2 rounded-lg border-2 hover:border-gray-400 transition-all flex items-center gap-2"
+                        style={{ borderColor: tierForm.name === preset.name ? preset.color : '#e5e7eb', backgroundColor: tierForm.name === preset.name ? `${preset.color}15` : 'transparent' }}
+                      >
+                        <span className="w-4 h-4 rounded-full" style={{ backgroundColor: preset.color }} />
+                        <span className="font-medium">{preset.displayName}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Internal Name</Label>
@@ -328,6 +434,26 @@ export default function AdminLoyaltyPage() {
                       onChange={(e) => setTierForm({ ...tierForm, color: e.target.value })}
                       className="flex-1"
                     />
+                  </div>
+                </div>
+                <div>
+                  <Label>Badge Icon</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {TIER_ICONS.map((iconOption) => (
+                      <button
+                        key={iconOption.name}
+                        type="button"
+                        onClick={() => setTierForm({ ...tierForm, icon: iconOption.name })}
+                        className={`px-3 py-2 rounded-lg border-2 transition-all flex items-center gap-2 ${
+                          tierForm.icon === iconOption.name 
+                            ? 'border-blue-500 bg-blue-50' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className="text-lg">{iconOption.emoji}</span>
+                        <span className="text-sm">{iconOption.label}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
                 <div>
@@ -579,10 +705,20 @@ export default function AdminLoyaltyPage() {
             <Crown className="w-5 h-5 text-yellow-500" />
             Loyalty Tiers
           </h2>
-          <Button onClick={openCreateTier} className="gap-2">
-            <Plus className="w-4 h-4" />
-            Add New Tier
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button onClick={openCreateTier} className="gap-2">
+              <Plus className="w-4 h-4" />
+              Add New Tier
+            </Button>
+            <Button onClick={fixTierOrder} variant="outline" className="gap-2 border-blue-200 text-blue-600 hover:bg-blue-50">
+              <RefreshCw className="w-4 h-4" />
+              Fix Tier Order
+            </Button>
+            <Button onClick={resetTiers} variant="outline" className="gap-2 border-red-200 text-red-600 hover:bg-red-50">
+              <RefreshCw className="w-4 h-4" />
+              Reset All Tiers
+            </Button>
+          </div>
         </div>
         
         {tiers.length === 0 ? (

@@ -22,15 +22,16 @@ export async function calculateTierForUser(userId: string) {
 
     const currentLifetimeSpent = loyaltyPoints.lifetimeSpent || 0
 
-    // Get all tiers ordered by minSpend descending
+    // Get all tiers ordered by minSpending descending (highest first)
     const tiers = await prisma.loyaltyTier.findMany({
-      orderBy: { minSpend: 'desc' }
+      where: { isActive: true },
+      orderBy: { minSpending: 'desc' }
     })
 
     // Find the highest tier the user qualifies for
     let qualifiedTier = null
     for (const tier of tiers) {
-      if (currentLifetimeSpent >= tier.minSpend) {
+      if (currentLifetimeSpent >= tier.minSpending) {
         qualifiedTier = tier
         break
       }

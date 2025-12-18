@@ -130,7 +130,7 @@ export async function PUT(
           const receiptOrder = await getOrderForReceipt(order.id)
           console.log('Receipt order found:', !!receiptOrder)
           
-          const receiptHtml = receiptOrder ? generateReceiptHTML(receiptOrder) : undefined
+          const receiptHtml = receiptOrder ? await generateReceiptHTML(receiptOrder) : undefined
           console.log('Receipt HTML generated:', !!receiptHtml, 'Length:', receiptHtml?.length || 0)
           
           console.log('Calling sendReceiptEmail with:', {
@@ -165,16 +165,17 @@ export async function PUT(
       }
     }
 
-    // Handle shipping notification
+    // Handle shipping notification - DISABLED to reduce email volume
     if (status === 'shipped' && existingOrder.status !== 'shipped') {
-      const recipientEmail = order.user?.email || existingOrder.guestEmail
-      if (recipientEmail && sendEmail !== false) {
-        try {
-          await sendShippingNotification(recipientEmail, order.orderNumber, trackingNumber || '')
-        } catch (e) {
-          console.error('Failed to send shipping email:', e)
-        }
-      }
+      // const recipientEmail = order.user?.email || existingOrder.guestEmail
+      // MUTED: Shipping emails disabled to prevent Google ban
+      // if (recipientEmail && sendEmail !== false) {
+      //   try {
+      //     await sendShippingNotification(recipientEmail, order.orderNumber, trackingNumber || '')
+      //   } catch (e) {
+      //     console.error('Failed to send shipping email:', e)
+      //   }
+      // }
       // In-app notification for logged in users
       if (existingOrder.userId) {
         try {
@@ -193,8 +194,9 @@ export async function PUT(
 
           // Award Loyalty Points
           try {
-            const settings = await prisma.loyaltySettings.findFirst() as any
-            if (settings && settings.isEnabled && settings.pointsPerTaka > 0) {
+            // Get loyalty settings from SiteSettings (not separate LoyaltySettings model)
+            const settings = await (prisma.siteSettings as any).findUnique({ where: { id: 'main' } }) as any
+            if (settings && settings.pointsPerTaka > 0) {
               const pointsEarned = Math.floor(existingOrder.total * settings.pointsPerTaka)
               if (pointsEarned > 0) {
                  await prisma.loyaltyPoints.upsert({
@@ -283,21 +285,21 @@ export async function PUT(
       }
     }
 
-    // Handle generic status update email
-    if (status && status !== existingOrder.status && sendEmail !== false) {
-      // Don't duplicate for shipped as it has handled above (check logic)
-      if (status !== 'shipped' && status !== 'paid') {
-        const recipientEmail = order.user?.email || existingOrder.guestEmail
-        if (recipientEmail) {
-          await sendOrderStatusUpdate(recipientEmail, {
-            orderNumber: order.orderNumber,
-            customerName: order.address?.name || order.user?.name || 'Customer',
-            status: status,
-            message: notes
-          })
-        }
-      }
-    }
+    // Handle generic status update email - DISABLED to reduce email volume  
+    // MUTED: Status update emails disabled to prevent Google ban
+    // if (status && status !== existingOrder.status && sendEmail !== false) {
+    //   if (status !== 'shipped' && status !== 'paid') {
+    //     const recipientEmail = order.user?.email || existingOrder.guestEmail
+    //     if (recipientEmail) {
+    //       await sendOrderStatusUpdate(recipientEmail, {
+    //         orderNumber: order.orderNumber,
+    //         customerName: order.address?.name || order.user?.name || 'Customer',
+    //         status: status,
+    //         message: notes
+    //       })
+    //     }
+    //   }
+    // }
 
     return NextResponse.json({ 
       order,

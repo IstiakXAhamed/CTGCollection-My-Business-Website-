@@ -36,11 +36,9 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Generate or get existing receipt
-    let receiptUrl = order.receiptUrl
-    if (!receiptUrl) {
-      receiptUrl = await saveReceiptToFile(order.id)
-    }
+    // ALWAYS regenerate receipt with CURRENT selected template
+    // This ensures template changes take effect immediately
+    const receiptUrl = await saveReceiptToFile(order.id)
 
     if (!receiptUrl) {
       return NextResponse.json({ error: 'Failed to generate receipt' }, { status: 500 })

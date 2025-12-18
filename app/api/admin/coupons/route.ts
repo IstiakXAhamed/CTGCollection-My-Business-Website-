@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     
     const user = await verifyToken(token)
     
-    if (!user || (user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'seller')) {
+    if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     
     const user = await verifyToken(token)
     
-    if (!user || (user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'seller')) {
+    if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

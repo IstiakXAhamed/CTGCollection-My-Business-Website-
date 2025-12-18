@@ -5,8 +5,9 @@ import Image from 'next/image'
 import { ShoppingCart, User, Search, Menu, Heart, LogOut, Settings, Package, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import NotificationBell from '@/components/NotificationBell'
+import { useCartStore } from '@/store/cart'
 
 interface UserData {
   id: string
@@ -19,14 +20,20 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [user, setUser] = useState<UserData | null>(null)
-  const [cartCount, setCartCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isHydrated, setIsHydrated] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
+  
+  // Use cart store for reactive cart count
+  const storeCartCount = useCartStore((state) => state.getTotalItems())
+  // Only show cart count after hydration to avoid SSR mismatch
+  const cartCount = isHydrated ? storeCartCount : 0
 
   useEffect(() => {
+    setIsHydrated(true) // Mark as hydrated after mount
     checkAuth()
-    loadCartCount()
   }, [])
 
   const checkAuth = async () => {
@@ -42,20 +49,6 @@ export default function Navbar() {
       console.error('Auth check failed:', error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const loadCartCount = () => {
-    try {
-      const stored = localStorage.getItem('cart-storage')
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        const items = parsed.state?.items || []
-        const count = items.reduce((sum: number, item: any) => sum + item.quantity, 0)
-        setCartCount(count)
-      }
-    } catch (error) {
-      console.error('Cart load failed:', error)
     }
   }
 
@@ -102,19 +95,54 @@ export default function Navbar() {
 
           {/* Desktop Navigation - Fixed width */}
           <div className="hidden md:flex items-center space-x-6 flex-shrink-0">
-            <Link href="/shop" className="text-sm font-medium transition-colors hover:text-blue-600 whitespace-nowrap">
+            <Link 
+              href="/shop" 
+              className={`text-sm font-medium transition-colors whitespace-nowrap ${
+                pathname === '/shop' && !pathname.includes('?') 
+                  ? 'text-blue-600 font-semibold' 
+                  : 'hover:text-blue-600'
+              }`}
+            >
               Shop
             </Link>
-            <Link href="/shop?featured=true" className="text-sm font-medium transition-colors hover:text-blue-600 whitespace-nowrap">
+            <Link 
+              href="/shop?featured=true" 
+              className={`text-sm font-medium transition-colors whitespace-nowrap ${
+                pathname.includes('featured=true') 
+                  ? 'text-blue-600 font-semibold' 
+                  : 'hover:text-blue-600'
+              }`}
+            >
               Featured
             </Link>
-            <Link href="/shop?sale=true" className="text-sm font-medium transition-colors hover:text-blue-600 whitespace-nowrap">
+            <Link 
+              href="/shop?sale=true" 
+              className={`text-sm font-medium transition-colors whitespace-nowrap ${
+                pathname.includes('sale=true') 
+                  ? 'text-blue-600 font-semibold' 
+                  : 'hover:text-blue-600'
+              }`}
+            >
               Sale
             </Link>
-            <Link href="/about" className="text-sm font-medium transition-colors hover:text-blue-600 whitespace-nowrap">
+            <Link 
+              href="/about" 
+              className={`text-sm font-medium transition-colors whitespace-nowrap ${
+                pathname === '/about' 
+                  ? 'text-blue-600 font-semibold' 
+                  : 'hover:text-blue-600'
+              }`}
+            >
               About
             </Link>
-            <Link href="/contact" className="text-sm font-medium transition-colors hover:text-blue-600 whitespace-nowrap">
+            <Link 
+              href="/contact" 
+              className={`text-sm font-medium transition-colors whitespace-nowrap ${
+                pathname === '/contact' 
+                  ? 'text-blue-600 font-semibold' 
+                  : 'hover:text-blue-600'
+              }`}
+            >
               Contact
             </Link>
           </div>

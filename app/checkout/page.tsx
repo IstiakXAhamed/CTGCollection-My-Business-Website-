@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatPrice } from '@/lib/utils'
 import { ALL_DISTRICTS, calculateShippingCost, isValidBDPhone, CTG_DISTRICTS } from '@/lib/bangladesh-data'
+import { useCartStore } from '@/store/cart'
 
 interface CartItem {
   id: string
@@ -52,26 +53,30 @@ export default function CheckoutPage() {
     postalCode: '',
   })
 
-  useEffect(() => {
-    loadCart()
-    loadUserInfo()
-  }, [])
+  // Get cart items from store directly
+  const storeItems = useCartStore((state) => state.items)
+  const hasHydrated = useCartStore((state) => state._hasHydrated)
 
-  const loadCart = async () => {
-    try {
-      const { useCartStore } = await import('@/store/cart')
-      const items = useCartStore.getState().items
-      setCartItems(items)
-      
-      if (items.length === 0) {
-        router.push('/cart')
-      }
-    } catch (error) {
-      console.error('Failed to load cart:', error)
-    } finally {
+  useEffect(() => {
+    // Update local state when store hydrates or items change
+    if (hasHydrated) {
+      console.log('Checkout: cart hydrated with', storeItems.length, 'items')
+      setCartItems(storeItems)
       setLoadingCart(false)
     }
-  }
+  }, [storeItems, hasHydrated])
+
+  useEffect(() => {
+    loadUserInfo()
+    // Fallback timeout in case hydration takes too long
+    const timeout = setTimeout(() => {
+      if (loadingCart) {
+        setCartItems(useCartStore.getState().items)
+        setLoadingCart(false)
+      }
+    }, 500)
+    return () => clearTimeout(timeout)
+  }, [])
 
   const loadUserInfo = async () => {
     try {
@@ -190,7 +195,7 @@ export default function CheckoutPage() {
         throw new Error(orderData.message || orderData.error || 'Failed to create order')
       }
 
-      const { useCartStore } = await import('@/store/cart')
+
       useCartStore.getState().clearCart()
 
       if (paymentMethod === 'cod') {

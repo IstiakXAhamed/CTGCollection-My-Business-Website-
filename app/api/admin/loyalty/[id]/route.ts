@@ -5,7 +5,7 @@ import { verifyAuth } from '@/lib/auth'
 // Check admin access
 async function checkAdmin(request: NextRequest) {
   const user = await verifyAuth(request)
-  if (!user || (user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'seller')) {
+  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
     return null
   }
   return user
@@ -44,6 +44,7 @@ export async function PUT(
         exclusiveDeals: body.exclusiveDeals ?? tier.exclusiveDeals,
         birthdayBonus: body.birthdayBonus ?? tier.birthdayBonus,
         color: body.color ?? tier.color,
+        icon: body.icon ?? tier.icon,
         isActive: body.isActive ?? tier.isActive
       }
     })

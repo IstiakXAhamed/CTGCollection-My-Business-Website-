@@ -20,6 +20,7 @@ import { LimitedStockAlert } from '@/components/LimitedStockAlert'
 import { ProductBundle } from '@/components/ProductBundle'
 import { PriceDropAlert } from '@/components/PriceDropAlert'
 import { SocialShare } from '@/components/SocialShare'
+import { useCartStore } from '@/store/cart'
 import Link from 'next/link'
 
 export default function ProductDetailPage() {
@@ -72,13 +73,12 @@ export default function ProductDetailPage() {
     }
   }
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = () => {
     if (!selectedVariant) {
       alert('Please select a variant')
       return
     }
 
-    const { useCartStore } = await import('@/store/cart')
     const images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images
     
     useCartStore.getState().addItem({
@@ -95,8 +95,8 @@ export default function ProductDetailPage() {
     alert(`✅ Added ${quantity} x ${product.name} to cart!`)
   }
 
-  const handleBuyNow = async () => {
-    await handleAddToCart()
+  const handleBuyNow = () => {
+    handleAddToCart()
     window.location.href = '/checkout'
   }
 

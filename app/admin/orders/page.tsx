@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Search, Eye, Package, RefreshCw, ChevronDown, CheckCircle, Clock, CreditCard, FileText, Mail, Loader2, Download } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
+import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -35,6 +36,9 @@ export default function AdminOrdersPage() {
   const [confirmingPayment, setConfirmingPayment] = useState<string | null>(null)
   const [sendingReceipt, setSendingReceipt] = useState<string | null>(null)
   const { toast } = useToast()
+
+  // Auto-refresh every 30 seconds
+  useAutoRefresh(useCallback(() => fetchOrders(), [pagination.page, pagination.limit]))
 
   useEffect(() => {
     fetchOrders()

@@ -10,6 +10,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ authenticated: false }, { status: 401 })
     }
 
+    // Check for role switching cookies
+    const tempRole = cookieHeader?.split(';').find(c => c.trim().startsWith('tempRole='))?.split('=')[1]
+    const originalRole = cookieHeader?.split(';').find(c => c.trim().startsWith('originalRole='))?.split('=')[1]
+
     // Verify token
     const { verifyToken } = await import('@/lib/auth')
     const { prisma } = await import('@/lib/prisma')
@@ -38,14 +42,21 @@ export async function GET(request: Request) {
       return NextResponse.json({ authenticated: false }, { status: 401 })
     }
 
+    // Determine the active role (use temp role if set, otherwise real role)
+    const activeRole = tempRole || freshUser.role
+    const isRoleSwitched = !!tempRole && tempRole !== freshUser.role
+
     return NextResponse.json({
       authenticated: true,
       user: {
         id: freshUser.id,
         name: freshUser.name,
         email: freshUser.email,
-        role: freshUser.role,
-        tier: freshUser.loyaltyPoints?.tier?.name || 'bronze'
+        role: activeRole,  // Return the active (potentially switched) role
+        realRole: freshUser.role,  // Keep track of actual role
+        originalRole: originalRole || freshUser.role,  // For role switcher component
+        isRoleSwitched,  // Flag to indicate if role is switched
+        tier: freshUser.loyaltyPoints?.tier?.name || null  // null = No Tier assigned
       }
     })
   } catch (error) {

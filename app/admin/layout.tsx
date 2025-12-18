@@ -22,16 +22,21 @@ import {
   Gift,
   Megaphone,
   BadgeCheck,
-  Shield
+  Shield,
+  Star,
+  Search
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AdminNotificationBell from '@/components/AdminNotificationBell'
 import RoleBadge from '@/components/RoleBadge'
+import RoleSwitcher from '@/components/RoleSwitcher'
 
 // Menu items - filtered by role
 const getMenuItems = (role: string) => {
   const isSuperAdmin = role === 'superadmin'
+  const isAdmin = role === 'admin'
   const isSeller = role === 'seller'
+  const isAdminOrSuper = isSuperAdmin || isAdmin  // Admin + SuperAdmin
   
   return [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
@@ -39,23 +44,28 @@ const getMenuItems = (role: string) => {
     { icon: FolderTree, label: 'Categories', href: '/admin/categories' },
     { icon: ShoppingCart, label: 'Orders', href: '/admin/orders' },
     { icon: Users, label: 'Customers', href: '/admin/customers' },
+    { icon: Star, label: 'Reviews', href: '/admin/reviews' },
     // Superadmin only
     ...(isSuperAdmin ? [{ icon: UserCog, label: 'User Management', href: '/admin/users' }] : []),
-    // Hide coupons from seller
-    ...(!isSeller ? [{ icon: Tag, label: 'Coupons', href: '/admin/coupons' }] : []),
-    // Loyalty - admin/superadmin only
-    ...(!isSeller ? [{ icon: Crown, label: 'Loyalty & Referrals', href: '/admin/loyalty' }] : []),
+    // Coupons - Admin + SuperAdmin (NOT sellers)
+    ...(isAdminOrSuper ? [{ icon: Tag, label: 'Coupons', href: '/admin/coupons' }] : []),
+    // Loyalty - Admin + SuperAdmin (NOT sellers)
+    ...(isAdminOrSuper ? [{ icon: Crown, label: 'Loyalty & Referrals', href: '/admin/loyalty' }] : []),
     { icon: Megaphone, label: 'Announcements', href: '/admin/announcements' },
     { icon: Package, label: 'Inventory History', href: '/admin/inventory' },
-    // Technical pages - admin/superadmin only
-    ...(!isSeller ? [{ icon: Palette, label: 'Banners', href: '/admin/banners' }] : []),
+    // Banners - Admin + SuperAdmin (NOT sellers)
+    ...(isAdminOrSuper ? [{ icon: Palette, label: 'Banners', href: '/admin/banners' }] : []),
     { icon: Mail, label: 'Messages', href: '/admin/messages' },
     { icon: MessageCircle, label: 'Live Chat', href: '/admin/chat' },
-    // Settings - admin/superadmin only
-    ...(!isSeller ? [
+    // Settings - superadmin only for security
+    ...(isSuperAdmin ? [
       { icon: Settings, label: 'Site Settings', href: '/admin/site-settings' },
       { icon: Settings, label: 'App Settings', href: '/admin/settings' },
     ] : []),
+    // Receipt Lookup - all roles can access
+    { icon: Search, label: 'Receipt Lookup', href: '/admin/receipt-lookup' },
+    // Receipt Templates - superadmin only
+    ...(isSuperAdmin ? [{ icon: Settings, label: 'Receipt Templates', href: '/admin/receipt-templates' }] : []),
   ]
 }
 
@@ -159,6 +169,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <span className="text-sm text-muted-foreground hidden sm:block">
               Welcome, <span className="font-semibold">{user?.name}</span>
             </span>
+            {/* Role Switcher - Only for SuperAdmin */}
+            {(user?.role === 'superadmin' || user?.originalRole === 'superadmin') && (
+              <RoleSwitcher currentRole={user?.role || 'superadmin'} />
+            )}
             <AdminNotificationBell />
             <Button variant="outline" asChild>
               <Link href="/" target="_blank">View Store</Link>

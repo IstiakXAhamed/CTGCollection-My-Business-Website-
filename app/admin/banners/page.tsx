@@ -24,10 +24,18 @@ export default function AdminBannersPage() {
 
   // Load banners
   useEffect(() => {
-    const saved = localStorage.getItem('ctg_promo_banners')
-    if (saved) {
+    const savedData = localStorage.getItem('ctg_promo_banners')
+    if (savedData) {
       try {
-        setBanners(JSON.parse(saved))
+        const parsed = JSON.parse(savedData)
+        // Merge with default fields to ensure new fields are present
+        const mergedBanners = parsed.map((banner: PromoBanner) => ({
+          size: 'normal',
+          fontSize: 'base', 
+          padding: 'normal',
+          ...banner // Saved values override defaults
+        }))
+        setBanners(mergedBanners)
       } catch {
         setBanners(getDefaultBanners())
       }
@@ -46,7 +54,10 @@ export default function AdminBannersPage() {
       preset: 'sunset',
       icon: 'sparkles',
       enabled: true,
-      order: 0
+      order: 0,
+      size: 'normal',
+      fontSize: 'base',
+      padding: 'normal'
     },
     {
       id: '2',
@@ -55,7 +66,10 @@ export default function AdminBannersPage() {
       preset: 'ocean',
       icon: 'gift',
       enabled: true,
-      order: 1
+      order: 1,
+      size: 'normal',
+      fontSize: 'base',
+      padding: 'normal'
     }
   ]
 
@@ -81,7 +95,10 @@ export default function AdminBannersPage() {
       preset: 'sunset',
       icon: 'sparkles',
       enabled: true,
-      order: banners.length
+      order: banners.length,
+      size: 'normal',
+      fontSize: 'base',
+      padding: 'normal'
     }
     setBanners([...banners, newBanner])
     setEditingBanner(newBanner)

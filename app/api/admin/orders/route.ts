@@ -23,13 +23,32 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const skip = (page - 1) * limit
 
+    // Sellers only see orders containing their products
+    const whereClause = admin.role === 'seller' 
+      ? {
+          items: {
+            some: {
+              product: { sellerId: admin.id }
+            }
+          }
+        }
+      : {}
+
     const [orders, total] = await Promise.all([
       prisma.order.findMany({
+        where: whereClause,
         include: {
           user: { select: { name: true, email: true } },
           items: {
             include: {
-              product: { select: { name: true, images: true } }
+              product: { 
+                select: { 
+                  name: true, 
+                  images: true,
+                  sellerId: true,
+                  seller: { select: { id: true, name: true } }
+                } 
+              }
             }
           },
           address: true,
@@ -39,7 +58,7 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit
       }),
-      prisma.order.count()
+      prisma.order.count({ where: whereClause })
     ])
 
     return NextResponse.json({

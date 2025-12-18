@@ -11,7 +11,16 @@ const nextConfig = {
   
   // Compress responses
   compress: true,
-  
+
+  // Output standalone for Vercel deployment
+  output: 'standalone',
+
+  // Experimental optimizations
+  experimental: {
+    // Optimize package imports for smaller bundles
+    optimizePackageImports: ['lucide-react', 'framer-motion', '@radix-ui/react-icons'],
+  },
+
   // Image optimization
   images: {
     remotePatterns: [
@@ -27,12 +36,18 @@ const nextConfig = {
         protocol: 'https',
         hostname: '*.googleusercontent.com',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
     ],
     // Device sizes for responsive images
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
-    // Disable image optimization for local images (fixes PNG loading issues)
-    unoptimized: true,
+    // Enable image optimization for faster loading
+    unoptimized: false,
+    // Optimize images with lower quality for faster loading
+    minimumCacheTTL: 86400, // 24 hours
   },
   
   // Custom headers for security and caching
@@ -58,11 +73,18 @@ const nextConfig = {
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ]
       },
-      // Cache images
+      // Cache images for 1 week
       {
         source: '/_next/image/:path*',
         headers: [
-          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
+          { key: 'Cache-Control', value: 'public, max-age=604800, stale-while-revalidate=86400' },
+        ]
+      },
+      // Cache uploaded images
+      {
+        source: '/uploads/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=604800, stale-while-revalidate=86400' },
         ]
       },
       // API caching for product listings
@@ -70,6 +92,20 @@ const nextConfig = {
         source: '/api/products/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
+        ]
+      },
+      // API caching for categories
+      {
+        source: '/api/categories/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=300, stale-while-revalidate=600' },
+        ]
+      },
+      // Cache static JS/CSS bundles for 1 year
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ]
       },
     ]

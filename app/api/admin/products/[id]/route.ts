@@ -10,6 +10,24 @@ async function checkAdmin(request: NextRequest) {
   return user
 }
 
+// Check if user can access this product
+async function checkProductAccess(productId: string, user: any) {
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { id: true, sellerId: true }
+  })
+  
+  if (!product) return { product: null, hasAccess: false }
+  
+  // Admins and superadmins can access all products
+  if (user.role === 'admin' || user.role === 'superadmin') {
+    return { product, hasAccess: true }
+  }
+  
+  // Sellers can only access their own products
+  return { product, hasAccess: product.sellerId === user.id }
+}
+
 // GET single product by ID
 export async function GET(
   request: NextRequest,
@@ -21,11 +39,17 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { hasAccess } = await checkProductAccess(params.id, admin)
+    if (!hasAccess && admin.role === 'seller') {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+    }
+
     const product = await prisma.product.findUnique({
       where: { id: params.id },
       include: {
         category: true,
-        variants: true
+        variants: true,
+        seller: { select: { id: true, name: true, email: true } }
       }
     })
 
@@ -50,6 +74,12 @@ export async function PUT(
     const admin = await checkAdmin(request)
     if (!admin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check ownership for sellers
+    const { hasAccess } = await checkProductAccess(params.id, admin)
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'Not authorized to modify this product' }, { status: 403 })
     }
 
     const body = await request.json()
@@ -80,7 +110,8 @@ export async function PUT(
       },
       include: {
         category: true,
-        variants: true
+        variants: true,
+        seller: { select: { id: true, name: true, email: true } }
       }
     })
 
@@ -101,6 +132,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Check ownership for sellers
+    const { hasAccess } = await checkProductAccess(params.id, admin)
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'Not authorized to delete this product' }, { status: 403 })
+    }
+
     // Delete variants first
     await prisma.productVariant.deleteMany({
       where: { productId: params.id }
@@ -116,3 +153,4 @@ export async function DELETE(
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
+
