@@ -172,7 +172,7 @@ export async function creditLoyaltyPoints(userId: string, orderTotal: number, or
     })
 
     // Log transaction
-    await (prisma.loyaltyTransaction.create as any)({
+    await (prisma.pointsTransaction.create as any)({
       data: {
         userId,
         orderId,
