@@ -54,8 +54,8 @@ export function QuickViewModal({ product, isOpen, onClose, onAddToCart }: QuickV
     : 0
 
   // Get unique sizes and colors from variants
-  const sizes = [...new Set(product.variants?.map(v => v.size).filter(Boolean) || [])]
-  const colors = [...new Set(product.variants?.map(v => v.color).filter(Boolean) || [])]
+  const sizes = Array.from(new Set(product.variants?.map(v => v.size).filter(Boolean) || []))
+  const colors = Array.from(new Set(product.variants?.map(v => v.color).filter(Boolean) || []))
 
   const handleAddToCart = async () => {
     if (onAddToCart) {
