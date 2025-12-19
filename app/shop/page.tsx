@@ -201,10 +201,10 @@ function ShopContent() {
           </Button>
         </div>
 
-        <div className="flex gap-8">
-          {/* Sidebar Filters */}
-          <aside className={`w-64 space-y-6 ${showFilters ? 'block' : 'hidden sm:block'}`}>
-            <Card className="p-6">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+          {/* Sidebar Filters - Mobile: shown when showFilters is true, Desktop: always visible */}
+          <aside className={`w-full lg:w-64 space-y-6 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-bold text-lg">Filters</h2>
                 {(selectedCategories.length > 0 || priceRange.min || priceRange.max) && (
@@ -293,7 +293,7 @@ function ShopContent() {
               </div>
             </div>
 
-            <div className={`grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-${gridCols}`}>
+            <div className="grid gap-4 sm:gap-6 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {sortedProducts.map((product, idx) => {
                 // Handle images - API returns parsed array but handle string fallback
                 let images: string[] = []

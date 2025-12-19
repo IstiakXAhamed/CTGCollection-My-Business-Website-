@@ -281,67 +281,91 @@ export default function Navbar() {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="border-t py-4 md:hidden">
-            <div className="flex flex-col space-y-3">
+            {/* Mobile Search */}
+            <form onSubmit={handleSearch} className="px-3 pb-4 border-b mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search products..."
+                  className="h-12 w-full rounded-xl border bg-muted/50 pl-11 pr-4 text-base focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                />
+              </div>
+            </form>
+            
+            <div className="flex flex-col space-y-1 px-1">
               <Link
                 href="/shop"
-                className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
+                className="rounded-xl px-4 py-3 text-base font-medium hover:bg-muted active:bg-muted/80 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Shop
               </Link>
               <Link
                 href="/shop?featured=true"
-                className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
+                className="rounded-xl px-4 py-3 text-base font-medium hover:bg-muted active:bg-muted/80 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Featured
+                ⭐ Featured
               </Link>
               <Link
                 href="/shop?sale=true"
-                className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
+                className="rounded-xl px-4 py-3 text-base font-medium hover:bg-muted active:bg-muted/80 transition-colors text-red-600"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Sale
+                🏷️ Sale
               </Link>
+              <Link
+                href="/dashboard/wishlist"
+                className="rounded-xl px-4 py-3 text-base font-medium hover:bg-muted active:bg-muted/80 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                ❤️ Wishlist
+              </Link>
+              
+              <div className="my-2 border-t" />
+              
               {user ? (
                 <>
                   <Link
                     href="/dashboard/profile"
-                    className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
+                    className="rounded-xl px-4 py-3 text-base font-medium hover:bg-muted active:bg-muted/80 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    My Profile
+                    👤 My Profile
                   </Link>
                   <Link
                     href="/dashboard/orders"
-                    className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
+                    className="rounded-xl px-4 py-3 text-base font-medium hover:bg-muted active:bg-muted/80 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    My Orders
+                    📦 My Orders
                   </Link>
-                  {user.role === 'admin' && (
+                  {(user.role === 'admin' || user.role === 'superadmin') && (
                     <Link
                       href="/admin"
-                      className="rounded-md px-3 py-2 text-sm font-medium text-blue-600 hover:bg-muted"
+                      className="rounded-xl px-4 py-3 text-base font-medium text-purple-600 hover:bg-purple-50 active:bg-purple-100 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Admin Panel
+                      ⚙️ Admin Panel
                     </Link>
                   )}
                   <button
                     onClick={handleLogout}
-                    className="rounded-md px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 text-left"
+                    className="rounded-xl px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 active:bg-red-100 text-left transition-colors w-full"
                   >
-                    Logout
+                    🚪 Logout
                   </button>
                 </>
               ) : (
                 <Link
                   href="/login"
-                  className="rounded-md px-3 py-2 text-sm font-medium text-blue-600 hover:bg-muted"
+                  className="rounded-xl px-4 py-3 text-base font-medium text-blue-600 hover:bg-blue-50 active:bg-blue-100 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Login / Register
+                  🔐 Login / Register
                 </Link>
               )}
             </div>

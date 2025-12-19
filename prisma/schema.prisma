@@ -46,6 +46,7 @@ model User {
   questions         ProductQuestion[]
   answers           ProductAnswer[]
   sellerProducts    Product[]   @relation("SellerProducts")  // Products this seller owns
+  shop              Shop?       // Seller's shop profile (if any)
 
   // Performance indexes
   @@index([role])
@@ -93,7 +94,8 @@ model Product {
   slug          String    @unique
   description   String
   categoryId    String
-  sellerId      String?   // Nullable: seller who owns this product
+  sellerId      String?   // Nullable: seller who owns this product (legacy)
+  shopId        String?   // Nullable: shop this product belongs to (multi-vendor)
   basePrice     Float
   salePrice     Float?
   images        String    // JSON array of image URLs
@@ -108,6 +110,7 @@ model Product {
   
   category      Category        @relation(fields: [categoryId], references: [id])
   seller        User?           @relation("SellerProducts", fields: [sellerId], references: [id])
+  shop          Shop?           @relation("ShopProducts", fields: [shopId], references: [id])
   variants      ProductVariant[]
   reviews       Review[]
   wishlists     Wishlist[]
@@ -119,6 +122,7 @@ model Product {
   // Performance indexes
   @@index([categoryId])
   @@index([sellerId])
+  @@index([shopId])
   @@index([isActive, isFeatured])
   @@index([isActive, isBestseller])
   @@index([createdAt])
@@ -696,6 +700,9 @@ model SiteSettings {
   // Login Settings
   unifiedLogin      Boolean  @default(true) // true = single login page auto-detects role, false = separate admin login
   
+  // Multi-Vendor Marketplace Settings
+  multiVendorEnabled Boolean @default(false) // true = marketplace with multiple shops, false = single vendor mode
+  
   updatedAt         DateTime @updatedAt
 }
 
@@ -708,4 +715,34 @@ model SiteSetting {
   updatedAt DateTime @updatedAt
   
   @@index([key])
+}
+
+// ============= MULTI-VENDOR SHOP SYSTEM =============
+
+model Shop {
+  id            String    @id @default(uuid())
+  ownerId       String    @unique
+  name          String
+  slug          String    @unique
+  description   String?   @db.Text
+  logo          String?
+  banner        String?
+  phone         String?
+  email         String?
+  address       String?
+  city          String?
+  isVerified    Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  rating        Float     @default(0)
+  totalSales    Int       @default(0)
+  totalProducts Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  owner         User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products      Product[] @relation("ShopProducts")
+  
+  @@index([slug])
+  @@index([isActive])
+  @@index([ownerId])
 }

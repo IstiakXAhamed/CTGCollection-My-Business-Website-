@@ -24,7 +24,10 @@ import {
   BadgeCheck,
   Shield,
   Star,
-  Search
+  Search,
+  Store,
+  Menu,
+  X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AdminNotificationBell from '@/components/AdminNotificationBell'
@@ -36,7 +39,7 @@ const getMenuItems = (role: string) => {
   const isSuperAdmin = role === 'superadmin'
   const isAdmin = role === 'admin'
   const isSeller = role === 'seller'
-  const isAdminOrSuper = isSuperAdmin || isAdmin  // Admin + SuperAdmin
+  const isAdminOrSuper = isSuperAdmin || isAdmin
   
   return [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
@@ -45,26 +48,20 @@ const getMenuItems = (role: string) => {
     { icon: ShoppingCart, label: 'Orders', href: '/admin/orders' },
     { icon: Users, label: 'Customers', href: '/admin/customers' },
     { icon: Star, label: 'Reviews', href: '/admin/reviews' },
-    // Superadmin only
     ...(isSuperAdmin ? [{ icon: UserCog, label: 'User Management', href: '/admin/users' }] : []),
-    // Coupons - Admin + SuperAdmin (NOT sellers)
+    ...(isSuperAdmin ? [{ icon: Store, label: 'Shops', href: '/admin/shops' }] : []),
     ...(isAdminOrSuper ? [{ icon: Tag, label: 'Coupons', href: '/admin/coupons' }] : []),
-    // Loyalty - Admin + SuperAdmin (NOT sellers)
     ...(isAdminOrSuper ? [{ icon: Crown, label: 'Loyalty & Referrals', href: '/admin/loyalty' }] : []),
     { icon: Megaphone, label: 'Announcements', href: '/admin/announcements' },
     { icon: Package, label: 'Inventory History', href: '/admin/inventory' },
-    // Banners - Admin + SuperAdmin (NOT sellers)
     ...(isAdminOrSuper ? [{ icon: Palette, label: 'Banners', href: '/admin/banners' }] : []),
     { icon: Mail, label: 'Messages', href: '/admin/messages' },
     { icon: MessageCircle, label: 'Live Chat', href: '/admin/chat' },
-    // Settings - superadmin only for security
     ...(isSuperAdmin ? [
       { icon: Settings, label: 'Site Settings', href: '/admin/site-settings' },
       { icon: Settings, label: 'App Settings', href: '/admin/settings' },
     ] : []),
-    // Receipt Lookup - all roles can access
     { icon: Search, label: 'Receipt Lookup', href: '/admin/receipt-lookup' },
-    // Receipt Templates - superadmin only
     ...(isSuperAdmin ? [{ icon: Settings, label: 'Receipt Templates', href: '/admin/receipt-templates' }] : []),
   ]
 }
@@ -74,8 +71,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  // Don't show layout on login and setup pages
   const isPublicPage = pathname === '/admin/login' || pathname === '/admin/setup'
 
   useEffect(() => {
@@ -86,21 +83,23 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     }
   }, [pathname])
 
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false)
+  }, [pathname])
+
   const checkAuth = async () => {
     try {
       const res = await fetch('/api/auth/me', { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
         if (data.authenticated && data.user) {
-          // Check if user has admin, superadmin, or seller role
           if (data.user.role !== 'admin' && data.user.role !== 'superadmin' && data.user.role !== 'seller') {
-            // Not authorized, redirect to home
             router.push('/')
             return
           }
           setUser(data.user)
         } else {
-          // Not authenticated, redirect to admin login
           router.push('/admin/login')
           return
         }
@@ -126,12 +125,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     }
   }
 
-  // No layout on public pages
   if (isPublicPage) {
     return <>{children}</>
   }
 
-  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -140,7 +137,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     )
   }
 
-  // Not authenticated
   if (!user) {
     return null
   }
@@ -152,47 +148,81 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-gray-100">
       {/* Top Header */}
       <header className="bg-white border-b sticky top-0 z-40">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-xl font-bold text-white">C</span>
+        <div className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          {/* Left side - Menu toggle + Logo */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-lg sm:text-xl font-bold text-white">C</span>
             </div>
-            <div>
-              <h1 className="text-xl font-bold">CTG Collection</h1>
-              <div className="mt-1">
+            <div className="hidden sm:block">
+              <h1 className="text-lg sm:text-xl font-bold">CTG Collection</h1>
+              <div className="mt-0.5">
                 <RoleBadge role={isSuperAdmin ? 'superadmin' : user?.role || 'admin'} size="sm" />
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground hidden sm:block">
+          {/* Right side - Actions */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            <span className="text-sm text-muted-foreground hidden md:block">
               Welcome, <span className="font-semibold">{user?.name}</span>
             </span>
-            {/* Role Switcher - Only for SuperAdmin */}
             {(user?.role === 'superadmin' || user?.originalRole === 'superadmin') && (
-              <RoleSwitcher currentRole={user?.role || 'superadmin'} />
+              <div className="hidden sm:block">
+                <RoleSwitcher currentRole={user?.role || 'superadmin'} />
+              </div>
             )}
             <AdminNotificationBell />
-            <Button variant="outline" asChild>
+            <Button variant="outline" size="sm" asChild className="hidden sm:flex">
               <Link href="/" target="_blank">View Store</Link>
             </Button>
             <Button
               variant="ghost"
+              size="sm"
               className="text-red-600"
               onClick={handleLogout}
             >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline ml-2">Logout</span>
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white border-r min-h-[calc(100vh-73px)] sticky top-[73px]">
-          <nav className="p-4 space-y-1">
+      <div className="flex relative">
+        {/* Mobile Sidebar Overlay */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sidebar - Hidden on mobile, toggle with overlay */}
+        <aside className={`
+          fixed lg:sticky top-0 lg:top-[65px] left-0 z-40 lg:z-0
+          w-64 bg-white border-r h-screen lg:h-[calc(100vh-65px)]
+          transform transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          overflow-y-auto
+        `}>
+          {/* Mobile Header in Sidebar */}
+          <div className="lg:hidden p-4 border-b flex items-center justify-between">
+            <span className="font-bold">Menu</span>
+            <button onClick={() => setSidebarOpen(false)} className="p-1 hover:bg-gray-100 rounded">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <nav className="p-3 sm:p-4 space-y-1">
             {menuItems.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(item.href))
@@ -201,33 +231,32 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+                  className={`flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition text-sm sm:text-base ${
                     isActive
                       ? 'bg-blue-600 text-white'
                       : 'hover:bg-gray-100'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.label}</span>
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                  <span className="font-medium truncate">{item.label}</span>
                 </Link>
               )
             })}
           </nav>
           
-            {/* Role Badge */}
-            <div className="p-4 border-t mt-4">
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50/50">
-                <div className="flex-1 min-w-0">
-                  <RoleBadge role={user?.role} size="sm" className="mb-1" />
-                  <p className="text-xs text-muted-foreground truncate font-medium">{user?.email}</p>
-                </div>
+          {/* Role Badge at bottom */}
+          <div className="p-3 sm:p-4 border-t mt-auto">
+            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50/50">
+              <div className="flex-1 min-w-0">
+                <RoleBadge role={user?.role} size="sm" className="mb-1" />
+                <p className="text-xs text-muted-foreground truncate font-medium">{user?.email}</p>
               </div>
             </div>
-
+          </div>
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 p-8">
+        {/* Main Content - Full width on mobile */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
           {children}
         </main>
       </div>

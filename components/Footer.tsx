@@ -72,18 +72,18 @@ export function Footer() {
     <footer className="bg-gray-900 text-white">
       {/* Features Bar */}
       <div className="border-b border-gray-800">
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="container mx-auto px-4 py-6 sm:py-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {features.map((feature, index) => {
               const Icon = feature.icon
               return (
-                <div key={index} className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-blue-600/10 rounded-xl flex items-center justify-center">
-                    <Icon className="w-6 h-6 text-blue-500" />
+                <div key={index} className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                   </div>
-                  <div>
-                    <p className="font-semibold">{feature.title}</p>
-                    <p className="text-sm text-gray-400">{feature.description}</p>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm sm:text-base">{feature.title}</p>
+                    <p className="text-xs sm:text-sm text-gray-400 truncate">{feature.description}</p>
                   </div>
                 </div>
               )
@@ -93,10 +93,9 @@ export function Footer() {
       </div>
 
       {/* Main Footer */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-          {/* Brand */}
-          <div className="lg:col-span-2">
+      <div className="container mx-auto px-4 py-8 sm:py-12">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8">
+          <div className="col-span-2 lg:col-span-2">
             <Link href="/" className="inline-flex items-center gap-2 mb-4">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                 <span className="text-xl font-bold">C</span>
@@ -170,9 +169,9 @@ export function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-gray-800">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-gray-400 text-sm">
+        <div className="container mx-auto px-4 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-gray-400 text-xs sm:text-sm text-center sm:text-left">
               {settings?.copyrightText || `© ${currentYear} CTG Collection. All rights reserved.`}
             </p>
             
@@ -187,22 +186,22 @@ export function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={social.label}
-                    className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition"
+                    className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition min-h-[44px] min-w-[44px]"
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </a>
                 )
               })}
             </div>
 
             {/* Payment Methods */}
-            <div className="flex items-center gap-2 text-gray-400 text-sm">
+            <div className="flex items-center gap-2 text-gray-400 text-xs sm:text-sm flex-wrap justify-center sm:justify-end">
               <span>We Accept:</span>
-              <div className="flex gap-2">
-                <span className="px-2 py-1 bg-gray-800 rounded text-xs">bKash</span>
-                <span className="px-2 py-1 bg-gray-800 rounded text-xs">Nagad</span>
-                <span className="px-2 py-1 bg-gray-800 rounded text-xs">Visa</span>
-                <span className="px-2 py-1 bg-gray-800 rounded text-xs">COD</span>
+              <div className="flex gap-1.5 sm:gap-2 flex-wrap">
+                <span className="px-2 py-1 bg-gray-800 rounded text-[10px] sm:text-xs">bKash</span>
+                <span className="px-2 py-1 bg-gray-800 rounded text-[10px] sm:text-xs">Nagad</span>
+                <span className="px-2 py-1 bg-gray-800 rounded text-[10px] sm:text-xs">Visa</span>
+                <span className="px-2 py-1 bg-gray-800 rounded text-[10px] sm:text-xs">COD</span>
               </div>
             </div>
           </div>

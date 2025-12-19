@@ -14,7 +14,7 @@ const menuItems = [
   { icon: Package, label: 'Orders', href: '/dashboard/orders' },
   { icon: MapPin, label: 'Addresses', href: '/dashboard/addresses' },
   { icon: Heart, label: 'Wishlist', href: '/dashboard/wishlist' },
-  { icon: Crown, label: 'Loyalty & Referrals', href: '/dashboard/loyalty' },
+  { icon: Crown, label: 'Loyalty', href: '/dashboard/loyalty' },
 ]
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -71,10 +71,56 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <aside className="lg:col-span-1">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        {/* Mobile: Horizontal scrollable nav */}
+        <div className="lg:hidden mb-4">
+          {/* User info card - compact for mobile */}
+          <Card className="p-3 sm:p-4 mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                {user.name?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="font-bold text-sm truncate">{user.name}</h2>
+                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              </div>
+              <RoleBadge role={user.role} tier={user.tier} size="sm" />
+            </div>
+          </Card>
+          
+          {/* Scrollable nav */}
+          <div className="overflow-x-auto -mx-3 px-3">
+            <div className="flex gap-2 pb-2 min-w-max">
+              {menuItems.map((item) => {
+                const Icon = item.icon
+                const isActive = pathname === item.href
+                return (
+                  <Link key={item.href} href={item.href}>
+                    <div className={`flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap text-sm font-medium transition ${
+                      isActive
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white border hover:bg-gray-50'
+                    }`}>
+                      <Icon className="w-4 h-4" />
+                      {item.label}
+                    </div>
+                  </Link>
+                )
+              })}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap text-sm font-medium bg-white border text-red-600 hover:bg-red-50 transition"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8">
+          {/* Desktop Sidebar - hidden on mobile */}
+          <aside className="hidden lg:block lg:col-span-1">
             <Card className="p-6 sticky top-20">
               {/* User Info */}
               <div className="mb-6 pb-4 border-b">
@@ -93,10 +139,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   <RoleBadge role={user.role} tier={user.tier} size="sm" />
                 </div>
                 
-                {/* Role Switcher - only renders if user can switch (superadmin only) */}
+                {/* Role Switcher */}
                 <RoleSwitcher currentRole={user.role} />
                 
-                {/* Admin/Seller Link to Panel - only for actual admin roles */}
+                {/* Admin/Seller Link */}
                 {(user.role === 'admin' || user.role === 'superadmin' || user.role === 'seller') && (
                   <div className="mt-3">
                     <Link href="/admin">

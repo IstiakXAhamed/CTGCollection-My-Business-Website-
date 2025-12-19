@@ -285,17 +285,17 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-6xl">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-4 sm:mb-8"
         >
-          <h1 className="text-4xl font-bold mb-2">Checkout</h1>
-          <p className="text-muted-foreground">{cartItems.length} items in your order</p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2">Checkout</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">{cartItems.length} items in your order</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Left: Forms */}
           <div className="lg:col-span-2 space-y-6">
             {/* Shipping Information */}

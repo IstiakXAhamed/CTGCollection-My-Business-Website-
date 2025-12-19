@@ -109,12 +109,12 @@ export default function HomePage() {
           />
         </div>
         
-        <div className="relative container mx-auto px-4 py-28 md:py-36">
+        <div className="relative container mx-auto px-4 py-16 sm:py-24 md:py-32 lg:py-36">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center max-w-4xl mx-auto"
+            className="text-center max-w-4xl mx-auto px-2 sm:px-0"
           >
             <motion.div 
               initial={{ scale: 0 }}
@@ -126,37 +126,37 @@ export default function HomePage() {
               <span className="text-sm font-medium">Premium E-commerce Store</span>
             </motion.div>
             
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 leading-tight">
               Welcome to<br />
               <span className="bg-gradient-to-r from-yellow-200 via-pink-200 to-cyan-200 bg-clip-text text-transparent">
                 CTG Collection
               </span>
             </h1>
             
-            <p className="text-xl md:text-2xl mb-8 text-blue-50/90 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 text-blue-50/90 max-w-2xl mx-auto px-2">
               Discover premium fashion and lifestyle products delivered to your doorstep
             </p>
             
-            <div className="flex gap-4 justify-center flex-wrap">
+            <div className="flex gap-3 sm:gap-4 justify-center flex-wrap px-2">
               <Button 
                 asChild
                 size="lg" 
-                className="bg-white text-blue-600 hover:bg-white/90 hover:scale-105 hover:shadow-2xl text-lg px-8 py-6 h-auto font-semibold transition-all duration-300 group"
+                className="bg-white text-blue-600 hover:bg-white/90 hover:scale-105 hover:shadow-2xl text-sm sm:text-base lg:text-lg px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6 h-auto font-semibold transition-all duration-300 group min-h-[48px]"
               >
                 <Link href="/shop">
                   Shop Now
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
               
               <Button 
                 asChild
                 size="lg" 
-                className="bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 hover:scale-105 text-lg px-8 py-6 h-auto font-semibold transition-all duration-300"
+                className="bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 hover:scale-105 text-sm sm:text-base lg:text-lg px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6 h-auto font-semibold transition-all duration-300 min-h-[48px]"
               >
                 <Link href="/shop?featured=true">
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Featured Items
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                  Featured
                 </Link>
               </Button>
             </div>

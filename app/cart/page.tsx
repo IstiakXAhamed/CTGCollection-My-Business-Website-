@@ -232,42 +232,54 @@ export default function CartPage() {
                   transition={{ delay: index * 0.1 }}
                 >
                   <Card>
-                    <CardContent className="p-4">
-                      <div className="flex gap-4">
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                         {/* Product Image */}
-                        <div className="flex-shrink-0">
-                          <div className="w-24 h-24 relative rounded-lg overflow-hidden bg-gray-100">
-                            <Image
-                              src={item.image || '/placeholder.png'}
-                              alt={item.name}
-                              fill
-                              className="object-cover"
-                            />
+                        <div className="flex gap-3 sm:gap-4">
+                          <div className="flex-shrink-0">
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 relative rounded-lg overflow-hidden bg-gray-100">
+                              <Image
+                                src={item.image || '/placeholder.png'}
+                                alt={item.name}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
                           </div>
-                        </div>
 
-                        {/* Product Info */}
-                        <div className="flex-1">
-                          <h3 className="font-semibold">{item.name}</h3>
-                          {(item.size || item.color) && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {item.size && `Size: ${item.size}`}
-                              {item.size && item.color && ' · '}
-                              {item.color && `Color: ${item.color}`}
+                          {/* Product Info - Mobile: next to image */}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm sm:text-base line-clamp-2">{item.name}</h3>
+                            {(item.size || item.color) && (
+                              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
+                                {item.size && `Size: ${item.size}`}
+                                {item.size && item.color && ' · '}
+                                {item.color && `Color: ${item.color}`}
+                              </p>
+                            )}
+                            <p className="text-base sm:text-lg font-bold text-blue-600 mt-1 sm:mt-2">
+                              {formatPrice(item.price)}
                             </p>
-                          )}
-                          <p className="text-lg font-bold text-blue-600 mt-2">
-                            {formatPrice(item.price)}
-                          </p>
-                        </div>
-
-                        {/* Quantity Controls */}
-                        <div className="flex flex-col items-end justify-between">
+                          </div>
+                          
+                          {/* Delete button - Mobile: top right */}
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleRemoveItem(item.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 sm:hidden h-8 w-8 p-0"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+
+                        {/* Quantity Controls - Mobile: full width row */}
+                        <div className="flex items-center justify-between sm:flex-col sm:items-end sm:justify-between">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveItem(item.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 hidden sm:flex"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -275,22 +287,22 @@ export default function CartPage() {
                           <div className="flex items-center border-2 rounded-lg">
                             <button
                               onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                              className="p-2 hover:bg-gray-100 transition"
+                              className="p-2 sm:p-2 hover:bg-gray-100 transition min-w-[40px] min-h-[40px] flex items-center justify-center"
                               disabled={item.quantity <= 1}
                             >
                               <Minus className="w-4 h-4" />
                             </button>
-                            <span className="px-4 font-semibold">{item.quantity}</span>
+                            <span className="px-3 sm:px-4 font-semibold min-w-[40px] text-center">{item.quantity}</span>
                             <button
                               onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                              className="p-2 hover:bg-gray-100 transition"
+                              className="p-2 sm:p-2 hover:bg-gray-100 transition min-w-[40px] min-h-[40px] flex items-center justify-center"
                             >
                               <Plus className="w-4 h-4" />
                             </button>
                           </div>
 
-                          <p className="text-sm text-muted-foreground mt-2">
-                            Subtotal: <span className="font-semibold text-foreground">
+                          <p className="text-sm text-muted-foreground sm:mt-2">
+                            <span className="font-semibold text-foreground">
                               {formatPrice(item.price * item.quantity)}
                             </span>
                           </p>
