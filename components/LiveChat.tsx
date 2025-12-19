@@ -106,9 +106,10 @@ export function LiveChat() {
         const res = await fetch(`/api/admin/chat/restrict?sessionId=${sessionId}`)
         if (res.ok) {
           const data = await res.json()
-          if (data.restricted) {
-            const until = new Date(data.restrictedUntil).getTime()
-            setAdminRestriction({ until, reason: data.reason })
+          if (data.restricted && data.remainingSeconds > 0) {
+            // Use remaining seconds from server to avoid timezone issues
+            const untilTime = Date.now() + (data.remainingSeconds * 1000)
+            setAdminRestriction({ until: untilTime, reason: data.reason })
           } else {
             setAdminRestriction(null)
             setRestrictionTimeLeft(null)

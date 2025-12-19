@@ -40,6 +40,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       restricted: true,
       restrictedUntil: restriction.restrictedUntil,
+      // Calculate remaining seconds on server to avoid timezone issues
+      remainingSeconds: Math.max(0, Math.floor((new Date(restriction.restrictedUntil).getTime() - Date.now()) / 1000)),
       reason: restriction.reason
     })
   } catch (error: any) {
