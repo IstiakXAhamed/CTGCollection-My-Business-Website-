@@ -99,8 +99,22 @@ export async function PUT(request: NextRequest) {
 
     const order = await prisma.order.update({
       where: { id: orderId },
-      data: { status }
+      data: { status },
+      include: { user: { select: { email: true, name: true } } }
     })
+
+    // Send Email Notification
+    const userEmail = order.user?.email || order.guestEmail
+    if (userEmail) {
+       import('@/lib/email').then(({ sendOrderStatusUpdate }) => {
+          sendOrderStatusUpdate(userEmail, {
+             orderNumber: order.orderNumber,
+             customerName: order.user?.name || order.name || 'Customer',
+             status,
+             message: 'Status updated by Admin'
+          }).catch(console.error)
+       })
+    }
 
     return NextResponse.json({ success: true, order })
   } catch (error: any) {

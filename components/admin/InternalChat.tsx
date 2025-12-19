@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Search, Send, Plus, User as UserIcon, MoreVertical, Paperclip, CheckCheck, Loader2 } from 'lucide-react'
+import { Search, Send, Plus, User as UserIcon, MoreVertical, Paperclip, CheckCheck, Loader2, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -197,9 +197,9 @@ export function InternalChat() {
   }
 
   return (
-    <div className="flex h-[600px] w-full border rounded-xl overflow-hidden bg-white shadow-sm">
-      {/* Sidebar - Conversations */}
-      <div className="w-80 border-r bg-gray-50 flex flex-col">
+    <div className="flex h-[600px] w-full border rounded-xl overflow-hidden bg-white shadow-sm relative">
+      {/* Sidebar - Conversations (Full width on mobile, hidden if chat open) */}
+      <div className={`${activeUser ? 'hidden md:flex' : 'flex'} w-full md:w-80 border-r bg-gray-50 flex-col md:flex`}>
         <div className="p-4 border-b flex items-center justify-between bg-white">
           <h2 className="font-semibold text-gray-800">Messages</h2>
           <Dialog open={isNewChatOpen} onOpenChange={setIsNewChatOpen}>
@@ -308,13 +308,16 @@ export function InternalChat() {
         </ScrollArea>
       </div>
 
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col bg-slate-50">
+      {/* Main Chat Area (Full width on mobile, hidden if no chat active) */}
+      <div className={`${!activeUser ? 'hidden md:flex' : 'flex'} flex-1 flex-col bg-slate-50 w-full`}>
         {activeUser ? (
           <>
             {/* Header */}
             <div className="h-16 border-b bg-white flex items-center justify-between px-6 shadow-sm">
               <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" className="md:hidden -ml-2" onClick={() => setActiveUser(null)}>
+                   <ArrowLeft className="h-5 w-5" />
+                </Button>
                 <Avatar className="h-10 w-10">
                   <AvatarFallback className="bg-blue-600 text-white">
                     {activeUser.name.charAt(0)}

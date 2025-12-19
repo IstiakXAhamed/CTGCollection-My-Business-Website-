@@ -28,7 +28,8 @@ import {
   Store,
   Menu,
   X,
-  ShieldAlert
+  ShieldAlert,
+  Wallet
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AdminNotificationBell from '@/components/AdminNotificationBell'
@@ -58,6 +59,7 @@ const getMenuItems = (role: string, permissions: string[] = []) => {
     ...(hasPerm('manage_users') ? [
       { icon: Users, label: 'Customers', href: '/admin/customers' },
       { icon: Star, label: 'Reviews', href: '/admin/reviews' },
+      { icon: Wallet, label: 'Payouts', href: '/admin/payouts' },
     ] : []),
 
     // Super Admin & Permitted features

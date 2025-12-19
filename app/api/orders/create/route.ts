@@ -183,6 +183,54 @@ export async function POST(request: NextRequest) {
       if (userId) {
         await notifyOrderConfirmed(userId, order.id)
       }
+
+      // Email Notifications (Async)
+      import('@/lib/email').then(async ({ sendOrderConfirmation, sendNewOrderSellerEmail }) => {
+         // 1. Notify Customer
+         const itemsForEmail = cartItems.map((item: any) => ({ 
+             name: item.name || 'Product', 
+             quantity: item.quantity, 
+             price: item.price 
+         }))
+
+         sendOrderConfirmation({
+           to: userEmail || guestEmail || '',
+           orderNumber: order.orderNumber,
+           customerName: shippingDetails.name || 'Customer',
+           items: itemsForEmail,
+           subtotal: order.subtotal,
+           shipping: order.shippingCost,
+           discount: order.discount,
+           total: order.total,
+           address: `${shippingDetails.address}, ${shippingDetails.city}`,
+           paymentMethod: order.paymentMethod
+         }).catch(console.error)
+  
+         // 2. Notify Sellers
+         const sellerEarnings: Record<string, number> = {}
+         const productIds = cartItems.map((i: any) => i.productId)
+         
+         try {
+           const products = await prisma.product.findMany({
+             where: { id: { in: productIds } },
+             include: { seller: { select: { email: true } }, shop: { include: { owner: { select: { email: true } } } } }
+           })
+  
+           products.forEach(p => {
+             const sellerEmail = p.seller?.email || p.shop?.owner?.email
+             if (sellerEmail) {
+                const item = cartItems.find((i: any) => i.productId === p.id)
+                if (item) {
+                   sellerEarnings[sellerEmail] = (sellerEarnings[sellerEmail] || 0) + (item.price * item.quantity)
+                }
+             }
+           })
+  
+           Object.entries(sellerEarnings).forEach(([email, amount]) => {
+              sendNewOrderSellerEmail(email, order.orderNumber, amount).catch(console.error)
+           })
+         } catch(e) { console.error('Seller email error', e) }
+      })
     } catch (notifyError) {
       console.log('Notification error (non-blocking):', notifyError)
     }

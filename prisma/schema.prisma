@@ -732,6 +732,8 @@ model SiteSettings {
   
   // Multi-Vendor Marketplace Settings
   multiVendorEnabled Boolean @default(false) // true = marketplace with multiple shops, false = single vendor mode
+  defaultCommission  Float   @default(5.0)   // Platform commission %
+  couponCostPolicy   String  @default("platform") // platform, shop, shared
   
   // Gamification (Spin Wheel)
   spinWheelConfig   Json?    // { enabled, prizes: [], cooldownMinutes, delaySeconds }
@@ -799,28 +801,61 @@ model SellerApplication {
   
   // Bank Details (for payouts)
   bankName        String?
-  bankAccountNo   String?
-  bankBranch      String?
+  accountName     String?
+  accountNumber   String?
+  routingNumber   String?
+  bkashNumber     String?
+  nagadNumber     String?
   
-  // Contact
-  phone           String
-  address         String?
-  city            String?
-  
-  // Verification Tier: basic (NID only) or verified (NID+Passport+Bank)
-  verificationTier String    @default("basic") // basic, verified
-  
-  // Status
   status          String    @default("pending") // pending, approved, rejected
-  rejectionReason String?
-  reviewedBy      String?   // Admin who reviewed
-  reviewedAt      DateTime?
-  
+  rejectionReason String?   @db.Text
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============= SELLER PAYOUT SYSTEM =============
+
+model PayoutRequest {
+  id            String   @id @default(uuid())
+  userId        String   // Seller
+  amount        Float
+  status        String   @default("pending") // pending, approved, rejected, paid
+  method        String   // bank, bkash, nagad
+  details       String   // Account number/details JSON
+  adminNote     String?
+  processedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+// ============= REFUND SYSTEM =============
+
+model RefundRequest {
+  id            String   @id @default(uuid())
+  orderId       String
+  userId        String   // Customer requesting
+  amount        Float
+  reason        String   @db.Text
+  images        String?  // JSON array of image URLs
+  status        String   @default("pending") // pending, approved, rejected, refunded
+  adminNote     String?
+  processedAt   DateTime?
+  processedBy   String?  // Admin ID
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
   @@index([status])
   @@index([userId])
 }
+

@@ -6,9 +6,12 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Package, Truck, CheckCircle, MapPin, FileDown, Shield, CreditCard, Loader2, Star, Edit2, X, Send, Camera, ImagePlus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Package, Truck, CheckCircle, MapPin, FileDown, Shield, CreditCard, Loader2, Star, Edit2, X, Send, Camera, ImagePlus, Trash2, Undo2 } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 
 const statusSteps = ['pending', 'confirmed', 'processing', 'shipped', 'delivered']
 
@@ -27,6 +30,41 @@ export default function OrderDetailPage() {
   const [reviewPhotos, setReviewPhotos] = useState<string[]>([])
   const [submittingReview, setSubmittingReview] = useState(false)
   const [existingReviews, setExistingReviews] = useState<{[key: string]: any}>({})
+
+  // Refund State
+  const [showRefundModal, setShowRefundModal] = useState(false)
+  const [refundReason, setRefundReason] = useState('')
+  const [isSubmittingRefund, setIsSubmittingRefund] = useState(false)
+
+  const handleRefundRequest = async () => {
+    if (!refundReason) return alert('Please provide a reason')
+    
+    setIsSubmittingRefund(true)
+    try {
+      const res = await fetch('/api/refunds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: order.id,
+          amount: order.total,
+          reason: refundReason,
+          images: [] // TODO: Add Image upload for refunds if needed
+        })
+      })
+
+      if (res.ok) {
+        alert('Refund request submitted successfully')
+        setShowRefundModal(false)
+      } else {
+        const err = await res.json()
+        alert(err.error || 'Failed to submit request')
+      }
+    } catch (e) {
+      alert('Error submitting request')
+    } finally {
+      setIsSubmittingRefund(false)
+    }
+  }
 
   useEffect(() => {
     if (params.id) {
@@ -229,6 +267,18 @@ export default function OrderDetailPage() {
           Back to Orders
         </Button>
         
+        {/* Request Refund */}
+        {order.status === 'delivered' && (
+           <Button
+             onClick={() => setShowRefundModal(true)}
+             variant="outline"
+             className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+           >
+             <Undo2 className="w-4 h-4 mr-2" />
+             Request Refund
+           </Button>
+        )}
+
         {/* Receipt Download - Single glowing blue button */}
         {order.paymentStatus === 'paid' && (
           <Button 
@@ -576,6 +626,38 @@ export default function OrderDetailPage() {
           </>
         )}
       </AnimatePresence>
+      <Dialog open={showRefundModal} onOpenChange={setShowRefundModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Refund</DialogTitle>
+            <DialogDescription>
+              We are sorry you are not satisfied. Please tell us why you want to return this order.
+              Note: Refund requests are subject to approval.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+             <div className="space-y-2">
+               <Label>Reason for Refund</Label>
+               <Textarea 
+                 value={refundReason}
+                 onChange={(e) => setRefundReason(e.target.value)}
+                 placeholder="e.g. Damaged item, wrong size, etc."
+                 rows={4}
+               />
+             </div>
+             <p className="text-sm text-muted-foreground">
+               Refund Amount: <span className="font-bold text-gray-900">{formatPrice(order?.total)}</span>
+             </p>
+          </div>
+          <DialogFooter>
+             <Button variant="outline" onClick={() => setShowRefundModal(false)}>Cancel</Button>
+             <Button onClick={handleRefundRequest} disabled={isSubmittingRefund} className="bg-red-600 hover:bg-red-700">
+               {isSubmittingRefund && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+               Submit Request
+             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
