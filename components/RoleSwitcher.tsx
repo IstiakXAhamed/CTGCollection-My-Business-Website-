@@ -47,6 +47,7 @@ export default function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcher
   const [originalRole, setOriginalRole] = useState<string | null>(null)
   const [isSwitched, setIsSwitched] = useState(false)
   const [canSwitch, setCanSwitch] = useState(false)
+  const [isLoading, setIsLoading] = useState(true) // Start as loading
 
   useEffect(() => {
     // Check initial role switch status
@@ -65,6 +66,8 @@ export default function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcher
       }
     } catch (error) {
       console.error('Failed to fetch role status:', error)
+    } finally {
+      setIsLoading(false) // Done loading
     }
   }
 
@@ -97,8 +100,8 @@ export default function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcher
     }
   }
 
-  // Don't show if user can't switch roles
-  if (!canSwitch && !isSwitched) return null
+  // Don't show while loading or if user can't switch roles
+  if (isLoading || (!canSwitch && !isSwitched)) return null
 
   const currentConfig = roleConfig[activeRole as keyof typeof roleConfig] || roleConfig.customer
 

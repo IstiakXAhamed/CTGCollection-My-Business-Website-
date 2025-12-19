@@ -96,8 +96,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 {/* Role Switcher - only renders if user can switch (superadmin only) */}
                 <RoleSwitcher currentRole={user.role} />
                 
-                {/* Admin/Seller Link to Panel - also show for role-switched users */}
-                {(user.role === 'admin' || user.role === 'superadmin' || user.role === 'seller' || user.originalRole === 'superadmin') && (
+                {/* Admin/Seller Link to Panel - only for actual admin roles */}
+                {(user.role === 'admin' || user.role === 'superadmin' || user.role === 'seller') && (
                   <div className="mt-3">
                     <Link href="/admin">
                       <Button variant="outline" size="sm" className="w-full gap-2 text-purple-600 border-purple-200 hover:bg-purple-50">
