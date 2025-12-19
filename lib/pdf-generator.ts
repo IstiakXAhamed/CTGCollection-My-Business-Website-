@@ -2,7 +2,7 @@
 // Uses PDF-lib - Free & Unlimited
 // Matches the HTML template design exactly
 
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+import { PDFDocument, StandardFonts, rgb, PDFPage, PDFFont, RGB } from 'pdf-lib'
 import { getOrderForReceipt } from './receipt'
 
 // Format date for receipt
@@ -16,6 +16,24 @@ const getVariant = (variantInfo: string | null | undefined): string => {
     const v = JSON.parse(variantInfo)
     return `${v.size || ''}${v.color ? ' / ' + v.color : ''}`.trim() || '-'
   } catch { return '-' }
+}
+
+// Helper function to draw text
+function drawText(
+  page: PDFPage, 
+  text: string, 
+  x: number, 
+  y: number, 
+  options: { font: PDFFont; size: number; color: RGB; maxWidth?: number }
+) {
+  page.drawText(text, {
+    x,
+    y,
+    size: options.size,
+    font: options.font,
+    color: options.color,
+    maxWidth: options.maxWidth
+  })
 }
 
 // Generate PDF receipt buffer - matches the HTML template design
@@ -60,38 +78,14 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
     })
     
     // Logo area (CTG text as placeholder)
-    page.drawText('CTG', margin, y - 5, {
-      font: bold,
-      size: 24,
-      color: navy
-    })
-    page.drawText('Collection', margin + 55, y - 5, {
-      font: regular,
-      size: 18,
-      color: navy
-    })
-    page.drawText('Premium Fashion & Lifestyle', margin, y - 22, {
-      font: regular,
-      size: 9,
-      color: grayText
-    })
+    drawText(page, 'CTG', margin, y - 5, { font: bold, size: 24, color: navy })
+    drawText(page, 'Collection', margin + 55, y - 5, { font: regular, size: 18, color: navy })
+    drawText(page, 'Premium Fashion & Lifestyle', margin, y - 22, { font: regular, size: 9, color: grayText })
     
     // Invoice info (right side)
-    page.drawText('INVOICE', width - margin - 130, y, {
-      font: regular,
-      size: 9,
-      color: grayText
-    })
-    page.drawText(order.orderNumber, width - margin - 130, y - 16, {
-      font: bold,
-      size: 14,
-      color: navy
-    })
-    page.drawText(formatDate(order.createdAt), width - margin - 130, y - 32, {
-      font: regular,
-      size: 10,
-      color: grayText
-    })
+    drawText(page, 'INVOICE', width - margin - 130, y, { font: regular, size: 9, color: grayText })
+    drawText(page, order.orderNumber, width - margin - 130, y - 16, { font: bold, size: 14, color: navy })
+    drawText(page, formatDate(order.createdAt), width - margin - 130, y - 32, { font: regular, size: 10, color: grayText })
     
     y -= 70
     
@@ -107,56 +101,23 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
     
     // ========== BILL TO / SHIP TO SECTION ==========
     // Bill To
-    page.drawText('BILL TO', margin, y, {
-      font: bold,
-      size: 9,
-      color: grayText
-    })
+    drawText(page, 'BILL TO', margin, y, { font: bold, size: 9, color: grayText })
     y -= 16
-    page.drawText(order.address.name, margin, y, {
-      font: bold,
-      size: 11,
-      color: darkText
-    })
+    drawText(page, order.address.name, margin, y, { font: bold, size: 11, color: darkText })
     y -= 14
-    page.drawText(order.user?.email || order.guestEmail || '', margin, y, {
-      font: regular,
-      size: 10,
-      color: grayText
-    })
+    drawText(page, order.user?.email || order.guestEmail || '', margin, y, { font: regular, size: 10, color: grayText })
     y -= 12
-    page.drawText(order.address.phone, margin, y, {
-      font: regular,
-      size: 10,
-      color: grayText
-    })
+    drawText(page, order.address.phone, margin, y, { font: regular, size: 10, color: grayText })
     
     // Ship To (right side)
     let shipY = y + 42
-    page.drawText('SHIP TO', width/2, shipY, {
-      font: bold,
-      size: 9,
-      color: grayText
-    })
+    drawText(page, 'SHIP TO', width/2, shipY, { font: bold, size: 9, color: grayText })
     shipY -= 16
-    page.drawText(order.address.name, width/2, shipY, {
-      font: bold,
-      size: 11,
-      color: darkText
-    })
+    drawText(page, order.address.name, width/2, shipY, { font: bold, size: 11, color: darkText })
     shipY -= 14
-    page.drawText(order.address.address, width/2, shipY, {
-      font: regular,
-      size: 10,
-      color: grayText,
-      maxWidth: 200
-    })
+    drawText(page, order.address.address, width/2, shipY, { font: regular, size: 10, color: grayText, maxWidth: 200 })
     shipY -= 12
-    page.drawText(`${order.address.city}, ${order.address.district}`, width/2, shipY, {
-      font: regular,
-      size: 10,
-      color: grayText
-    })
+    drawText(page, `${order.address.city}, ${order.address.district}`, width/2, shipY, { font: regular, size: 10, color: grayText })
     
     y -= 45
     
@@ -177,52 +138,32 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
     const colPrice = margin + 360
     const colTotal = margin + 440
     
-    page.drawText('ITEM', colItem, y, { font: bold, size: 9, color: grayText })
-    page.drawText('VARIANT', colVariant, y, { font: bold, size: 9, color: grayText })
-    page.drawText('QTY', colQty, y, { font: bold, size: 9, color: grayText })
-    page.drawText('PRICE', colPrice, y, { font: bold, size: 9, color: grayText })
-    page.drawText('TOTAL', colTotal, y, { font: bold, size: 9, color: grayText })
+    drawText(page, 'ITEM', colItem, y, { font: bold, size: 9, color: grayText })
+    drawText(page, 'VARIANT', colVariant, y, { font: bold, size: 9, color: grayText })
+    drawText(page, 'QTY', colQty, y, { font: bold, size: 9, color: grayText })
+    drawText(page, 'PRICE', colPrice, y, { font: bold, size: 9, color: grayText })
+    drawText(page, 'TOTAL', colTotal, y, { font: bold, size: 9, color: grayText })
     
     y -= 30
     
     // Items
     for (const item of order.items) {
       // Product name
-      page.drawText(item.product.name, colItem, y, {
-        font: bold,
-        size: 10,
-        color: darkText
-      })
+      drawText(page, item.product.name, colItem, y, { font: bold, size: 10, color: darkText })
       
       // Variant
       const variant = getVariant(item.variantInfo)
-      page.drawText(variant, colVariant, y, {
-        font: regular,
-        size: 10,
-        color: grayText
-      })
+      drawText(page, variant, colVariant, y, { font: regular, size: 10, color: grayText })
       
       // Quantity
-      page.drawText(item.quantity.toString(), colQty, y, {
-        font: regular,
-        size: 10,
-        color: darkText
-      })
+      drawText(page, item.quantity.toString(), colQty, y, { font: regular, size: 10, color: darkText })
       
       // Price (using Tk instead of ৳)
-      page.drawText(`Tk${item.price.toLocaleString()}`, colPrice, y, {
-        font: regular,
-        size: 10,
-        color: darkText
-      })
+      drawText(page, `Tk${item.price.toLocaleString()}`, colPrice, y, { font: regular, size: 10, color: darkText })
       
       // Total
       const itemTotal = item.price * item.quantity
-      page.drawText(`Tk${itemTotal.toLocaleString()}`, colTotal, y, {
-        font: bold,
-        size: 10,
-        color: darkText
-      })
+      drawText(page, `Tk${itemTotal.toLocaleString()}`, colTotal, y, { font: bold, size: 10, color: darkText })
       
       y -= 28
       
@@ -251,21 +192,21 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
     const totalsValueX = width - margin - 80
     
     // Subtotal
-    page.drawText('Subtotal', totalsLabelX, y, { font: regular, size: 10, color: grayText })
-    page.drawText(`Tk${order.subtotal.toLocaleString()}`, totalsValueX, y, { font: regular, size: 10, color: darkText })
+    drawText(page, 'Subtotal', totalsLabelX, y, { font: regular, size: 10, color: grayText })
+    drawText(page, `Tk${order.subtotal.toLocaleString()}`, totalsValueX, y, { font: regular, size: 10, color: darkText })
     
     y -= 18
     
     // Shipping
-    page.drawText('Shipping', totalsLabelX, y, { font: regular, size: 10, color: grayText })
-    page.drawText(`Tk${order.shippingCost.toLocaleString()}`, totalsValueX, y, { font: regular, size: 10, color: darkText })
+    drawText(page, 'Shipping', totalsLabelX, y, { font: regular, size: 10, color: grayText })
+    drawText(page, `Tk${order.shippingCost.toLocaleString()}`, totalsValueX, y, { font: regular, size: 10, color: darkText })
     
     y -= 18
     
     // Discount (if any)
     if (order.discount > 0) {
-      page.drawText('Discount', totalsLabelX, y, { font: regular, size: 10, color: green })
-      page.drawText(`-Tk${order.discount.toLocaleString()}`, totalsValueX, y, { font: regular, size: 10, color: green })
+      drawText(page, 'Discount', totalsLabelX, y, { font: regular, size: 10, color: green })
+      drawText(page, `-Tk${order.discount.toLocaleString()}`, totalsValueX, y, { font: regular, size: 10, color: green })
       y -= 18
     }
     
@@ -277,8 +218,8 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
       color: rgb(0.85, 0.85, 0.85)
     })
     y -= 8
-    page.drawText('Total', totalsLabelX, y, { font: bold, size: 12, color: navy })
-    page.drawText(`Tk${order.total.toLocaleString()}`, totalsValueX - 10, y, { font: bold, size: 14, color: navy })
+    drawText(page, 'Total', totalsLabelX, y, { font: bold, size: 12, color: navy })
+    drawText(page, `Tk${order.total.toLocaleString()}`, totalsValueX - 10, y, { font: bold, size: 14, color: navy })
     
     y -= 40
     
@@ -294,11 +235,7 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
     })
     
     const paymentMethod = order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'
-    page.drawText(`Payment: ${paymentMethod}`, margin + 15, y - 5, {
-      font: bold,
-      size: 10,
-      color: darkText
-    })
+    drawText(page, `Payment: ${paymentMethod}`, margin + 15, y - 5, { font: bold, size: 10, color: darkText })
     
     // Paid badge
     if (order.paymentStatus === 'paid') {
@@ -313,11 +250,7 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
         borderColor: green,
         borderWidth: 1,
       })
-      page.drawText('Paid', badgeX + 12, badgeY + 6, {
-        font: bold,
-        size: 10,
-        color: white
-      })
+      drawText(page, 'Paid', badgeX + 12, badgeY + 6, { font: bold, size: 10, color: white })
     }
     
     y -= 50
@@ -334,17 +267,8 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
         borderWidth: 1
       })
       
-      page.drawText('Verification Code', margin + 15, y - 5, {
-        font: regular,
-        size: 9,
-        color: grayText
-      })
-      
-      page.drawText(order.verificationCode, width - margin - 80, y - 5, {
-        font: bold,
-        size: 14,
-        color: navy
-      })
+      drawText(page, 'Verification Code', margin + 15, y - 5, { font: regular, size: 9, color: grayText })
+      drawText(page, order.verificationCode, width - margin - 80, y - 5, { font: bold, size: 14, color: navy })
     }
     
     // ========== FOOTER SECTION ==========
@@ -360,12 +284,7 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
     })
     
     // Footer text
-    page.drawText('Thank you for shopping with CTG Collection! * ctgcollection2@gmail.com', 
-      margin + 50, footerY - 18, {
-      font: regular,
-      size: 10,
-      color: white
-    })
+    drawText(page, 'Thank you for shopping with CTG Collection! * ctgcollection2@gmail.com', margin + 50, footerY - 18, { font: regular, size: 10, color: white })
     
     // Generate PDF bytes
     const pdfBytes = await pdfDoc.save()
