@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ShoppingBag, Truck, Shield, HeadphonesIcon, Star, Users, Package, TrendingUp, ArrowRight, Sparkles, Heart, Eye } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { ShoppingBag, Truck, Shield, HeadphonesIcon, Star, Users, Package, TrendingUp, ArrowRight, Sparkles, Heart, Eye, Store, BadgeCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -10,6 +11,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
 import { TestimonialsCarousel } from '@/components/TestimonialsCarousel'
+import { SpinWheel } from '@/components/SpinWheel'
 
 interface Product {
   id: string
@@ -27,9 +29,14 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
   const [subscribing, setSubscribing] = useState(false)
+  const [multiVendorEnabled, setMultiVendorEnabled] = useState(false)
 
   useEffect(() => {
     fetchFeaturedProducts()
+    fetch('/api/settings/public')
+      .then(res => res.json())
+      .then(data => setMultiVendorEnabled(data.multiVendorEnabled))
+      .catch(err => console.error('Settings fetch error:', err))
   }, [])
 
   const fetchFeaturedProducts = async () => {
@@ -409,6 +416,64 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Become a Seller CTA - Multi-Vendor Only */}
+      {multiVendorEnabled && (
+        <section className="py-16 container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+          >
+            <div className="bg-gray-900 rounded-3xl p-8 md:p-12 relative overflow-hidden text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-8">
+              {/* Background Effects */}
+              <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-600/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+              
+              <div className="relative z-10 max-w-xl">
+                <Badge className="mb-4 bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border-purple-500/50">
+                  <Store className="w-3.5 h-3.5 mr-1" /> Seller Zone
+                </Badge>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                  Become a Seller on <br/>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                    South Asia's First Marketplace
+                  </span>
+                </h2>
+                <p className="text-gray-400 text-lg mb-6">
+                  Join our growing network of sellers. Reach millions of customers, get instant payments, and grow your business with 0% commission for the first month.
+                </p>
+                <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                  <div className="flex items-center gap-2 text-sm text-gray-300">
+                    <BadgeCheck className="w-4 h-4 text-green-500" /> Verified Badge
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-300">
+                    <TrendingUp className="w-4 h-4 text-blue-500" /> Analytics
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-300">
+                    <Shield className="w-4 h-4 text-purple-500" /> Secure Payments
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative z-10 flex flex-col gap-4 min-w-[200px]">
+                <Button 
+                  asChild
+                  size="lg" 
+                  className="h-14 px-8 text-lg bg-white text-gray-900 hover:bg-gray-100 hover:scale-105 transition-all duration-300 font-bold shadow-xl shadow-white/10"
+                >
+                  <Link href="/become-seller">
+                    Start Selling Now <ArrowRight className="w-5 h-5 ml-2" />
+                  </Link>
+                </Button>
+                <p className="text-center text-xs text-gray-500">
+                  Takes less than 2 minutes
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </section>
+      )}
+
       {/* Newsletter Section - New */}
       <section className="py-16 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 relative overflow-hidden">
         <div className="absolute inset-0">
@@ -495,6 +560,7 @@ export default function HomePage() {
         </motion.div>
         {/* Testimonials Section */}
         <TestimonialsCarousel />
+        <SpinWheel />
       </section>
     </div>
   )

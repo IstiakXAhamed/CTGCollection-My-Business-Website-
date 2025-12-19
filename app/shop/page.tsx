@@ -13,6 +13,8 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { formatPrice } from '@/lib/utils'
 import type { Product, Category } from '@/types'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { FilterSidebar } from '@/components/shop/FilterSidebar'
 
 function ShopContent() {
   const searchParams = useSearchParams()
@@ -191,84 +193,48 @@ function ShopContent() {
               className="pl-9 sm:pl-10 h-10 text-sm"
             />
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-            className="sm:hidden"
-          >
-            <SlidersHorizontal className="w-4 h-4 mr-2" />
-            Filters {selectedCategories.length > 0 && `(${selectedCategories.length})`}
-          </Button>
+          
+          {/* Mobile Filter Button - Triggers Dialog */}
+          <div className="sm:hidden">
+            <Dialog open={showFilters} onOpenChange={setShowFilters}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full">
+                  <SlidersHorizontal className="w-4 h-4 mr-2" />
+                  Filters {selectedCategories.length > 0 && `(${selectedCategories.length})`}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="w-full max-w-sm h-[85vh] p-0 overflow-y-auto">
+                <div className="p-4">
+                  <FilterSidebar
+                    categories={categories}
+                    selectedCategories={selectedCategories}
+                    toggleCategory={toggleCategory}
+                    priceRange={priceRange}
+                    setPriceRange={setPriceRange}
+                    clearFilters={clearFilters}
+                    isFeatured={isFeatured}
+                    isSale={isSale}
+                    className="mt-4"
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          {/* Sidebar Filters - Mobile: shown when showFilters is true, Desktop: always visible */}
-          <aside className={`w-full lg:w-64 space-y-6 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <Card className="p-4 sm:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-bold text-lg">Filters</h2>
-                {(selectedCategories.length > 0 || priceRange.min || priceRange.max) && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
-                    Clear All
-                  </Button>
-                )}
-              </div>
-
-              {/* Quick Links */}
-              <div className="mb-6 space-y-2">
-                <h3 className="font-semibold mb-3">Quick Links</h3>
-                <Link href="/shop" className={`block px-3 py-2 rounded-lg transition ${!isFeatured && !isSale ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}>
-                  All Products
-                </Link>
-                <Link href="/shop?featured=true" className={`block px-3 py-2 rounded-lg transition ${isFeatured ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}>
-                  ⭐ Featured
-                </Link>
-                <Link href="/shop?sale=true" className={`block px-3 py-2 rounded-lg transition ${isSale ? 'bg-red-100 text-red-700' : 'hover:bg-gray-100'}`}>
-                  🏷️ On Sale
-                </Link>
-              </div>
-
-              {/* Categories */}
-              <div className="mb-6">
-                <h3 className="font-semibold mb-3">Categories</h3>
-                <div className="space-y-2">
-                  {categories.map((category) => (
-                    <div key={category.id} className="flex items-center gap-2">
-                      <Checkbox
-                        id={category.id}
-                        checked={selectedCategories.includes(category.id)}
-                        onCheckedChange={() => toggleCategory(category.id)}
-                      />
-                      <label
-                        htmlFor={category.id}
-                        className="text-sm cursor-pointer flex-1"
-                      >
-                        {category.name}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Range */}
-              <div>
-                <h3 className="font-semibold mb-3">Price Range (BDT)</h3>
-                <div className="space-y-2">
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    value={priceRange.min}
-                    onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    value={priceRange.max}
-                    onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
-                  />
-                </div>
-              </div>
-            </Card>
+          {/* Desktop Sidebar Filters - Hidden on Mobile */}
+          <aside className="w-full lg:w-64 space-y-6 hidden lg:block">
+            <FilterSidebar
+              categories={categories}
+              selectedCategories={selectedCategories}
+              toggleCategory={toggleCategory}
+              priceRange={priceRange}
+              setPriceRange={setPriceRange}
+              clearFilters={clearFilters}
+              isFeatured={isFeatured}
+              isSale={isSale}
+            />
           </aside>
 
           {/* Products Grid */}

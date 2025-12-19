@@ -81,7 +81,8 @@ export function FileUpload({
 
       const res = await fetch('/api/upload', {
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: 'include' // Send auth cookies
       })
 
       const data = await res.json()

@@ -304,7 +304,7 @@ export default function AdminBannersPage() {
                   </div>
 
                   {/* Coupon Code */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label>Coupon Code (optional)</Label>
                       <Input
@@ -340,7 +340,7 @@ export default function AdminBannersPage() {
                   {/* Design Preset */}
                   <div className="space-y-2">
                     <Label>Design Preset</Label>
-                    <div className="grid grid-cols-5 gap-2">
+                    <div className="grid grid-cols-3 gap-2 md:grid-cols-5">
                       {Object.entries(GRADIENT_PRESETS).map(([name, gradient]) => (
                         <button
                           key={name}
@@ -362,7 +362,7 @@ export default function AdminBannersPage() {
                   {/* Icon */}
                   <div className="space-y-2">
                     <Label>Icon</Label>
-                    <div className="grid grid-cols-8 gap-2">
+                    <div className="grid grid-cols-4 gap-2 md:grid-cols-8">
                       {ICON_OPTIONS.map((opt) => (
                         <button
                           key={opt.value}
@@ -384,7 +384,7 @@ export default function AdminBannersPage() {
                   <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
                     <h4 className="font-semibold text-gray-700">Size Controls</h4>
                     
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                       {/* Banner Height */}
                       <div className="space-y-2">
                         <Label className="text-xs">Banner Height</Label>

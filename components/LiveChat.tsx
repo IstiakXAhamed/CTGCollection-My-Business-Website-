@@ -158,7 +158,7 @@ export function LiveChat() {
         if (res.ok) {
           const data = await res.json()
           if (data.authenticated && data.user) {
-            if (data.user.role === 'admin' || data.user.role === 'superadmin') {
+            if (data.user.role === 'admin' || data.user.role === 'superadmin' || data.user.role === 'seller') {
               setIsAdmin(true)
               return
             }

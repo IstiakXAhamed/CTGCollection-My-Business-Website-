@@ -212,7 +212,88 @@ export default function AdminUsersPage() {
       {/* Users Table */}
       <Card>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          
+          {/* Mobile Card View */}
+          <div className="grid grid-cols-1 gap-4 md:hidden">
+            {filteredUsers.map((user) => (
+              <div key={user.id} className="bg-white p-4 rounded-lg border shadow-sm space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold">{user.name}</h3>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                  </div>
+                  <RoleBadge role={user.role} tier={user.loyaltyPoints?.tier?.name} size="sm" />
+                </div>
+                
+                <div className="flex justify-between items-center text-sm border-t pt-3 border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Status:</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                      user.isActive !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {user.isActive !== false ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Orders:</span> {user._count?.orders || 0}
+                  </div>
+                </div>
+
+                {isSuperAdmin && user.role !== 'superadmin' && (
+                  <div className="pt-3 flex flex-wrap gap-2 border-t border-gray-100 justify-end">
+                    {user.role === 'customer' ? (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openDialog(user, 'promote_admin')}
+                          className="h-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                        >
+                          <Shield className="w-4 h-4 mr-1" /> Admin
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openDialog(user, 'promote_seller')}
+                          className="h-8 text-blue-600 border-blue-200 hover:bg-blue-50"
+                        >
+                          <BadgeCheck className="w-4 h-4 mr-1" /> Seller
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openDialog(user, 'demote')}
+                        className="h-8 text-orange-600 border-orange-200 hover:bg-orange-50"
+                      >
+                        <UserIcon className="w-4 h-4 mr-1" /> Demote
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openDialog(user, 'toggle')}
+                      className={`h-8 w-8 p-0 ${user.isActive !== false ? 'text-orange-600 border-orange-200' : 'text-green-600 border-green-200'}`}
+                    >
+                      {user.isActive !== false ? <Ban className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openDialog(user, 'delete')}
+                      className="h-8 w-8 p-0 text-red-600 border-red-200 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b bg-gray-50">

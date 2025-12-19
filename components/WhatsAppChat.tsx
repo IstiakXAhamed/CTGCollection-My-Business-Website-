@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MessageCircle, X, Send } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -19,6 +19,27 @@ export function WhatsAppChat({
 }: WhatsAppChatProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [message, setMessage] = useState(defaultMessage)
+  const [isVisible, setIsVisible] = useState(true)
+
+  // Check if user is staff (admin/seller)
+  useEffect(() => {
+    const checkRole = async () => {
+      try {
+        const res = await fetch('/api/auth/me')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.authenticated && ['admin', 'superadmin', 'seller'].includes(data.user.role)) {
+            setIsVisible(false)
+          }
+        }
+      } catch (err) {
+        console.error('Role check failed', err)
+      }
+    }
+    checkRole()
+  }, [])
+
+  if (!isVisible) return null
 
   const handleSend = () => {
     try {

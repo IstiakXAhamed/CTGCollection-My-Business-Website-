@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { 
   Store, Plus, Search, Edit2, Trash2, Loader2, X, Check, 
-  Users, Package, BadgeCheck, AlertTriangle
+  Users, Package, BadgeCheck, AlertTriangle, Pause, Play
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useToast } from '@/hooks/use-toast'
@@ -221,6 +221,27 @@ export default function ShopsPage() {
     }
   }
 
+  const toggleActive = async (shop: Shop) => {
+    try {
+      const res = await fetch(`/api/admin/shops/${shop.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ isActive: !shop.isActive })
+      })
+
+      if (res.ok) {
+        toast({ 
+          title: shop.isActive ? '⏸️ Shop Paused' : '▶️ Shop Resumed',
+          description: shop.isActive ? 'All products hidden from store' : 'Shop is now active again'
+        })
+        fetchData()
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to update', variant: 'destructive' })
+    }
+  }
+
   const filteredShops = shops.filter(s =>
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.owner?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -241,19 +262,21 @@ export default function ShopsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Responsive Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Store className="w-8 h-8 text-purple-600" />
-            Shops Management
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold flex items-center gap-2 sm:gap-3">
+            <Store className="w-5 h-5 sm:w-8 sm:h-8 text-purple-600" />
+            Shops
           </h1>
-          <p className="text-gray-600 mt-1">
-            {shops.length} shops • Multi-vendor: {multiVendorEnabled ? '✅ Enabled' : '❌ Disabled'}
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
+            {shops.length} shops • Multi-vendor: {multiVendorEnabled ? '✅ On' : '❌ Off'}
           </p>
         </div>
-        <Button onClick={openCreateModal} className="gap-2 bg-purple-600 hover:bg-purple-700">
-          <Plus className="w-4 h-4" /> Create Shop
+        <Button onClick={openCreateModal} size="sm" className="gap-1.5 sm:gap-2 bg-purple-600 hover:bg-purple-700 h-9 text-xs sm:text-sm">
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline">Create</span> Shop
         </Button>
       </div>
 
@@ -270,74 +293,102 @@ export default function ShopsPage() {
       )}
 
       <Card>
-        <CardHeader>
+        <CardHeader className="p-3 sm:p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
             <Input
-              placeholder="Search by shop name or owner..."
+              placeholder="Search shops..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-9 sm:pl-10 h-10 text-sm"
             />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4">
           {filteredShops.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <Store className="w-12 h-12 mx-auto mb-4 text-gray-300" />
               <p>No shops yet. Create your first shop!</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {filteredShops.map((shop) => (
                 <div
                   key={shop.id}
-                  className="p-4 border rounded-lg hover:border-purple-200 transition"
+                  className="p-3 sm:p-4 border rounded-lg hover:border-purple-200 transition"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center">
+                  {/* Mobile: Stacked layout, Desktop: Side by side */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    {/* Shop Info */}
+                    <div className="flex items-start sm:items-center gap-3">
+                      <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         {shop.logo ? (
                           <img src={shop.logo} alt={shop.name} className="w-full h-full object-cover rounded-lg" />
                         ) : (
-                          <Store className="w-7 h-7 text-purple-600" />
+                          <Store className="w-5 h-5 sm:w-7 sm:h-7 text-purple-600" />
                         )}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-lg">{shop.name}</h3>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h3 className="font-semibold text-sm sm:text-lg truncate">{shop.name}</h3>
                           {shop.isVerified && (
-                            <BadgeCheck className="w-5 h-5 text-blue-500" />
+                            <BadgeCheck className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 flex-shrink-0" />
                           )}
                           {!shop.isActive && (
-                            <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded">Inactive</span>
+                            <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-[10px] sm:text-xs rounded">Off</span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-500">/{shop.slug}</p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Owner: <strong>{shop.owner?.name}</strong> ({shop.owner?.email})
+                        <p className="text-[10px] sm:text-sm text-gray-500">/{shop.slug}</p>
+                        <p className="text-[10px] sm:text-sm text-gray-600 truncate">
+                          <strong>{shop.owner?.name}</strong>
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    {/* Actions */}
+                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 border-t sm:border-0 pt-2 sm:pt-0">
                       <div className="text-center">
-                        <p className="text-2xl font-bold text-purple-600">{shop._count?.products || 0}</p>
-                        <p className="text-xs text-gray-500">Products</p>
+                        <p className="text-lg sm:text-2xl font-bold text-purple-600">{shop._count?.products || 0}</p>
+                        <p className="text-[10px] sm:text-xs text-gray-500">Products</p>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        {/* Pause/Resume Button - Prominent */}
+                        <Button
+                          size="sm"
+                          variant={shop.isActive ? "outline" : "default"}
+                          onClick={() => toggleActive(shop)}
+                          className={`h-8 px-2 sm:px-3 gap-1 ${
+                            shop.isActive 
+                              ? 'text-orange-600 border-orange-300 hover:bg-orange-50' 
+                              : 'bg-green-600 hover:bg-green-700 text-white'
+                          }`}
+                          title={shop.isActive ? 'Pause shop (hide products)' : 'Resume shop'}
+                        >
+                          {shop.isActive ? (
+                            <>
+                              <Pause className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline text-xs">Pause</span>
+                            </>
+                          ) : (
+                            <>
+                              <Play className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline text-xs">Resume</span>
+                            </>
+                          )}
+                        </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => toggleVerified(shop)}
+                          className="h-8 w-8 p-0"
                           title={shop.isVerified ? 'Remove verification' : 'Verify shop'}
                         >
                           {shop.isVerified ? <Check className="w-4 h-4 text-green-600" /> : <BadgeCheck className="w-4 h-4" />}
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => openEditModal(shop)}>
+                        <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => openEditModal(shop)}>
                           <Edit2 className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="outline" className="text-red-600" onClick={() => handleDelete(shop.id)}>
+                        <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-red-600" onClick={() => handleDelete(shop.id)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -397,7 +448,7 @@ export default function ShopsPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <Label>Shop Name *</Label>
                     <Input
@@ -430,7 +481,7 @@ export default function ShopsPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <Label>Phone</Label>
                     <Input
@@ -449,7 +500,7 @@ export default function ShopsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <Label>City</Label>
                     <Input

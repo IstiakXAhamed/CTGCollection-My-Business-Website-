@@ -158,7 +158,7 @@ export default function AdminSettingsPage() {
               <p className="text-sm text-muted-foreground mb-4">
                 Set your availability status. This controls what customers see on the chat widget.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <button
                   onClick={() => handleChatStatusChange('online')}
                   className={`p-4 rounded-xl border-2 transition-all ${
@@ -246,7 +246,7 @@ export default function AdminSettingsPage() {
             <CardDescription>Basic store details shown across the site</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label>Store Name</Label>
                 <Input 
@@ -299,7 +299,7 @@ export default function AdminSettingsPage() {
             <CardDescription>Configure shipping costs and free shipping threshold</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label>Shipping Cost (৳)</Label>
                 <Input 
@@ -386,7 +386,7 @@ export default function AdminSettingsPage() {
                     value={settings.bkashNumber}
                     onChange={(e) => handlePromoChange('bkashNumber', e.target.value)}
                     placeholder="01XXXXXXXXX"
-                    className="mt-2 max-w-xs"
+                    className="mt-2 w-full md:max-w-xs"
                   />
                 </div>
               </div>

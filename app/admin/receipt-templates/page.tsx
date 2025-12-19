@@ -508,7 +508,7 @@ export default function ReceiptTemplatesPage() {
       {previewTemplate && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
-            <div className="flex items-center justify-between p-4 border-b">
+            <div className="flex flex-col gap-4 border-b p-4 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-2">
                 {RECEIPT_TEMPLATES.find(t => t.id === previewTemplate) && (
                   <span className={`px-2 py-1 rounded text-white text-sm ${GRADE_INFO[RECEIPT_TEMPLATES.find(t => t.id === previewTemplate)!.grade].color}`}>
@@ -538,7 +538,7 @@ export default function ReceiptTemplatesPage() {
             <div className="p-4 bg-gray-100 overflow-auto max-h-[calc(90vh-80px)]">
               <iframe
                 src={`/api/admin/preview-receipt?template=${previewTemplate}`}
-                className="w-full h-[600px] rounded-lg border shadow-lg bg-white"
+                className="h-[400px] w-full rounded-lg border bg-white shadow-lg md:h-[600px]"
                 title="Receipt Preview"
               />
             </div>

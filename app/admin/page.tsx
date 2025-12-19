@@ -7,6 +7,7 @@ import { Package, ShoppingCart, Users, DollarSign, TrendingUp, AlertCircle, Refr
 import { formatPrice } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
+import { InternalChat } from '@/components/admin/InternalChat'
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -266,6 +267,12 @@ export default function AdminDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Internal Chat System */}
+      <div className="pt-4">
+        <h2 className="text-xl font-bold mb-4">Internal Team Chat</h2>
+        <InternalChat />
+      </div>
     </div>
   )
 }

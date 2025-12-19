@@ -16,19 +16,26 @@ async function checkSuperAdmin(request: NextRequest) {
   return user
 }
 
-// Check admin/superadmin access
-async function checkAdmin(request: NextRequest) {
-  const user = await verifyAuth(request)
-  if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
-    return null
+// Check admin/superadmin access with permission
+async function checkAccess(request: NextRequest) {
+  const user: any = await verifyAuth(request)
+  if (!user) return null
+  
+  // Super Admin has full access
+  if (user.role === 'superadmin') return user
+  
+  // Admin requires 'manage_shops' permission
+  if (user.role === 'admin' && user.permissions?.includes('manage_shops')) {
+    return user
   }
-  return user
+  
+  return null
 }
 
 // GET - List all shops
 export async function GET(request: NextRequest) {
   try {
-    const admin = await checkAdmin(request)
+    const admin = await checkAccess(request)
     if (!admin) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 401 })
     }

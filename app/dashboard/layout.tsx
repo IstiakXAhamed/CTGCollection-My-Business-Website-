@@ -3,7 +3,7 @@
 import { ReactNode, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { User, Package, MapPin, Heart, Settings, LogOut, Loader2, Shield, ArrowLeft, Crown } from 'lucide-react'
+import { User, Package, MapPin, Heart, Settings, LogOut, Loader2, Shield, ArrowLeft, Crown, MessageSquare } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import RoleBadge from '@/components/RoleBadge'
@@ -15,6 +15,7 @@ const menuItems = [
   { icon: MapPin, label: 'Addresses', href: '/dashboard/addresses' },
   { icon: Heart, label: 'Wishlist', href: '/dashboard/wishlist' },
   { icon: Crown, label: 'Loyalty', href: '/dashboard/loyalty' },
+  { icon: MessageSquare, label: 'Messages', href: '/dashboard/chat' },
 ]
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {

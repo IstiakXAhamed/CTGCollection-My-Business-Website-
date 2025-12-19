@@ -21,6 +21,7 @@ import { ProductBundle } from '@/components/ProductBundle'
 import { PriceDropAlert } from '@/components/PriceDropAlert'
 import { SocialShare } from '@/components/SocialShare'
 import { useCartStore } from '@/store/cart'
+import { StickyMobileCart } from '@/components/product/StickyMobileCart'
 import Link from 'next/link'
 
 export default function ProductDetailPage() {
@@ -399,6 +400,14 @@ export default function ProductDetailPage() {
           <RecentlyViewedProducts />
         </motion.div>
       </div>
+
+      <StickyMobileCart 
+        product={product} 
+        price={product.salePrice || product.basePrice} 
+        originalPrice={product.basePrice}
+        onAddToCart={handleAddToCart}
+        disabled={!selectedVariant || selectedVariant.stock === 0}
+      />
     </div>
   )
 }

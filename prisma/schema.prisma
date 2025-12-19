@@ -18,6 +18,7 @@ model User {
   phone         String?
   role          String    @default("customer") // customer, admin, superadmin
   isActive      Boolean   @default(true)
+  permissions   String[]  @default([]) // For granular access control (e.g. ['manage_shop', 'manage_settings'])
   createdById   String?   // Who created this admin (null for first superadmin)
   googleId      String?   @unique // For Google OAuth
   referralCode  String?   @unique // Unique referral code
@@ -47,11 +48,32 @@ model User {
   answers           ProductAnswer[]
   sellerProducts    Product[]   @relation("SellerProducts")  // Products this seller owns
   shop              Shop?       // Seller's shop profile (if any)
+  sellerApplication SellerApplication? // Seller application (if pending)
+  
+  // Internal Chat
+  sentMessages     InternalMessage[] @relation("SentMessages")
+  receivedMessages InternalMessage[] @relation("ReceivedMessages")
 
   // Performance indexes
   @@index([role])
   @@index([createdAt])
   @@index([isActive])
+}
+
+model InternalMessage {
+  id        String   @id @default(uuid())
+  senderId  String
+  receiverId String
+  content   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver  User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([isRead])
 }
 
 model Address {
@@ -711,6 +733,9 @@ model SiteSettings {
   // Multi-Vendor Marketplace Settings
   multiVendorEnabled Boolean @default(false) // true = marketplace with multiple shops, false = single vendor mode
   
+  // Gamification (Spin Wheel)
+  spinWheelConfig   Json?    // { enabled, prizes: [], cooldownMinutes, delaySeconds }
+
   updatedAt         DateTime @updatedAt
 }
 
@@ -753,4 +778,49 @@ model Shop {
   @@index([slug])
   @@index([isActive])
   @@index([ownerId])
+}
+
+// ============= SELLER APPLICATION SYSTEM =============
+
+model SellerApplication {
+  id              String    @id @default(uuid())
+  userId          String    @unique  // Existing user applying
+  
+  // Shop Details
+  shopName        String
+  shopDescription String?   @db.Text
+  category        String?   // What they plan to sell
+  
+  // Verification Documents
+  nidNumber       String?
+  nidImage        String?   // Cloudinary URL
+  passportNumber  String?
+  passportImage   String?   // Cloudinary URL
+  
+  // Bank Details (for payouts)
+  bankName        String?
+  bankAccountNo   String?
+  bankBranch      String?
+  
+  // Contact
+  phone           String
+  address         String?
+  city            String?
+  
+  // Verification Tier: basic (NID only) or verified (NID+Passport+Bank)
+  verificationTier String    @default("basic") // basic, verified
+  
+  // Status
+  status          String    @default("pending") // pending, approved, rejected
+  rejectionReason String?
+  reviewedBy      String?   // Admin who reviewed
+  reviewedAt      DateTime?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([status])
+  @@index([userId])
 }

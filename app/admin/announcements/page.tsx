@@ -213,7 +213,7 @@ export default function AdminAnnouncementsPage() {
                     placeholder="Announcement details..."
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
                     <Label>Type</Label>
                     <select
@@ -247,7 +247,7 @@ export default function AdminAnnouncementsPage() {
                     ))}
                   </select>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
                     <Label>Start Date</Label>
                     <Input
@@ -309,7 +309,7 @@ export default function AdminAnnouncementsPage() {
             return (
               <Card key={ann.id} className={`${!ann.isActive ? 'opacity-60' : ''}`}>
                 <CardContent className="p-5">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col items-start gap-4 md:flex-row md:justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${typeInfo.color}`}>
@@ -335,7 +335,7 @@ export default function AdminAnnouncementsPage() {
                         <span>{ann._count?.dismissals || 0} dismissed</span>
                       </div>
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex w-full flex-row gap-2 md:w-auto md:flex-col">
                       <Button
                         size="sm"
                         variant={ann.isActive ? "default" : "outline"}

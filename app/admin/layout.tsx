@@ -27,42 +27,76 @@ import {
   Search,
   Store,
   Menu,
-  X
+  X,
+  ShieldAlert
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AdminNotificationBell from '@/components/AdminNotificationBell'
 import RoleBadge from '@/components/RoleBadge'
 import RoleSwitcher from '@/components/RoleSwitcher'
 
-// Menu items - filtered by role
-const getMenuItems = (role: string) => {
+// Menu items - filtered by role and permissions
+const getMenuItems = (role: string, permissions: string[] = []) => {
   const isSuperAdmin = role === 'superadmin'
   const isAdmin = role === 'admin'
   const isSeller = role === 'seller'
   const isAdminOrSuper = isSuperAdmin || isAdmin
   
+  const hasPerm = (perm: string) => isSuperAdmin || permissions.includes(perm)
+
   return [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
-    { icon: Package, label: 'Products', href: '/admin/products' },
-    { icon: FolderTree, label: 'Categories', href: '/admin/categories' },
-    { icon: ShoppingCart, label: 'Orders', href: '/admin/orders' },
-    { icon: Users, label: 'Customers', href: '/admin/customers' },
-    { icon: Star, label: 'Reviews', href: '/admin/reviews' },
+    // E-commerce Core
+    ...(hasPerm('manage_products') ? [
+      { icon: Package, label: 'Products', href: '/admin/products' },
+      { icon: FolderTree, label: 'Categories', href: '/admin/categories' },
+      { icon: Package, label: 'Inventory History', href: '/admin/inventory' },
+    ] : []),
+    
+    ...(hasPerm('manage_orders') ? [{ icon: ShoppingCart, label: 'Orders', href: '/admin/orders' }] : []),
+    
+    ...(hasPerm('manage_users') ? [
+      { icon: Users, label: 'Customers', href: '/admin/customers' },
+      { icon: Star, label: 'Reviews', href: '/admin/reviews' },
+    ] : []),
+
+    // Super Admin & Permitted features
+    ...(isSuperAdmin ? [{ icon: ShieldAlert, label: 'Super Console', href: '/admin/super-admin' }] : []),
+    
     ...(isSuperAdmin ? [{ icon: UserCog, label: 'User Management', href: '/admin/users' }] : []),
-    ...(isSuperAdmin ? [{ icon: Store, label: 'Shops', href: '/admin/shops' }] : []),
-    ...(isAdminOrSuper ? [{ icon: Tag, label: 'Coupons', href: '/admin/coupons' }] : []),
-    ...(isAdminOrSuper ? [{ icon: Crown, label: 'Loyalty & Referrals', href: '/admin/loyalty' }] : []),
-    { icon: Megaphone, label: 'Announcements', href: '/admin/announcements' },
-    { icon: Package, label: 'Inventory History', href: '/admin/inventory' },
-    ...(isAdminOrSuper ? [{ icon: Palette, label: 'Banners', href: '/admin/banners' }] : []),
-    { icon: Mail, label: 'Messages', href: '/admin/messages' },
-    { icon: MessageCircle, label: 'Live Chat', href: '/admin/chat' },
-    ...(isSuperAdmin ? [
+    
+    // Shops: Super Admin OR 'manage_shops' permission
+    ...(hasPerm('manage_shops') ? [{ icon: Store, label: 'Shops', href: '/admin/shops' }] : []),
+    
+    // Marketing
+    ...(hasPerm('manage_marketing') ? [
+      { icon: Tag, label: 'Coupons', href: '/admin/coupons' },
+      { icon: Crown, label: 'Loyalty & Referrals', href: '/admin/loyalty' },
+    ] : []),
+    
+    // Content
+    ...(hasPerm('manage_content') ? [
+      { icon: Megaphone, label: 'Announcements', href: '/admin/announcements' },
+      { icon: Palette, label: 'Banners', href: '/admin/banners' },
+    ] : []),
+    
+    // Comms
+    ...(hasPerm('manage_communications') ? [
+      { icon: Mail, label: 'Messages', href: '/admin/messages' },
+      { icon: MessageCircle, label: 'Live Chat', href: '/admin/chat' },
+    ] : []),
+    
+    // Site Settings: Super Admin OR 'manage_settings'
+    ...(hasPerm('manage_settings') ? [
       { icon: Settings, label: 'Site Settings', href: '/admin/site-settings' },
       { icon: Settings, label: 'App Settings', href: '/admin/settings' },
     ] : []),
+    
     { icon: Search, label: 'Receipt Lookup', href: '/admin/receipt-lookup' },
     ...(isSuperAdmin ? [{ icon: Settings, label: 'Receipt Templates', href: '/admin/receipt-templates' }] : []),
+    
+    // Seller Applications: Super Admin OR 'approve_sellers'
+    ...(hasPerm('approve_sellers') ? [{ icon: UserCog, label: 'Seller Apps', href: '/admin/seller-applications' }] : []),
   ]
 }
 

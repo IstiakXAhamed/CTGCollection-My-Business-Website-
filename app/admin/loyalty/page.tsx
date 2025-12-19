@@ -370,7 +370,7 @@ export default function AdminLoyaltyPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <Label>Internal Name</Label>
                   <Input
@@ -467,7 +467,7 @@ export default function AdminLoyaltyPage() {
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-4">
+              <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -535,7 +535,7 @@ export default function AdminLoyaltyPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-2xl font-bold flex items-center gap-3 md:text-3xl">
             <Crown className="w-8 h-8 text-yellow-500" />
             Loyalty & Referral Program
           </h1>
@@ -635,7 +635,7 @@ export default function AdminLoyaltyPage() {
         </CardHeader>
         <CardContent>
           {settings && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               <div className="space-y-2">
                 <Label>Points per ৳1 spent</Label>
                 <Input

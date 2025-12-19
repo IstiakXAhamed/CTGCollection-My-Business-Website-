@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+// Type cast for shop relation until prisma types regenerated
+const db = prisma as any
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -24,7 +27,13 @@ export async function GET(request: NextRequest) {
     const order = searchParams.get('order') || 'desc'
 
     // Build where clause
-    const where: any = { isActive: true }
+    const where: any = { 
+      isActive: true,
+      OR: [
+        { shopId: null },           // Main store products are always visible
+        { shop: { isActive: true } } // Vendor products visible only if shop is active
+      ]
+    }
 
     // If slug is provided, fetch only that specific product
     if (slug) {
@@ -63,7 +72,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch products with count
     const [products, total] = await Promise.all([
-      prisma.product.findMany({
+      db.product.findMany({
         where,
         include: {
           category: { select: { name: true, slug: true } },
@@ -72,29 +81,39 @@ export async function GET(request: NextRequest) {
             where: { isApproved: true },
             include: { user: { select: { name: true } } },
             orderBy: { createdAt: 'desc' }
+          },
+          // Shop info for multi-vendor mode
+          shop: {
+            select: { id: true, name: true, slug: true, isVerified: true, logo: true }
           }
         },
         orderBy,
         skip,
         take: limit
       }),
-      prisma.product.count({ where })
+      db.product.count({ where })
     ])
 
-    // Parse images JSON safely
-    const productsWithImages = products.map(p => {
+    // Fetch settings for multi-vendor check
+    const settings = await db.siteSettings.findFirst()
+    const isMultiVendor = settings?.multiVendorEnabled ?? true
+
+    // Parse images JSON safely and handle Multi-Vendor logic
+    const productsWithImages = products.map((p: any) => {
       let images: string[] = []
       try {
-        // Handle both escaped and non-escaped JSON strings
         const imageStr = p.images as string || '[]'
-        // Remove backslashes if present
         const cleanStr = imageStr.replace(/\\"/g, '"')
         images = JSON.parse(cleanStr)
       } catch (error) {
         console.error('Image parse error:', error)
         images = []
       }
-      return { ...p, images }
+
+      // If Multi-Vendor is disabled, hide shop info (appear as "Platform" products)
+      const shopInfo = isMultiVendor ? p.shop : null
+
+      return { ...p, images, shop: shopInfo }
     })
 
     return NextResponse.json({

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Gift, X, Copy, Check, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -32,7 +32,7 @@ interface SpinWheelProps {
 }
 
 export function SpinWheel({
-  prizes = DEFAULT_PRIZES,
+  prizes: initialPrizes = DEFAULT_PRIZES,
   onWin,
   trigger = 'popup',
   showOnce = true
@@ -44,12 +44,25 @@ export function SpinWheel({
   const [copied, setCopied] = useState(false)
   const [email, setEmail] = useState('')
   const [hasSpun, setHasSpun] = useState(false)
+  const [config, setConfig] = useState<any>(null)
+  const [prizes, setPrizes] = useState<Prize[]>(initialPrizes)
   const wheelRef = useRef<HTMLDivElement>(null)
 
   // Check if user has already spun (localStorage)
-  const checkAlreadySpun = useCallback(() => {
+  const checkAlreadySpun = useCallback((cooldownMinutes = 0) => {
     try {
       if (typeof window !== 'undefined' && showOnce) {
+        const lastSpun = localStorage.getItem('spin_wheel_last_spun')
+        if (!lastSpun) return false
+        
+        // If no cooldown, assume once per forever (or session if simplified)
+        // But if cooldownMinutes is set, check diff
+        if (cooldownMinutes > 0) {
+          const diff = Date.now() - parseInt(lastSpun)
+          const cooldownMs = cooldownMinutes * 60 * 1000
+          return diff < cooldownMs
+        }
+        
         return localStorage.getItem('spin_wheel_spun') === 'true'
       }
       return false
@@ -58,15 +71,48 @@ export function SpinWheel({
     }
   }, [showOnce])
 
-  // Show popup after delay or on exit intent
-  useState(() => {
-    if (trigger === 'popup' && !checkAlreadySpun()) {
-      const timer = setTimeout(() => {
-        setIsOpen(true)
-      }, 10000) // Show after 10 seconds
-      return () => clearTimeout(timer)
+  // Initial Fetch & Logic
+  useEffect(() => {
+    const init = async () => {
+      try {
+        // 1. Check User Role (Hide for Admin/Seller)
+        const authRes = await fetch('/api/auth/me')
+        if (authRes.ok) {
+          const authData = await authRes.json()
+          if (authData.authenticated && (authData.user.role === 'admin' || authData.user.role === 'seller' || authData.user.role === 'superadmin')) {
+            console.log('SpinWheel hidden for staff')
+            return // Don't show
+          }
+        }
+
+        // 2. Fetch Settings
+        const settingsRes = await fetch('/api/settings/public')
+        const settingsData = await settingsRes.json()
+        const wheelConfig = settingsData.spinWheelConfig || {}
+        
+        setConfig(wheelConfig)
+
+        if (wheelConfig.enabled === false) return 
+        if (wheelConfig.prizes && wheelConfig.prizes.length > 0) {
+          setPrizes(wheelConfig.prizes)
+        }
+
+        // 3. Trigger Popup
+        if (trigger === 'popup' && !checkAlreadySpun(wheelConfig.cooldownMinutes)) {
+          const delay = (wheelConfig.delaySeconds || 10) * 1000
+          const timer = setTimeout(() => {
+            setIsOpen(true)
+          }, delay)
+          return () => clearTimeout(timer)
+        }
+
+      } catch (error) {
+        console.error('SpinWheel init error:', error)
+      }
     }
-  })
+
+    init()
+  }, [trigger, checkAlreadySpun])
 
   // Weighted random selection
   const selectPrize = useCallback((): Prize => {
@@ -120,6 +166,7 @@ export function SpinWheel({
       // Save to localStorage
       if (typeof window !== 'undefined' && showOnce) {
         localStorage.setItem('spin_wheel_spun', 'true')
+        localStorage.setItem('spin_wheel_last_spun', Date.now().toString())
       }
 
       // Save email and prize to backend

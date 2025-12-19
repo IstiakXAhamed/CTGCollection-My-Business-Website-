@@ -79,7 +79,7 @@ export async function verifyAuth(request: NextRequest) {
     // This enables automatic role sync without requiring re-login
     const dbUser = await prisma.user.findUnique({
       where: { id: payload.userId },
-      select: { id: true, email: true, role: true, name: true, isActive: true }
+      select: { id: true, email: true, role: true, name: true, isActive: true, permissions: true }
     })
     
     if (!dbUser) return null
@@ -93,7 +93,8 @@ export async function verifyAuth(request: NextRequest) {
       userId: dbUser.id, // Keep for backwards compatibility
       email: dbUser.email,
       name: dbUser.name,
-      role: dbUser.role // Fresh role from database!
+      role: dbUser.role, // Fresh role from database!
+      permissions: dbUser.permissions || [] 
     }
   } catch (error) {
     console.error('verifyAuth error:', error)
