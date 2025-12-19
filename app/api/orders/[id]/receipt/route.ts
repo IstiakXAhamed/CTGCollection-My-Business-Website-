@@ -5,6 +5,8 @@ import { generateReceiptHTML, getOrderForReceipt, saveReceiptToFile } from '@/li
 import { sendOrderConfirmationWithPDF } from '@/lib/email'
 import { generateReceiptPDF } from '@/lib/pdf-generator'
 
+export const dynamic = 'force-dynamic'
+
 // GET - Get receipt for an order (user or admin)
 export async function GET(
   request: NextRequest,

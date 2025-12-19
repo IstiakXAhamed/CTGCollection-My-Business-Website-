@@ -163,7 +163,7 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
       const variant = getVariant(item.variantInfo)
       let variantText = variant
       if (item.product.hasWarranty) {
-        variantText += ` • 🛡️ ${item.product.warrantyPeriod || 'Warranty'}`
+        variantText += ` • [W] ${item.product.warrantyPeriod || 'Warranty'}`
       }
       drawText(variantText, margin + 10, y - 12, { size: 8, color: grayColor })
       
@@ -171,10 +171,10 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
       drawText(item.quantity.toString(), margin + 300, y, { size: 10, color: textColor })
       
       // Price
-      drawText(`৳${item.price.toLocaleString()}`, margin + 360, y, { size: 10, color: textColor })
+      drawText(`BDT ${item.price.toLocaleString()}`, margin + 360, y, { size: 10, color: textColor })
       
       // Total
-      drawText(`৳${(item.price * item.quantity).toLocaleString()}`, margin + 430, y, { font: helveticaBold, size: 10, color: textColor })
+      drawText(`BDT ${(item.price * item.quantity).toLocaleString()}`, margin + 430, y, { font: helveticaBold, size: 10, color: textColor })
       
       y -= 35
       
@@ -200,16 +200,16 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
     })
     
     drawText('Subtotal', totalsX, y, { size: 10, color: grayColor })
-    drawText(`৳${order.subtotal.toLocaleString()}`, totalsX + 140, y, { size: 10, color: textColor })
+    drawText(`BDT ${order.subtotal.toLocaleString()}`, totalsX + 140, y, { size: 10, color: textColor })
     
     y -= 18
     drawText('Shipping', totalsX, y, { size: 10, color: grayColor })
-    drawText(`৳${order.shippingCost.toLocaleString()}`, totalsX + 140, y, { size: 10, color: textColor })
+    drawText(`BDT ${order.shippingCost.toLocaleString()}`, totalsX + 140, y, { size: 10, color: textColor })
     
     if (order.discount > 0) {
       y -= 18
       drawText(`Discount${order.couponCode ? ` (${order.couponCode})` : ''}`, totalsX, y, { size: 10, color: greenColor })
-      drawText(`-৳${order.discount.toLocaleString()}`, totalsX + 140, y, { size: 10, color: greenColor })
+      drawText(`-BDT ${order.discount.toLocaleString()}`, totalsX + 140, y, { size: 10, color: greenColor })
     }
     
     y -= 25
@@ -221,13 +221,13 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
     })
     
     drawText('TOTAL', totalsX, y - 5, { font: helveticaBold, size: 12, color: primaryColor })
-    drawText(`৳${order.total.toLocaleString()}`, totalsX + 120, y - 5, { font: helveticaBold, size: 14, color: primaryColor })
+    drawText(`BDT ${order.total.toLocaleString()}`, totalsX + 120, y - 5, { font: helveticaBold, size: 14, color: primaryColor })
     
     y -= 50
     
     // Payment info
     const paymentText = order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'
-    const paymentStatus = order.paymentStatus === 'paid' ? '✓ Paid' : 'Pending'
+    const paymentStatus = order.paymentStatus === 'paid' ? '[OK] Paid' : 'Pending'
     drawText(`Payment: ${paymentText} • ${paymentStatus}`, margin, y, {
       font: helveticaBold,
       size: 10,

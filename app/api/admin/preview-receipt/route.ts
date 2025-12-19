@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth } from '@/lib/auth'
 import { generateReceipt } from '@/lib/receipt'
 
+export const dynamic = 'force-dynamic'
+
 // Sample order data for preview
 const sampleOrder = {
   id: 'preview-123',

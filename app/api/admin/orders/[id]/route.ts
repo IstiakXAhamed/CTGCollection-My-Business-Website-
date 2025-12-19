@@ -6,6 +6,8 @@ import { sendShippingNotification, sendOrderStatusUpdate, sendLoyaltyUpdateEmail
 import { notifyOrderShipped, notifyOrderDelivered, notifyOrderCancelled } from '@/lib/notifications'
 import { calculateTierForUser } from '@/lib/tier-calculator'
 
+export const dynamic = 'force-dynamic'
+
 async function checkAdmin(request: NextRequest) {
   const user = await verifyAuth(request)
   if (!user || (user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'seller')) {

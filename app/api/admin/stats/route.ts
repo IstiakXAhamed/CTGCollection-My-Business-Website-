@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 async function checkAdmin(request: NextRequest) {
   const user = await verifyAuth(request)
   // Allow both admin and superadmin roles
