@@ -13,23 +13,32 @@ export async function generateTemplatedPDF(orderId: string): Promise<Buffer | nu
     console.log('=== CLOUD PDF GENERATION ===')
     console.log('Order ID:', orderId)
 
+    // If no API key configured, use local pdf-lib generator directly
+    if (!HTML2PDF_API_KEY) {
+      console.log('No HTML2PDF_API_KEY configured, using fallback pdf-lib generator')
+      try {
+        const { generateReceiptPDF } = await import('./pdf-generator')
+        const result = await generateReceiptPDF(orderId)
+        console.log('Fallback PDF result:', !!result, 'Size:', result?.length || 0)
+        return result
+      } catch (fallbackError) {
+        console.error('Fallback PDF generation failed:', fallbackError)
+        return null
+      }
+    }
+
     // Get order data
     const order = await getOrderForReceipt(orderId)
     if (!order) {
       console.error('Order not found for PDF generation:', orderId)
-      return null
+      // Still try fallback
+      const { generateReceiptPDF } = await import('./pdf-generator')
+      return generateReceiptPDF(orderId)
     }
 
     // Generate HTML using the SELECTED template from database
     const html = await generateReceiptHTML(order)
     console.log('Generated HTML length:', html.length)
-
-    // If no API key configured, fall back to local pdf-lib generator
-    if (!HTML2PDF_API_KEY) {
-      console.log('No HTML2PDF_API_KEY configured, using fallback pdf-lib generator')
-      const { generateReceiptPDF } = await import('./pdf-generator')
-      return generateReceiptPDF(orderId)
-    }
 
     // Call html2pdf.app API
     const response = await fetch(HTML2PDF_API_URL, {
@@ -65,8 +74,11 @@ export async function generateTemplatedPDF(orderId: string): Promise<Buffer | nu
     console.error('Cloud PDF generation error:', error)
     // Fallback to local generator
     try {
+      console.log('Attempting fallback PDF generation...')
       const { generateReceiptPDF } = await import('./pdf-generator')
-      return generateReceiptPDF(orderId)
+      const result = await generateReceiptPDF(orderId)
+      console.log('Fallback result:', !!result)
+      return result
     } catch (e) {
       console.error('Fallback PDF generation also failed:', e)
       return null
