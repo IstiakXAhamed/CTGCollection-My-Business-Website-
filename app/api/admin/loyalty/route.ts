@@ -132,18 +132,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { action } = body
 
-    // Premium tier presets - 10 tiers with correct values
+    // Premium tier presets - 10 tiers with CUSTOM values from local PostgreSQL
     const premiumTiers = [
-      { name: 'bronze', displayName: 'Bronze', color: '#CD7F32', icon: 'bronze', minSpending: 0, discountPercent: 0, pointsMultiplier: 1, birthdayBonus: 50, freeShipping: false, prioritySupport: false, earlyAccess: false, exclusiveDeals: false, sortOrder: 1 },
-      { name: 'silver', displayName: 'Silver', color: '#C0C0C0', icon: 'silver', minSpending: 5000, discountPercent: 3, pointsMultiplier: 1.5, birthdayBonus: 100, freeShipping: false, prioritySupport: false, earlyAccess: false, exclusiveDeals: false, sortOrder: 2 },
-      { name: 'gold', displayName: 'Gold', color: '#FFD700', icon: 'gold', minSpending: 15000, discountPercent: 5, pointsMultiplier: 2, birthdayBonus: 200, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: false, sortOrder: 3 },
-      { name: 'platinum', displayName: 'Platinum', color: '#8C8C8C', icon: 'platinum', minSpending: 35000, discountPercent: 8, pointsMultiplier: 2.5, birthdayBonus: 350, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 4 },
-      { name: 'diamond', displayName: 'Diamond', color: '#B9F2FF', icon: 'diamond', minSpending: 60000, discountPercent: 12, pointsMultiplier: 3, birthdayBonus: 500, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 5 },
-      { name: 'emerald', displayName: 'Emerald', color: '#50C878', icon: 'emerald', minSpending: 100000, discountPercent: 15, pointsMultiplier: 3.5, birthdayBonus: 750, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 6 },
-      { name: 'ruby', displayName: 'Ruby', color: '#E0115F', icon: 'ruby', minSpending: 150000, discountPercent: 18, pointsMultiplier: 4, birthdayBonus: 1000, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 7 },
-      { name: 'sapphire', displayName: 'Sapphire', color: '#0F52BA', icon: 'sapphire', minSpending: 250000, discountPercent: 22, pointsMultiplier: 5, birthdayBonus: 1500, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 8 },
-      { name: 'obsidian', displayName: 'Obsidian', color: '#1C1C1C', icon: 'obsidian', minSpending: 400000, discountPercent: 25, pointsMultiplier: 6, birthdayBonus: 2000, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 9 },
-      { name: 'legendary', displayName: 'Legendary', color: '#FFD700', icon: 'legendary', minSpending: 750000, discountPercent: 30, pointsMultiplier: 10, birthdayBonus: 5000, freeShipping: true, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 10 }
+      { name: 'bronze', displayName: 'Bronze', color: '#CD7F32', icon: 'bronze', minSpending: 5000, discountPercent: 1, pointsMultiplier: 1.5, birthdayBonus: 100, freeShipping: false, freeShippingMin: 3000, prioritySupport: false, earlyAccess: true, exclusiveDeals: false, sortOrder: 1 },
+      { name: 'silver', displayName: 'Silver', color: '#C0C0C0', icon: 'silver', minSpending: 15000, discountPercent: 2, pointsMultiplier: 2, birthdayBonus: 300, freeShipping: true, freeShippingMin: 1998, prioritySupport: false, earlyAccess: true, exclusiveDeals: false, sortOrder: 2 },
+      { name: 'gold', displayName: 'Gold', color: '#FFD700', icon: 'gold', minSpending: 40000, discountPercent: 4, pointsMultiplier: 2.5, birthdayBonus: 400, freeShipping: true, freeShippingMin: 1499, prioritySupport: true, earlyAccess: true, exclusiveDeals: false, sortOrder: 3 },
+      { name: 'platinum', displayName: 'Platinum', color: '#8C8C8C', icon: 'platinum', minSpending: 60000, discountPercent: 7, pointsMultiplier: 3, birthdayBonus: 500, freeShipping: true, freeShippingMin: 1199, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 4 },
+      { name: 'diamond', displayName: 'Diamond', color: '#B9F2FF', icon: 'diamond', minSpending: 100000, discountPercent: 9, pointsMultiplier: 5, birthdayBonus: 1000, freeShipping: true, freeShippingMin: 1000, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 5 },
+      { name: 'emerald', displayName: 'Emerald', color: '#50C878', icon: 'emerald', minSpending: 120000, discountPercent: 10, pointsMultiplier: 6, birthdayBonus: 750, freeShipping: true, freeShippingMin: 1000, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 6 },
+      { name: 'ruby', displayName: 'Ruby', color: '#E0115F', icon: 'ruby', minSpending: 150000, discountPercent: 11, pointsMultiplier: 7, birthdayBonus: 1000, freeShipping: true, freeShippingMin: 800, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 7 },
+      { name: 'sapphire', displayName: 'Sapphire', color: '#0F52BA', icon: 'sapphire', minSpending: 250000, discountPercent: 11, pointsMultiplier: 8, birthdayBonus: 1500, freeShipping: true, freeShippingMin: 800, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 8 },
+      { name: 'obsidian', displayName: 'Obsidian', color: '#1C1C1C', icon: 'obsidian', minSpending: 400000, discountPercent: 13, pointsMultiplier: 10, birthdayBonus: 2000, freeShipping: true, freeShippingMin: 700, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 9 },
+      { name: 'legendary', displayName: 'Legendary', color: '#FFD700', icon: 'legendary', minSpending: 600000, discountPercent: 15, pointsMultiplier: 15, birthdayBonus: 5000, freeShipping: true, freeShippingMin: null, prioritySupport: true, earlyAccess: true, exclusiveDeals: true, sortOrder: 10 }
     ]
 
     if (action === 'seed_tiers') {
