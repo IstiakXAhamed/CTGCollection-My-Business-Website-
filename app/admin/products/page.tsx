@@ -160,36 +160,99 @@ export default function AdminProductsPage() {
   if (loading) return <div className="text-center py-12">Loading products...</div>
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Products</h1>
-          <p className="text-muted-foreground">{products.length} total products</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">Products</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">{products.length} total</p>
         </div>
         <Link href="/admin/products/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Product
+          <Button size="sm">
+            <Plus className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Add Product</span>
           </Button>
         </Link>
       </div>
 
       <Card>
-        <CardHeader>
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+        <CardHeader className="p-3 sm:p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+            <Input
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 sm:pl-10 h-10 text-sm"
+            />
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
+        <CardContent className="p-2 sm:p-4">
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-3">
+            {filteredProducts.map((product) => (
+              <div key={product.id} className="border rounded-lg p-3">
+                <div className="flex gap-3">
+                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 rounded flex-shrink-0">
+                    <Image
+                      src={product.images[0]}
+                      alt={product.name}
+                      fill
+                      className="object-cover rounded"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-xs sm:text-sm truncate">{product.name}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">{product.category?.name || '-'}</p>
+                    <p className="font-semibold text-xs sm:text-sm text-blue-600 mt-1">
+                      {formatPrice(product.salePrice || product.basePrice)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between mt-3 pt-2 border-t">
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-1.5 text-[10px] sm:text-xs">
+                      <Switch
+                        checked={product.isFeatured}
+                        onCheckedChange={() => toggleFeatured(product)}
+                        className="scale-75"
+                      />
+                      <span>Featured</span>
+                    </label>
+                    <label className="flex items-center gap-1.5 text-[10px] sm:text-xs">
+                      <Switch
+                        checked={product.isActive}
+                        onCheckedChange={() => toggleActive(product)}
+                        className="scale-75"
+                      />
+                      <span>Active</span>
+                    </label>
+                  </div>
+                  <div className="flex gap-1">
+                    <Link href={`/admin/products/${product.id}/edit`}>
+                      <Button size="sm" variant="outline" className="h-7 w-7 p-0">
+                        <Edit2 className="w-3 h-3" />
+                      </Button>
+                    </Link>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 w-7 p-0 text-red-600"
+                      onClick={() => {
+                        setProductToDelete(product)
+                        setDeleteDialogOpen(true)
+                      }}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b">

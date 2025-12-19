@@ -167,31 +167,33 @@ export default function AdminReviewsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Review Management</h1>
-        <div className="text-sm text-muted-foreground">
-          {reviews.length} total reviews
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Reviews</h1>
+        <div className="text-xs sm:text-sm text-muted-foreground">
+          {reviews.length} total
         </div>
       </div>
 
       {/* Filters */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col gap-2 sm:gap-4">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search by customer, product, or content..."
+                placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-9 h-10 text-sm"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1">
               <Button
                 variant={filter === 'all' ? 'default' : 'outline'}
                 size="sm"
+                className="text-xs h-8"
                 onClick={() => setFilter('all')}
               >
                 All
@@ -199,6 +201,7 @@ export default function AdminReviewsPage() {
               <Button
                 variant={filter === 'pending' ? 'default' : 'outline'}
                 size="sm"
+                className="text-xs h-8"
                 onClick={() => setFilter('pending')}
               >
                 Pending
@@ -206,6 +209,7 @@ export default function AdminReviewsPage() {
               <Button
                 variant={filter === 'approved' ? 'default' : 'outline'}
                 size="sm"
+                className="text-xs h-8"
                 onClick={() => setFilter('approved')}
               >
                 Approved
@@ -226,54 +230,48 @@ export default function AdminReviewsPage() {
           <p className="text-muted-foreground">No reviews found</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {filteredReviews.map(review => (
             <Card key={review.id} className={!review.isApproved ? 'border-yellow-300 bg-yellow-50/50' : ''}>
-              <CardContent className="p-4">
-                <div className="flex gap-4">
-                  {/* Customer Info */}
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <p className="font-semibold">{review.user.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Product: <span className="text-blue-600">{review.product.name}</span>
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          {renderStars(review.rating)}
-                          <span className="text-sm text-muted-foreground">
-                            {new Date(review.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* Status Badge */}
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        review.isApproved 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {review.isApproved ? 'Approved' : 'Pending'}
-                      </span>
-                    </div>
+              <CardContent className="p-3 sm:p-4">
+                {/* Header */}
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm truncate">{review.user.name}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
+                      <span className="text-blue-600">{review.product.name}</span>
+                    </p>
+                  </div>
+                  <span className={`px-1.5 py-0.5 text-[10px] rounded-full flex-shrink-0 ${review.isApproved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                    {review.isApproved ? 'OK' : 'Pending'}
+                  </span>
+                </div>
+                
+                {/* Rating & Date */}
+                <div className="flex items-center gap-2 mb-2">
+                  {renderStars(review.rating)}
+                  <span className="text-[10px] sm:text-xs text-muted-foreground">
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
 
-                    {/* Review Content */}
-                    {review.comment && (
-                      <p className="text-sm text-gray-700 mb-3 bg-gray-50 p-3 rounded-lg">
-                        "{review.comment}"
-                      </p>
-                    )}
+                {/* Review Content */}
+                {review.comment && (
+                  <p className="text-xs sm:text-sm text-gray-700 mb-2 bg-gray-50 p-2 sm:p-3 rounded-lg line-clamp-3">
+                    "{review.comment}"
+                  </p>
+                )}
 
-                    {/* Review Photos */}
-                    {parsePhotos(review.photos).length > 0 && (
-                      <div className="flex gap-2 mb-3">
-                        {parsePhotos(review.photos).map((photo, idx) => (
-                          <div key={idx} className="relative w-16 h-16 rounded overflow-hidden">
-                            <Image src={photo} alt={`Review photo ${idx + 1}`} fill className="object-cover" />
-                          </div>
-                        ))}
+                {/* Review Photos */}
+                {parsePhotos(review.photos).length > 0 && (
+                  <div className="flex gap-1.5 mb-2 overflow-x-auto pb-1">
+                    {parsePhotos(review.photos).map((photo, idx) => (
+                      <div key={idx} className="relative w-12 h-12 sm:w-16 sm:h-16 rounded overflow-hidden flex-shrink-0">
+                        <Image src={photo} alt={`Photo ${idx + 1}`} fill className="object-cover" />
                       </div>
-                    )}
+                    ))}
+                  </div>
+                )}
 
                     {/* Admin Reply */}
                     {review.adminReply && (
@@ -322,26 +320,24 @@ export default function AdminReviewsPage() {
                       </div>
                     )}
 
-                    {/* Actions */}
-                    <div className="flex gap-2">
-                      {!review.isApproved && (
-                        <Button size="sm" onClick={() => approveReview(review.id)}>
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Approve
-                        </Button>
-                      )}
-                      {!review.adminReply && replyingTo !== review.id && (
-                        <Button size="sm" variant="outline" onClick={() => setReplyingTo(review.id)}>
-                          <MessageSquare className="w-4 h-4 mr-1" />
-                          Reply
-                        </Button>
-                      )}
-                      <Button size="sm" variant="destructive" onClick={() => deleteReview(review.id)}>
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
+                {/* Actions */}
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  {!review.isApproved && (
+                    <Button size="sm" className="h-7 text-xs px-2" onClick={() => approveReview(review.id)}>
+                      <CheckCircle className="w-3 h-3 sm:mr-1" />
+                      <span className="hidden sm:inline">Approve</span>
+                    </Button>
+                  )}
+                  {!review.adminReply && replyingTo !== review.id && (
+                    <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => setReplyingTo(review.id)}>
+                      <MessageSquare className="w-3 h-3 sm:mr-1" />
+                      <span className="hidden sm:inline">Reply</span>
+                    </Button>
+                  )}
+                  <Button size="sm" variant="destructive" className="h-7 text-xs px-2" onClick={() => deleteReview(review.id)}>
+                    <Trash2 className="w-3 h-3 sm:mr-1" />
+                    <span className="hidden sm:inline">Delete</span>
+                  </Button>
                 </div>
               </CardContent>
             </Card>

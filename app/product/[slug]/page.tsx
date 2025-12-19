@@ -136,10 +136,10 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="mb-6 text-sm">
-          <ol className="flex items-center gap-2 text-muted-foreground">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        {/* Breadcrumb - hidden on very small screens */}
+        <nav className="mb-4 sm:mb-6 text-xs sm:text-sm hidden sm:block">
+          <ol className="flex items-center gap-1 sm:gap-2 text-muted-foreground flex-wrap">
             <li><Link href="/" className="hover:text-foreground">Home</Link></li>
             <li>/</li>
             <li><Link href="/shop" className="hover:text-foreground">Shop</Link></li>
@@ -148,12 +148,12 @@ export default function ProductDetailPage() {
               {product.category?.name}
             </Link></li>
             <li>/</li>
-            <li className="text-foreground font-semibold truncate max-w-[200px]">{product.name}</li>
+            <li className="text-foreground font-semibold truncate max-w-[150px] sm:max-w-[200px]">{product.name}</li>
           </ol>
         </nav>
 
         {/* Main Product Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
           {/* Left: Image Gallery */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -170,13 +170,13 @@ export default function ProductDetailPage() {
             transition={{ duration: 0.5 }}
           >
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 {/* Product Name & Category */}
-                <div className="mb-4">
-                  <span className="text-sm text-blue-600 font-semibold">
+                <div className="mb-3 sm:mb-4">
+                  <span className="text-xs sm:text-sm text-blue-600 font-semibold">
                     {product.category?.name}
                   </span>
-                  <h1 className="text-3xl font-bold mt-2 mb-3">{product.name}</h1>
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mt-1 sm:mt-2 mb-2 sm:mb-3">{product.name}</h1>
                   
                   {/* Rating Summary */}
                   {product.reviews && product.reviews.length > 0 && (
@@ -202,36 +202,36 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* Price */}
-                <div className="mb-6">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-4xl font-bold text-blue-600">
+                <div className="mb-4 sm:mb-6">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-wrap mb-1 sm:mb-2">
+                    <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600">
                       {formatPrice(product.salePrice || product.basePrice)}
                     </span>
                     {product.salePrice && (
                       <>
-                        <span className="text-xl text-gray-500 line-through">
+                        <span className="text-base sm:text-lg lg:text-xl text-gray-500 line-through">
                           {formatPrice(product.basePrice)}
                         </span>
-                        <span className="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">
+                        <span className="bg-red-500 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
                           Save {discount}%
                         </span>
                       </>
                     )}
                   </div>
-                  <p className="text-sm text-green-600 font-semibold">
+                  <p className="text-xs sm:text-sm text-green-600 font-semibold">
                     You save BDT {product.basePrice - (product.salePrice || product.basePrice)}
                   </p>
                 </div>
 
                 {/* Short Description */}
-                <p className="text-muted-foreground mb-6 leading-relaxed">
-                  {product.description.substring(0, 150)}...
+                <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 leading-relaxed">
+                  {product.description.substring(0, 120)}...
                 </p>
 
                 {/* Variant Selection */}
                 {product.variants && product.variants.length > 0 && (
-                  <div className="mb-6">
-                    <label className="block text-sm font-semibold mb-3">
+                  <div className="mb-4 sm:mb-6">
+                    <label className="block text-xs sm:text-sm font-semibold mb-2 sm:mb-3">
                       Select Variant: 
                       {selectedVariant && (
                         <span className="text-blue-600 ml-2">
@@ -241,12 +241,12 @@ export default function ProductDetailPage() {
                         </span>
                       )}
                     </label>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
                       {product.variants.map((variant: any) => (
                         <button
                           key={variant.id}
                           onClick={() => setSelectedVariant(variant)}
-                          className={`px-4 py-2 border-2 rounded-lg font-medium transition ${
+                          className={`px-3 sm:px-4 py-1.5 sm:py-2 border-2 rounded-lg text-xs sm:text-sm font-medium transition min-h-[36px] sm:min-h-[40px] ${
                             selectedVariant?.id === variant.id
                               ? 'border-blue-600 bg-blue-50 text-blue-600'
                               : 'border-gray-200 hover:border-gray-300'
@@ -256,7 +256,7 @@ export default function ProductDetailPage() {
                           {variant.size && variant.size}
                           {variant.size && variant.color && ' / '}
                           {variant.color && variant.color}
-                          {variant.stock === 0 && ' (Out of Stock)'}
+                          {variant.stock === 0 && ' (Out)'}
                         </button>
                       ))}
                     </div>
@@ -279,27 +279,27 @@ export default function ProductDetailPage() {
                 )}
 
                 {/* Quantity Selector */}
-                <div className="mb-6">
-                  <label className="block text-sm font-semibold mb-3">Quantity:</label>
-                  <div className="flex items-center gap-3">
+                <div className="mb-4 sm:mb-6">
+                  <label className="block text-xs sm:text-sm font-semibold mb-2 sm:mb-3">Quantity:</label>
+                  <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                     <div className="flex items-center border-2 rounded-lg">
                       <button
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="p-3 hover:bg-gray-100 transition"
+                        className="p-2 sm:p-3 hover:bg-gray-100 transition min-w-[40px] min-h-[40px] flex items-center justify-center"
                       >
                         <Minus className="w-4 h-4" />
                       </button>
-                      <span className="px-6 font-semibold">{quantity}</span>
+                      <span className="px-4 sm:px-6 font-semibold text-sm sm:text-base">{quantity}</span>
                       <button
                         onClick={() => setQuantity(Math.min(selectedVariant?.stock || 99, quantity + 1))}
-                        className="p-3 hover:bg-gray-100 transition"
+                        className="p-2 sm:p-3 hover:bg-gray-100 transition min-w-[40px] min-h-[40px] flex items-center justify-center"
                         disabled={!selectedVariant || quantity >= selectedVariant.stock}
                       >
                         <Plus className="w-4 h-4" />
                       </button>
                     </div>
-                    <span className="text-sm text-muted-foreground">
-                      Total: <span className="font-bold text-blue-600 text-lg">
+                    <span className="text-xs sm:text-sm text-muted-foreground">
+                      Total: <span className="font-bold text-blue-600 text-base sm:text-lg">
                         {formatPrice((product.salePrice || product.basePrice) * quantity)}
                       </span>
                     </span>
@@ -307,26 +307,26 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3 mb-6">
+                <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-6">
                   <Button
                     onClick={handleAddToCart}
                     disabled={!selectedVariant || selectedVariant.stock === 0}
-                    className="flex-1 h-12 text-lg"
+                    className="flex-1 h-11 sm:h-12 text-sm sm:text-base lg:text-lg"
                     size="lg"
                   >
-                    <ShoppingCart className="w-5 h-5 mr-2" />
+                    <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
                     Add to Cart
                   </Button>
                   <Button
                     variant="outline"
                     size="lg"
-                    className="h-12"
+                    className="h-11 sm:h-12 w-11 sm:w-12 p-0"
                   >
-                    <Heart className="w-5 h-5" />
+                    <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
                   </Button>
                 </div>
 
-                <Button variant="default" className="w-full h-12 bg-green-600 hover:bg-green-700 text-lg" onClick={handleBuyNow}>
+                <Button variant="default" className="w-full h-11 sm:h-12 bg-green-600 hover:bg-green-700 text-sm sm:text-base lg:text-lg" onClick={handleBuyNow}>
                   Buy Now
                 </Button>
 

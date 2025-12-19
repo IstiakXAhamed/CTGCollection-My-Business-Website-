@@ -162,34 +162,75 @@ export default function CustomersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold mb-2">Customers</h1>
-        <p className="text-muted-foreground">
-          {pagination.total} total customers • Page {pagination.page} of {pagination.totalPages}
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">Customers</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground">
+          {pagination.total} total • Page {pagination.page}/{pagination.totalPages}
         </p>
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="p-3 sm:p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
             <Input
-              placeholder="Search by name or email..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-9 sm:pl-10 h-10 text-sm"
             />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-2 sm:p-4">
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
+              {/* Mobile Card View */}
+              <div className="lg:hidden space-y-2">
+                {filteredUsers.map((user) => (
+                  <div key={user.id} className="border rounded-lg p-3">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <UsersIcon className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-sm truncate">{user.name}</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{user.email}</p>
+                      </div>
+                      {getTierBadge(user)}
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : user.role === 'superadmin' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
+                          {user.role}
+                        </span>
+                        <span className="text-muted-foreground">{user._count?.orders || 0} orders</span>
+                      </div>
+                      {currentUserRole === 'superadmin' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs px-2"
+                          onClick={() => {
+                            setSelectedUser(user)
+                            setShowTierModal(true)
+                          }}
+                        >
+                          <Crown className="w-3 h-3 mr-1" />Tier
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
@@ -257,9 +298,9 @@ export default function CustomersPage() {
               </div>
 
               {/* Pagination */}
-              <div className="flex items-center justify-between mt-6 pt-4 border-t">
-                <p className="text-sm text-muted-foreground">
-                  Showing {(pagination.page - 1) * pagination.limit + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} customers
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-4 border-t">
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  {(pagination.page - 1) * pagination.limit + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
                 </p>
                 <div className="flex items-center gap-2">
                   <Button 
@@ -268,10 +309,9 @@ export default function CustomersPage() {
                     onClick={prevPage}
                     disabled={pagination.page <= 1}
                   >
-                    <ChevronLeft className="w-4 h-4 mr-1" />
-                    Previous
+                    Prev
                   </Button>
-                  <span className="px-3 py-1 bg-gray-100 rounded text-sm font-medium">
+                  <span className="px-2 py-1 bg-gray-100 rounded text-xs font-medium">
                     {pagination.page}
                   </span>
                   <Button 
@@ -281,7 +321,6 @@ export default function CustomersPage() {
                     disabled={pagination.page >= pagination.totalPages}
                   >
                     Next
-                    <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
                 </div>
               </div>

@@ -135,33 +135,34 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+      {/* Header - stacks on mobile */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back! Here's what's happening with your store.</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">Dashboard</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">Welcome back! Here's what's happening.</p>
         </div>
-        <Button onClick={() => { fetchStats(); fetchRecentOrders(); fetchLowStockProducts(); }} variant="outline">
+        <Button onClick={() => { fetchStats(); fetchRecentOrders(); fetchLowStockProducts(); }} variant="outline" size="sm" className="self-start sm:self-auto">
           <RefreshCw className="w-4 h-4 mr-2" />
           Refresh
         </Button>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* Stats Grid - 2 cols on mobile, 3 on sm, 5 on lg */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
         {statCards.map((stat) => {
           const Icon = stat.icon
           return (
             <Link href={stat.href} key={stat.title}>
-              <Card className="hover:shadow-lg transition cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">{stat.title}</p>
-                      <p className="text-2xl font-bold">{stat.value}</p>
+              <Card className="hover:shadow-lg transition cursor-pointer h-full">
+                <CardContent className="p-3 sm:p-4 lg:p-6">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1 truncate">{stat.title}</p>
+                      <p className="text-base sm:text-lg lg:text-2xl font-bold truncate">{stat.value}</p>
                     </div>
-                    <div className={`w-12 h-12 rounded-full ${stat.bgColor} flex items-center justify-center`}>
-                      <Icon className={`w-6 h-6 ${stat.color}`} />
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-full ${stat.bgColor} flex items-center justify-center flex-shrink-0`}>
+                      <Icon className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ${stat.color}`} />
                     </div>
                   </div>
                 </CardContent>
@@ -172,27 +173,27 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
         {/* Recent Orders */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <h2 className="text-xl font-semibold">Recent Orders</h2>
-            <Link href="/admin/orders" className="text-sm text-blue-600 hover:underline">View All</Link>
+          <CardHeader className="p-3 sm:p-4 lg:p-6 flex flex-row items-center justify-between">
+            <h2 className="text-sm sm:text-base lg:text-xl font-semibold">Recent Orders</h2>
+            <Link href="/admin/orders" className="text-xs sm:text-sm text-blue-600 hover:underline">View All</Link>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
             {recentOrders.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">No orders yet</p>
+              <p className="text-muted-foreground text-center py-4 text-sm">No orders yet</p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between pb-4 border-b last:border-0">
-                    <div>
-                      <p className="font-semibold">{order.orderNumber || `#${order.id.slice(0, 8)}`}</p>
-                      <p className="text-sm text-muted-foreground">{order.user?.name || 'Guest'}</p>
+                  <div key={order.id} className="flex items-center justify-between pb-3 border-b last:border-0 last:pb-0">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-xs sm:text-sm truncate">{order.orderNumber || `#${order.id.slice(0, 8)}`}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{order.user?.name || 'Guest'}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">{formatPrice(order.total)}</p>
-                      <span className={`text-xs px-2 py-1 rounded-full ${statusColors[order.status] || 'bg-gray-100'}`}>
+                    <div className="text-right flex-shrink-0 ml-2">
+                      <p className="font-semibold text-xs sm:text-sm">{formatPrice(order.total)}</p>
+                      <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${statusColors[order.status] || 'bg-gray-100'}`}>
                         {order.status}
                       </span>
                     </div>
@@ -205,28 +206,28 @@ export default function AdminDashboard() {
 
         {/* Low Stock Products */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-orange-600" />
-              Low Stock Alert
+          <CardHeader className="p-3 sm:p-4 lg:p-6 flex flex-row items-center justify-between">
+            <h2 className="text-sm sm:text-base lg:text-xl font-semibold flex items-center gap-1 sm:gap-2">
+              <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
+              Low Stock
             </h2>
-            <Link href="/admin/products" className="text-sm text-blue-600 hover:underline">View All</Link>
+            <Link href="/admin/products" className="text-xs sm:text-sm text-blue-600 hover:underline">View All</Link>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
             {lowStockProducts.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">All products are well stocked!</p>
+              <p className="text-muted-foreground text-center py-4 text-sm">All products are well stocked!</p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {lowStockProducts.map((product) => {
                   const totalStock = product.variants?.reduce((sum: number, v: any) => sum + (v.stock || 0), 0) || 0
                   return (
-                    <div key={product.id} className="flex items-center justify-between pb-4 border-b last:border-0">
-                      <div>
-                        <p className="font-semibold">{product.name}</p>
-                        <p className="text-sm text-muted-foreground">{product.category?.name || 'Uncategorized'}</p>
+                    <div key={product.id} className="flex items-center justify-between pb-3 border-b last:border-0 last:pb-0">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-xs sm:text-sm truncate">{product.name}</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{product.category?.name || 'Uncategorized'}</p>
                       </div>
-                      <div className="text-right">
-                        <p className={`text-sm font-semibold ${totalStock < 5 ? 'text-red-600' : 'text-orange-600'}`}>
+                      <div className="text-right flex-shrink-0 ml-2">
+                        <p className={`text-xs sm:text-sm font-semibold ${totalStock < 5 ? 'text-red-600' : 'text-orange-600'}`}>
                           {totalStock} left
                         </p>
                       </div>
@@ -241,26 +242,26 @@ export default function AdminDashboard() {
 
       {/* Quick Actions */}
       <Card>
-        <CardHeader>
-          <h2 className="text-xl font-semibold">Quick Actions</h2>
+        <CardHeader className="p-3 sm:p-4 lg:p-6">
+          <h2 className="text-base sm:text-lg lg:text-xl font-semibold">Quick Actions</h2>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Link href="/admin/products/new" className="p-4 border-2 border-dashed rounded-lg text-center hover:border-blue-600 hover:bg-blue-50 transition">
-              <Package className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <p className="font-semibold">Add Product</p>
+        <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+            <Link href="/admin/products/new" className="p-3 sm:p-4 border-2 border-dashed rounded-lg text-center hover:border-blue-600 hover:bg-blue-50 transition">
+              <Package className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 text-blue-600" />
+              <p className="text-xs sm:text-sm font-semibold">Add Product</p>
             </Link>
-            <Link href="/admin/orders" className="p-4 border-2 border-dashed rounded-lg text-center hover:border-blue-600 hover:bg-blue-50 transition">
-              <ShoppingCart className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <p className="font-semibold">View Orders</p>
+            <Link href="/admin/orders" className="p-3 sm:p-4 border-2 border-dashed rounded-lg text-center hover:border-blue-600 hover:bg-blue-50 transition">
+              <ShoppingCart className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 text-blue-600" />
+              <p className="text-xs sm:text-sm font-semibold">View Orders</p>
             </Link>
-            <Link href="/admin/customers" className="p-4 border-2 border-dashed rounded-lg text-center hover:border-blue-600 hover:bg-blue-50 transition">
-              <Users className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <p className="font-semibold">Manage Users</p>
+            <Link href="/admin/customers" className="p-3 sm:p-4 border-2 border-dashed rounded-lg text-center hover:border-blue-600 hover:bg-blue-50 transition">
+              <Users className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 text-blue-600" />
+              <p className="text-xs sm:text-sm font-semibold">Manage Users</p>
             </Link>
-            <Link href="/admin/coupons" className="p-4 border-2 border-dashed rounded-lg text-center hover:border-blue-600 hover:bg-blue-50 transition">
-              <TrendingUp className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <p className="font-semibold">Create Coupon</p>
+            <Link href="/admin/coupons" className="p-3 sm:p-4 border-2 border-dashed rounded-lg text-center hover:border-blue-600 hover:bg-blue-50 transition">
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-1 sm:mb-2 text-blue-600" />
+              <p className="text-xs sm:text-sm font-semibold">Create Coupon</p>
             </Link>
           </div>
         </CardContent>

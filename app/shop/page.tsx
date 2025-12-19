@@ -158,22 +158,22 @@ function ShopContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            {isFeatured && <Sparkles className="w-8 h-8 text-yellow-500" />}
-            {isSale && <Percent className="w-8 h-8 text-red-500" />}
-            <h1 className="text-4xl font-bold">{getPageTitle()}</h1>
+        <div className="mb-4 sm:mb-8">
+          <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+            {isFeatured && <Sparkles className="w-5 h-5 sm:w-8 sm:h-8 text-yellow-500" />}
+            {isSale && <Percent className="w-5 h-5 sm:w-8 sm:h-8 text-red-500" />}
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">{getPageTitle()}</h1>
           </div>
-          <p className="text-muted-foreground">{getPageDescription()}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">{getPageDescription()}</p>
           
           {/* Mode indicator */}
           {(isFeatured || isSale) && (
-            <div className="mt-4">
+            <div className="mt-3 sm:mt-4">
               <Link href="/shop">
-                <Button variant="outline" size="sm">
-                  ← View All Products
+                <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+                  ← View All
                 </Button>
               </Link>
             </div>
@@ -181,14 +181,14 @@ function ShopContent() {
         </div>
 
         {/* Search & Filter Toggle */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2 sm:gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
             <Input
-              placeholder="Search products..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-9 sm:pl-10 h-10 text-sm"
             />
           </div>
           <Button

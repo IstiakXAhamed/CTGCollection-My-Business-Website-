@@ -184,29 +184,55 @@ export default function AdminCouponsPage() {
   if (loading) return <div className="text-center py-12">Loading coupons...</div>
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Coupons</h1>
-          <p className="text-muted-foreground">{coupons.length} total coupons</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">Coupons</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">{coupons.length} total</p>
         </div>
-        <Button onClick={() => setShowDialog(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Coupon
+        <Button size="sm" onClick={() => setShowDialog(true)}>
+          <Plus className="w-4 h-4 sm:mr-2" />
+          <span className="hidden sm:inline">Add Coupon</span>
         </Button>
       </div>
 
       <Card>
-        <CardHeader>
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input placeholder="Search coupons..." className="pl-10" />
-            </div>
+        <CardHeader className="p-3 sm:p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input placeholder="Search..." className="pl-9 h-10 text-sm" />
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
+        <CardContent className="p-2 sm:p-4">
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-2">
+            {coupons.map((coupon) => (
+              <div key={coupon.id} className="border rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-mono font-semibold text-sm text-blue-600">{coupon.code}</span>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] ${coupon.isActive && new Date(coupon.validUntil) > new Date() ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {coupon.isActive && new Date(coupon.validUntil) > new Date() ? 'Active' : 'Expired'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs mb-2">
+                  <span className="font-medium">
+                    {coupon.discountType === 'free_shipping' ? '🚚 Free Ship' : coupon.discountType === 'percentage' ? `${coupon.discountValue}% OFF` : `৳${coupon.discountValue} OFF`}
+                  </span>
+                  <span className="text-muted-foreground">{coupon.usedCount}/{coupon.usageLimit || '∞'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <CountdownTimer endDate={coupon.validUntil} />
+                  <Button size="sm" variant="outline" className="h-7 w-7 p-0 text-red-600" onClick={() => handleDelete(coupon.id)}>
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b">

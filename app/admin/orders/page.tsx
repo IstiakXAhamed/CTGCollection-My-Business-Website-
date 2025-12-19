@@ -168,47 +168,88 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Orders</h1>
-          <p className="text-muted-foreground">{orders.length} total orders</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">Orders</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">{orders.length} total orders</p>
         </div>
         <div className="flex gap-2">
           <Button 
             variant="outline" 
+            size="sm"
             onClick={() => window.open('/api/admin/orders/export', '_blank')}
           >
-            <Download className="w-4 h-4 mr-2" />
-            Export CSV
+            <Download className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Export</span>
           </Button>
-          <Button onClick={fetchOrders} variant="outline">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
+          <Button onClick={fetchOrders} variant="outline" size="sm">
+            <RefreshCw className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Refresh</span>
           </Button>
         </div>
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="p-3 sm:p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
             <Input
-              placeholder="Search by order number, customer name or email..."
+              placeholder="Search orders..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-9 sm:pl-10 h-10 text-sm"
             />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-2 sm:p-4">
           {orders.length === 0 ? (
-            <div className="text-center py-12">
-              <Package className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No orders yet</p>
+            <div className="text-center py-8">
+              <Package className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+              <p className="text-sm text-muted-foreground">No orders yet</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              {/* Mobile Card View */}
+              <div className="lg:hidden space-y-3">
+                {filteredOrders.map((order) => (
+                  <div key={order.id} className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs sm:text-sm font-semibold text-blue-600">
+                        {order.orderNumber || `#${order.id.slice(0, 8)}`}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold ${statusColors[order.status] || 'bg-gray-100'}`}>
+                        {order.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                      <span className="text-muted-foreground truncate max-w-[120px]">
+                        {order.user?.name || 'Guest'}
+                      </span>
+                      <span className="font-semibold">{formatPrice(order.total)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] ${paymentStatusColors[order.paymentStatus] || 'bg-gray-100'}`}>
+                          {order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <Link href={`/admin/orders/${order.id}`}>
+                        <Button size="sm" variant="outline" className="h-7 text-xs px-2">
+                          <Eye className="w-3 h-3 mr-1" /> View
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden lg:block overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
@@ -325,15 +366,16 @@ export default function AdminOrdersPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
 
       {/* Pagination Controls */}
-      <div className="flex items-center justify-between mt-4 pb-8">
-        <div className="text-sm text-gray-500">
-          Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} orders
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pb-8">
+        <div className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
+          Showing {(pagination.page - 1) * pagination.limit + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
         </div>
         <div className="flex gap-2">
           <Button 
@@ -342,11 +384,11 @@ export default function AdminOrdersPage() {
             onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
             disabled={pagination.page <= 1 || loading}
           >
-            Previous
+            Prev
           </Button>
-          <div className="flex items-center gap-2 px-2">
-             <span className="text-sm font-medium">Page {pagination.page} of {pagination.totalPages || 1}</span>
-          </div>
+          <span className="text-xs sm:text-sm font-medium flex items-center px-2">
+            {pagination.page}/{pagination.totalPages || 1}
+          </span>
           <Button 
             variant="outline" 
             size="sm" 
