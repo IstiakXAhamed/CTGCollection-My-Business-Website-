@@ -23,10 +23,12 @@ export async function GET(req: NextRequest) {
     let roleFilter: any = {}
     
     if (currentUserRole === 'seller') {
-      // Sellers can only search for admins
+      // Sellers can only search for admins and superadmins
       roleFilter = { in: ['admin', 'superadmin'] }
     } else {
-      // Admins can search for sellers and other admins
+      // Admins/Superadmins can search for everyone except customers (sellers, admins, superadmins)
+      // "for superadmin ,,admin and seller" - covers this.
+      // "for admin seller and super" - covers this.
       roleFilter = { in: ['admin', 'superadmin', 'seller'] }
     }
 

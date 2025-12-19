@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { GamificationSettings } from "@/components/admin/GamificationSettings"
+import { InternalChat } from "@/components/admin/InternalChat"
 
 interface User {
   id: string
@@ -223,6 +224,11 @@ export default function SuperAdminPage() {
       </Card>
 
       <GamificationSettings />
+
+      <div className="mt-8">
+        <h2 className="text-xl font-bold mb-4 text-purple-800">Direct Command Chat</h2>
+        <InternalChat />
+      </div>
 
       {/* Permission Modal */}
       <Dialog open={!!permissionTarget} onOpenChange={(open) => !open && setPermissionTarget(null)}>
