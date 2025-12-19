@@ -1,54 +1,24 @@
 // PDF Receipt Generation for Serverless Environments (Vercel)
-// Uses PDF-lib instead of Puppeteer for serverless compatibility
+// Uses PDF-lib - Free & Unlimited
+// Matches the HTML template design exactly
 
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import { getOrderForReceipt } from './receipt'
 
-interface OrderData {
-  id: string
-  orderNumber: string
-  verificationCode?: string | null
-  createdAt: Date
-  status: string
-  paymentMethod: string
-  paymentStatus: string
-  subtotal: number
-  shippingCost: number
-  discount: number
-  total: number
-  couponCode?: string | null
-  address: {
-    name: string
-    phone: string
-    address: string
-    city: string
-    district: string
-    postalCode?: string | null
-  }
-  user?: { name: string; email: string } | null
-  guestEmail?: string | null
-  items: {
-    quantity: number
-    price: number
-    product: { name: string; hasWarranty: boolean; warrantyPeriod?: string | null }
-    variantInfo?: string | null
-  }[]
-}
-
 // Format date for receipt
 const formatDate = (date: Date) => 
-  new Date(date).toLocaleDateString('en-BD', { day: 'numeric', month: 'long', year: 'numeric' })
+  new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 
 // Parse variant info
 const getVariant = (variantInfo: string | null | undefined): string => {
   if (!variantInfo) return '-'
   try {
     const v = JSON.parse(variantInfo)
-    return `${v.size || ''}${v.color ? ' / ' + v.color : ''}` || '-'
+    return `${v.size || ''}${v.color ? ' / ' + v.color : ''}`.trim() || '-'
   } catch { return '-' }
 }
 
-// Generate PDF receipt buffer - serverless compatible
+// Generate PDF receipt buffer - matches the HTML template design
 export async function generateReceiptPDF(orderId: string): Promise<Buffer | null> {
   try {
     console.log('Generating PDF for order:', orderId)
@@ -59,232 +29,358 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
       return null
     }
 
-    // Create a new PDF document
+    // Create PDF document
     const pdfDoc = await PDFDocument.create()
     const page = pdfDoc.addPage([595, 842]) // A4 size
     const { width, height } = page.getSize()
     
     // Embed fonts
-    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica)
-    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+    const regular = await pdfDoc.embedFont(StandardFonts.Helvetica)
+    const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
     
-    // Colors
-    const primaryColor = rgb(0.1, 0.2, 0.36) // #1a365d
-    const textColor = rgb(0.2, 0.2, 0.2)
-    const grayColor = rgb(0.5, 0.5, 0.5)
-    const greenColor = rgb(0.09, 0.62, 0.35) // #16a34a
+    // Colors matching the HTML template
+    const navy = rgb(0.11, 0.19, 0.33)      // #1c3155 - dark navy header/footer
+    const darkText = rgb(0.13, 0.13, 0.13)  // #222 - main text
+    const grayText = rgb(0.47, 0.47, 0.47)  // #787878 - labels
+    const lightGray = rgb(0.96, 0.96, 0.96) // #f5f5f5 - backgrounds
+    const green = rgb(0.16, 0.65, 0.53)     // #2aa689 - paid badge
+    const white = rgb(1, 1, 1)
     
-    let y = height - 50
     const margin = 50
-    const contentWidth = width - (margin * 2)
+    let y = height - 50
     
-    // Helper function to draw text
-    const drawText = (text: string, x: number, yPos: number, options: {
-      font?: typeof helvetica,
-      size?: number,
-      color?: typeof textColor,
-      maxWidth?: number
-    } = {}) => {
-      const { font = helvetica, size = 10, color = textColor, maxWidth } = options
-      page.drawText(text, {
-        x,
-        y: yPos,
-        size,
-        font,
-        color,
-        maxWidth
-      })
-    }
+    // ========== HEADER SECTION ==========
+    // White header background
+    page.drawRectangle({
+      x: 0,
+      y: height - 100,
+      width: width,
+      height: 100,
+      color: white
+    })
     
-    // Header - Brand
-    drawText('CTG COLLECTION', margin, y, { font: helveticaBold, size: 20, color: primaryColor })
-    drawText('Premium Fashion & Lifestyle', margin, y - 18, { size: 9, color: grayColor })
+    // Logo area (CTG text as placeholder)
+    page.drawText('CTG', margin, y - 5, {
+      font: bold,
+      size: 24,
+      color: navy
+    })
+    page.drawText('Collection', margin + 55, y - 5, {
+      font: regular,
+      size: 18,
+      color: navy
+    })
+    page.drawText('Premium Fashion & Lifestyle', margin, y - 22, {
+      font: regular,
+      size: 9,
+      color: grayText
+    })
     
-    // Invoice number (right side)
-    drawText('INVOICE', width - margin - 100, y, { font: helveticaBold, size: 10, color: grayColor })
-    drawText(order.orderNumber, width - margin - 100, y - 14, { font: helveticaBold, size: 14, color: primaryColor })
-    drawText(formatDate(order.createdAt), width - margin - 100, y - 28, { size: 9, color: grayColor })
+    // Invoice info (right side)
+    page.drawText('INVOICE', width - margin - 130, y, {
+      font: regular,
+      size: 9,
+      color: grayText
+    })
+    page.drawText(order.orderNumber, width - margin - 130, y - 16, {
+      font: bold,
+      size: 14,
+      color: navy
+    })
+    page.drawText(formatDate(order.createdAt), width - margin - 130, y - 32, {
+      font: regular,
+      size: 10,
+      color: grayText
+    })
     
-    y -= 60
+    y -= 70
     
     // Divider line
     page.drawLine({
       start: { x: margin, y },
       end: { x: width - margin, y },
-      thickness: 2,
-      color: primaryColor
+      thickness: 1.5,
+      color: navy
     })
+    
+    y -= 35
+    
+    // ========== BILL TO / SHIP TO SECTION ==========
+    // Bill To
+    page.drawText('BILL TO', margin, y, {
+      font: bold,
+      size: 9,
+      color: grayText
+    })
+    y -= 16
+    page.drawText(order.address.name, margin, y, {
+      font: bold,
+      size: 11,
+      color: darkText
+    })
+    y -= 14
+    page.drawText(order.user?.email || order.guestEmail || '', margin, y, {
+      font: regular,
+      size: 10,
+      color: grayText
+    })
+    y -= 12
+    page.drawText(order.address.phone, margin, y, {
+      font: regular,
+      size: 10,
+      color: grayText
+    })
+    
+    // Ship To (right side)
+    let shipY = y + 42
+    page.drawText('SHIP TO', width/2, shipY, {
+      font: bold,
+      size: 9,
+      color: grayText
+    })
+    shipY -= 16
+    page.drawText(order.address.name, width/2, shipY, {
+      font: bold,
+      size: 11,
+      color: darkText
+    })
+    shipY -= 14
+    page.drawText(order.address.address, width/2, shipY, {
+      font: regular,
+      size: 10,
+      color: grayText,
+      maxWidth: 200
+    })
+    shipY -= 12
+    page.drawText(`${order.address.city}, ${order.address.district}`, width/2, shipY, {
+      font: regular,
+      size: 10,
+      color: grayText
+    })
+    
+    y -= 45
+    
+    // ========== ITEMS TABLE SECTION ==========
+    // Table header background
+    page.drawRectangle({
+      x: margin,
+      y: y - 8,
+      width: width - margin * 2,
+      height: 24,
+      color: lightGray
+    })
+    
+    // Table headers
+    const colItem = margin + 10
+    const colVariant = margin + 170
+    const colQty = margin + 290
+    const colPrice = margin + 360
+    const colTotal = margin + 440
+    
+    page.drawText('ITEM', colItem, y, { font: bold, size: 9, color: grayText })
+    page.drawText('VARIANT', colVariant, y, { font: bold, size: 9, color: grayText })
+    page.drawText('QTY', colQty, y, { font: bold, size: 9, color: grayText })
+    page.drawText('PRICE', colPrice, y, { font: bold, size: 9, color: grayText })
+    page.drawText('TOTAL', colTotal, y, { font: bold, size: 9, color: grayText })
     
     y -= 30
     
-    // Customer Info
-    drawText('BILL TO', margin, y, { font: helveticaBold, size: 9, color: grayColor })
-    y -= 14
-    drawText(order.address.name, margin, y, { font: helveticaBold, size: 11, color: textColor })
-    y -= 14
-    drawText(order.user?.email || order.guestEmail || '', margin, y, { size: 10, color: grayColor })
-    y -= 12
-    drawText(order.address.phone, margin, y, { size: 10, color: grayColor })
-    
-    // Ship To (right side)
-    let shipY = y + 40
-    drawText('SHIP TO', width/2 + 20, shipY, { font: helveticaBold, size: 9, color: grayColor })
-    shipY -= 14
-    drawText(order.address.name, width/2 + 20, shipY, { font: helveticaBold, size: 11, color: textColor })
-    shipY -= 14
-    drawText(order.address.address, width/2 + 20, shipY, { size: 10, color: grayColor, maxWidth: 200 })
-    shipY -= 12
-    drawText(`${order.address.city}, ${order.address.district}`, width/2 + 20, shipY, { size: 10, color: grayColor })
-    
-    y -= 50
-    
-    // Items header
-    page.drawRectangle({
-      x: margin,
-      y: y - 5,
-      width: contentWidth,
-      height: 20,
-      color: rgb(0.96, 0.97, 0.98)
-    })
-    
-    drawText('ITEM', margin + 10, y, { font: helveticaBold, size: 9, color: grayColor })
-    drawText('QTY', margin + 300, y, { font: helveticaBold, size: 9, color: grayColor })
-    drawText('PRICE', margin + 360, y, { font: helveticaBold, size: 9, color: grayColor })
-    drawText('TOTAL', margin + 430, y, { font: helveticaBold, size: 9, color: grayColor })
-    
-    y -= 25
-    
-    // Items list
+    // Items
     for (const item of order.items) {
-      // Item name
-      drawText(item.product.name, margin + 10, y, { font: helveticaBold, size: 10, color: textColor })
+      // Product name
+      page.drawText(item.product.name, colItem, y, {
+        font: bold,
+        size: 10,
+        color: darkText
+      })
       
-      // Variant & Warranty
+      // Variant
       const variant = getVariant(item.variantInfo)
-      let variantText = variant
-      if (item.product.hasWarranty) {
-        variantText += ` • [W] ${item.product.warrantyPeriod || 'Warranty'}`
-      }
-      drawText(variantText, margin + 10, y - 12, { size: 8, color: grayColor })
+      page.drawText(variant, colVariant, y, {
+        font: regular,
+        size: 10,
+        color: grayText
+      })
       
       // Quantity
-      drawText(item.quantity.toString(), margin + 300, y, { size: 10, color: textColor })
+      page.drawText(item.quantity.toString(), colQty, y, {
+        font: regular,
+        size: 10,
+        color: darkText
+      })
       
-      // Price
-      drawText(`BDT ${item.price.toLocaleString()}`, margin + 360, y, { size: 10, color: textColor })
+      // Price (using Tk instead of ৳)
+      page.drawText(`Tk${item.price.toLocaleString()}`, colPrice, y, {
+        font: regular,
+        size: 10,
+        color: darkText
+      })
       
       // Total
-      drawText(`BDT ${(item.price * item.quantity).toLocaleString()}`, margin + 430, y, { font: helveticaBold, size: 10, color: textColor })
+      const itemTotal = item.price * item.quantity
+      page.drawText(`Tk${itemTotal.toLocaleString()}`, colTotal, y, {
+        font: bold,
+        size: 10,
+        color: darkText
+      })
       
-      y -= 35
+      y -= 28
       
-      // Item divider
+      // Divider line
       page.drawLine({
-        start: { x: margin, y: y + 15 },
-        end: { x: width - margin, y: y + 15 },
+        start: { x: margin, y: y + 12 },
+        end: { x: width - margin, y: y + 12 },
         thickness: 0.5,
         color: rgb(0.9, 0.9, 0.9)
       })
     }
     
-    y -= 10
+    y -= 15
     
-    // Totals section (right aligned box)
-    const totalsX = width - margin - 200
+    // ========== TOTALS SECTION ==========
+    // Totals background
     page.drawRectangle({
-      x: totalsX - 10,
-      y: y - 90,
-      width: 210,
-      height: 100,
-      color: rgb(0.96, 0.97, 0.98)
+      x: margin,
+      y: y - 80,
+      width: width - margin * 2,
+      height: 90,
+      color: lightGray
     })
     
-    drawText('Subtotal', totalsX, y, { size: 10, color: grayColor })
-    drawText(`BDT ${order.subtotal.toLocaleString()}`, totalsX + 140, y, { size: 10, color: textColor })
+    const totalsLabelX = margin + 20
+    const totalsValueX = width - margin - 80
+    
+    // Subtotal
+    page.drawText('Subtotal', totalsLabelX, y, { font: regular, size: 10, color: grayText })
+    page.drawText(`Tk${order.subtotal.toLocaleString()}`, totalsValueX, y, { font: regular, size: 10, color: darkText })
     
     y -= 18
-    drawText('Shipping', totalsX, y, { size: 10, color: grayColor })
-    drawText(`BDT ${order.shippingCost.toLocaleString()}`, totalsX + 140, y, { size: 10, color: textColor })
     
+    // Shipping
+    page.drawText('Shipping', totalsLabelX, y, { font: regular, size: 10, color: grayText })
+    page.drawText(`Tk${order.shippingCost.toLocaleString()}`, totalsValueX, y, { font: regular, size: 10, color: darkText })
+    
+    y -= 18
+    
+    // Discount (if any)
     if (order.discount > 0) {
+      page.drawText('Discount', totalsLabelX, y, { font: regular, size: 10, color: green })
+      page.drawText(`-Tk${order.discount.toLocaleString()}`, totalsValueX, y, { font: regular, size: 10, color: green })
       y -= 18
-      drawText(`Discount${order.couponCode ? ` (${order.couponCode})` : ''}`, totalsX, y, { size: 10, color: greenColor })
-      drawText(`-BDT ${order.discount.toLocaleString()}`, totalsX + 140, y, { size: 10, color: greenColor })
     }
     
-    y -= 25
+    // Total row
     page.drawLine({
-      start: { x: totalsX, y: y + 5 },
-      end: { x: totalsX + 180, y: y + 5 },
+      start: { x: margin + 10, y: y + 5 },
+      end: { x: width - margin - 10, y: y + 5 },
       thickness: 1,
-      color: primaryColor
+      color: rgb(0.85, 0.85, 0.85)
+    })
+    y -= 8
+    page.drawText('Total', totalsLabelX, y, { font: bold, size: 12, color: navy })
+    page.drawText(`Tk${order.total.toLocaleString()}`, totalsValueX - 10, y, { font: bold, size: 14, color: navy })
+    
+    y -= 40
+    
+    // ========== PAYMENT SECTION ==========
+    page.drawRectangle({
+      x: margin,
+      y: y - 25,
+      width: width - margin * 2,
+      height: 40,
+      color: white,
+      borderColor: rgb(0.9, 0.9, 0.9),
+      borderWidth: 1
     })
     
-    drawText('TOTAL', totalsX, y - 5, { font: helveticaBold, size: 12, color: primaryColor })
-    drawText(`BDT ${order.total.toLocaleString()}`, totalsX + 120, y - 5, { font: helveticaBold, size: 14, color: primaryColor })
+    const paymentMethod = order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'
+    page.drawText(`Payment: ${paymentMethod}`, margin + 15, y - 5, {
+      font: bold,
+      size: 10,
+      color: darkText
+    })
+    
+    // Paid badge
+    if (order.paymentStatus === 'paid') {
+      const badgeX = width - margin - 70
+      const badgeY = y - 12
+      page.drawRectangle({
+        x: badgeX,
+        y: badgeY,
+        width: 50,
+        height: 22,
+        color: green,
+        borderColor: green,
+        borderWidth: 1,
+      })
+      page.drawText('Paid', badgeX + 12, badgeY + 6, {
+        font: bold,
+        size: 10,
+        color: white
+      })
+    }
     
     y -= 50
     
-    // Payment info
-    const paymentText = order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'
-    const paymentStatus = order.paymentStatus === 'paid' ? '[OK] Paid' : 'Pending'
-    drawText(`Payment: ${paymentText} • ${paymentStatus}`, margin, y, {
-      font: helveticaBold,
-      size: 10,
-      color: order.paymentStatus === 'paid' ? greenColor : grayColor
-    })
-    
-    y -= 30
-    
-    // Verification code
+    // ========== VERIFICATION CODE SECTION ==========
     if (order.verificationCode) {
       page.drawRectangle({
         x: margin,
-        y: y - 15,
-        width: 200,
-        height: 35,
-        color: rgb(0.96, 0.97, 0.98),
-        borderColor: rgb(0.85, 0.85, 0.85),
+        y: y - 25,
+        width: width - margin * 2,
+        height: 40,
+        color: lightGray,
+        borderColor: rgb(0.9, 0.9, 0.9),
         borderWidth: 1
       })
-      drawText('Verification Code:', margin + 10, y + 5, { size: 9, color: grayColor })
-      drawText(order.verificationCode, margin + 10, y - 10, { font: helveticaBold, size: 16, color: primaryColor })
+      
+      page.drawText('Verification Code', margin + 15, y - 5, {
+        font: regular,
+        size: 9,
+        color: grayText
+      })
+      
+      page.drawText(order.verificationCode, width - margin - 80, y - 5, {
+        font: bold,
+        size: 14,
+        color: navy
+      })
     }
     
-    // Footer
-    const footerY = 40
-    page.drawLine({
-      start: { x: margin, y: footerY + 15 },
-      end: { x: width - margin, y: footerY + 15 },
-      thickness: 1,
-      color: primaryColor
-    })
-    drawText('Thank you for shopping with CTG Collection! • ctgcollection2@gmail.com', margin, footerY, {
-      size: 9,
-      color: grayColor
+    // ========== FOOTER SECTION ==========
+    const footerY = 50
+    
+    // Footer background
+    page.drawRectangle({
+      x: 0,
+      y: 0,
+      width: width,
+      height: footerY + 10,
+      color: navy
     })
     
-    // Serialize the PDF to bytes
+    // Footer text
+    page.drawText('Thank you for shopping with CTG Collection! * ctgcollection2@gmail.com', 
+      margin + 50, footerY - 18, {
+      font: regular,
+      size: 10,
+      color: white
+    })
+    
+    // Generate PDF bytes
     const pdfBytes = await pdfDoc.save()
     
     console.log('PDF generated successfully, size:', pdfBytes.length, 'bytes')
     return Buffer.from(pdfBytes)
+    
   } catch (error) {
     console.error('Error generating PDF:', error)
     return null
   }
 }
 
-// Alternative: Generate PDF from any HTML string
-// Note: This is a simplified version - complex HTML won't render perfectly
+// Legacy function - not used in serverless
 export async function htmlToPDF(html: string): Promise<Buffer | null> {
-  try {
-    // For serverless, we can't render HTML to PDF directly without a headless browser
-    // Instead, we return null and let the caller handle this case
-    console.warn('htmlToPDF is not available in serverless environment')
-    return null
-  } catch (error) {
-    console.error('Error converting HTML to PDF:', error)
-    return null
-  }
+  console.warn('htmlToPDF is not available in serverless environment')
+  return null
 }

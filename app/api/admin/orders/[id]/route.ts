@@ -127,11 +127,11 @@ export async function PUT(
       
       if (recipientEmail && sendEmail !== false) {
         try {
-          // Import cloud PDF generator (uses selected template)
+          // Import PDF generator and email sender
           const { generateTemplatedPDF } = await import('@/lib/pdf-cloud')
           const { sendOrderConfirmationWithPDF } = await import('@/lib/email')
           
-          console.log('Generating templated PDF for email attachment...')
+          console.log('Generating PDF for email attachment...')
           const pdfBuffer = await generateTemplatedPDF(order.id)
           console.log('PDF generated:', !!pdfBuffer, 'Size:', pdfBuffer?.length || 0, 'bytes')
           

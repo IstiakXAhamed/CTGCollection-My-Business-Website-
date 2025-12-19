@@ -348,6 +348,7 @@ interface OrderConfirmationWithPDFData {
   address: string
   paymentMethod: string
   pdfBuffer?: Buffer  // PDF receipt as buffer
+  htmlContent?: string // HTML receipt as string (fallback when PDF fails)
 }
 
 export async function sendOrderConfirmationWithPDF(data: OrderConfirmationWithPDFData): Promise<boolean> {
@@ -395,7 +396,7 @@ export async function sendOrderConfirmationWithPDF(data: OrderConfirmationWithPD
           <p>Great news! Your order has been confirmed and is being processed.</p>
           
           <div class="pdf-notice">
-            <p><strong>Your PDF Receipt is attached to this email</strong></p>
+            <p><strong>Your Receipt is attached to this email</strong></p>
           </div>
           
           <div class="order-number">
@@ -460,15 +461,23 @@ export async function sendOrderConfirmationWithPDF(data: OrderConfirmationWithPD
     </html>
   `
 
-  // Prepare attachments
+  // Prepare attachments - prioritize PDF, fallback to HTML
   const attachments: any[] = []
-  if (data.pdfBuffer) {
+  if (data.pdfBuffer && data.pdfBuffer.length > 0) {
     attachments.push({
       filename: `Receipt-${data.orderNumber}.pdf`,
       content: data.pdfBuffer,
       contentType: 'application/pdf'
     })
     console.log('PDF attachment added, size:', data.pdfBuffer.length, 'bytes')
+  } else if (data.htmlContent) {
+    // Fallback: attach HTML receipt (opens beautifully in browser)
+    attachments.push({
+      filename: `Receipt-${data.orderNumber}.html`,
+      content: data.htmlContent,
+      contentType: 'text/html'
+    })
+    console.log('HTML receipt attachment added, length:', data.htmlContent.length)
   }
 
   try {
