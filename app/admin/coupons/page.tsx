@@ -318,50 +318,53 @@ export default function AdminCouponsPage() {
 
       {/* Add Coupon Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>Create New Coupon</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 overflow-y-auto flex-1 pr-1 sm:pr-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <Label>Coupon Code *</Label>
+                <Label className="text-xs sm:text-sm">Coupon Code *</Label>
                 <Input
                   value={formData.code}
                   onChange={(e) => setFormData({...formData, code: e.target.value.toUpperCase()})}
                   placeholder="FLASH50"
                   required
+                  className="h-10 text-sm"
                 />
               </div>
               <div>
-                <Label>Discount Type *</Label>
+                <Label className="text-xs sm:text-sm">Discount Type *</Label>
                 <select
                   value={formData.discountType}
                   onChange={(e) => setFormData({...formData, discountType: e.target.value})}
-                  className="w-full h-10 px-3 border rounded-md"
+                  className="w-full h-10 px-3 border rounded-md text-sm"
                   required
                 >
-                  <option value="percentage">Percentage (%)</option>
-                  <option value="fixed">Fixed Amount (৳)</option>
+                  <option value="percentage">📊 Percentage (%)</option>
+                  <option value="fixed">💵 Fixed Amount (৳)</option>
                   <option value="free_shipping">🚚 Free Shipping</option>
+                  <option value="buy_x_get_y">🎁 Buy X Get Y Free</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <Label>Description</Label>
+              <Label className="text-xs sm:text-sm">Description</Label>
               <Input
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                 placeholder="Flash sale - 50% off for limited time!"
+                className="h-10 text-sm"
               />
             </div>
 
             {/* Discount Value & Min Order - Only show value field if not free shipping */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {formData.discountType !== 'free_shipping' && (
                 <div>
-                  <Label>Discount Value * {formData.discountType === 'percentage' ? '(%)' : '(BDT)'}</Label>
+                  <Label className="text-xs sm:text-sm">Discount Value * {formData.discountType === 'percentage' ? '(%)' : '(BDT)'}</Label>
                   <Input
                     type="number"
                     value={formData.discountValue}
@@ -369,66 +372,90 @@ export default function AdminCouponsPage() {
                     placeholder="50"
                     required
                     min="0"
+                    className="h-10 text-sm"
                   />
                 </div>
               )}
-              <div className={formData.discountType === 'free_shipping' ? 'col-span-2' : ''}>
-                <Label>Min Order Value (BDT)</Label>
+              <div className={formData.discountType === 'free_shipping' ? 'sm:col-span-2' : ''}>
+                <Label className="text-xs sm:text-sm">Min Order Value (BDT)</Label>
                 <Input
                   type="number"
                   value={formData.minOrderValue}
                   onChange={(e) => setFormData({...formData, minOrderValue: e.target.value})}
                   placeholder="1000"
                   min="0"
+                  className="h-10 text-sm"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {formData.discountType !== 'free_shipping' && (
                 <div>
-                  <Label>Max Discount (BDT)</Label>
+                  <Label className="text-xs sm:text-sm">Max Discount (BDT)</Label>
                   <Input
                     type="number"
                     value={formData.maxDiscount}
                     onChange={(e) => setFormData({...formData, maxDiscount: e.target.value})}
                     placeholder="500"
                     min="0"
+                    className="h-10 text-sm"
                   />
                 </div>
               )}
-              <div className={formData.discountType === 'free_shipping' ? '' : ''}>
-                <Label>Usage Limit</Label>
+              <div>
+                <Label className="text-xs sm:text-sm">Usage Limit</Label>
                 <Input
                   type="number"
                   value={formData.usageLimit}
                   onChange={(e) => setFormData({...formData, usageLimit: e.target.value})}
                   placeholder="100"
                   min="1"
+                  className="h-10 text-sm"
                 />
               </div>
             </div>
 
             {/* Target Audience */}
-            <div className="bg-orange-50 p-4 rounded-lg space-y-3">
-              <Label className="text-orange-800 font-semibold flex items-center gap-2">
+            <div className="bg-orange-50 p-3 sm:p-4 rounded-lg space-y-2 sm:space-y-3">
+              <Label className="text-orange-800 font-semibold flex items-center gap-2 text-xs sm:text-sm">
                 👥 Target Audience
               </Label>
               <select
                 value={formData.targetAudience}
                 onChange={(e) => setFormData({...formData, targetAudience: e.target.value})}
-                className="w-full h-10 px-3 border rounded-md bg-white"
+                className="w-full h-10 px-3 border rounded-md bg-white text-sm"
               >
-                <option value="all">🌍 All Customers</option>
-                <option value="new_customers">🆕 New Customers (First Order)</option>
-                <option value="returning">🔄 Returning Customers</option>
-                <option value="vip">⭐ VIP Customers (5+ orders)</option>
-                <option value="loyalty_bronze">🥉 Bronze Tier Members</option>
-                <option value="loyalty_silver">🥈 Silver Tier Members</option>
-                <option value="loyalty_gold">🥇 Gold Tier Members</option>
-                <option value="loyalty_platinum">💎 Platinum Tier Members</option>
+                <optgroup label="📊 By Order Status">
+                  <option value="all">🌍 All Customers</option>
+                  <option value="new_customers">🆕 New Customers (First Order)</option>
+                  <option value="returning">🔄 Returning Customers (2+ orders)</option>
+                  <option value="vip">⭐ VIP Customers (5+ orders)</option>
+                  <option value="super_vip">👑 Super VIP (10+ orders)</option>
+                </optgroup>
+                <optgroup label="💰 By Spending">
+                  <option value="high_spender">💸 High Spenders (৳50,000+)</option>
+                  <option value="top_spender">🏆 Top Spenders (৳100,000+)</option>
+                </optgroup>
+                <optgroup label="🏅 Loyalty Tiers (10 Tiers)">
+                  <option value="loyalty_bronze">🥉 Bronze Tier</option>
+                  <option value="loyalty_silver">🥈 Silver Tier</option>
+                  <option value="loyalty_gold">🥇 Gold Tier</option>
+                  <option value="loyalty_platinum">💎 Platinum Tier</option>
+                  <option value="loyalty_diamond">💍 Diamond Tier</option>
+                  <option value="loyalty_emerald">💚 Emerald Tier</option>
+                  <option value="loyalty_ruby">❤️ Ruby Tier</option>
+                  <option value="loyalty_sapphire">💙 Sapphire Tier</option>
+                  <option value="loyalty_obsidian">🖤 Obsidian Tier</option>
+                  <option value="loyalty_legendary">🔥 Legendary Tier</option>
+                </optgroup>
+                <optgroup label="🎯 Special Groups">
+                  <option value="inactive">😴 Inactive (No orders 90+ days)</option>
+                  <option value="cart_abandoner">🛒 Cart Abandoners</option>
+                  <option value="birthday">🎂 Birthday This Month</option>
+                </optgroup>
               </select>
-              <p className="text-xs text-orange-600">
+              <p className="text-[10px] sm:text-xs text-orange-600">
                 Only users matching this category will see and can use this coupon
               </p>
             </div>

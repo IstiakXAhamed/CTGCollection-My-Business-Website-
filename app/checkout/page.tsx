@@ -43,6 +43,14 @@ export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [paymentMethod, setPaymentMethod] = useState('cod')
   const [errors, setErrors] = useState<FormErrors>({})
+  const [paymentSettings, setPaymentSettings] = useState({
+    bkashEnabled: true,
+    bkashNumber: '01991523289',
+    nagadEnabled: true,
+    nagadNumber: '01991523289',
+    rocketEnabled: true,
+    rocketNumber: '01991523289'
+  })
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -68,6 +76,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     loadUserInfo()
+    loadPaymentSettings()
     // Fallback timeout in case hydration takes too long
     const timeout = setTimeout(() => {
       if (loadingCart) {
@@ -77,6 +86,25 @@ export default function CheckoutPage() {
     }, 500)
     return () => clearTimeout(timeout)
   }, [])
+
+  const loadPaymentSettings = async () => {
+    try {
+      const res = await fetch('/api/settings')
+      if (res.ok) {
+        const data = await res.json()
+        setPaymentSettings({
+          bkashEnabled: data.bkashEnabled ?? true,
+          bkashNumber: data.bkashNumber || '01991523289',
+          nagadEnabled: data.nagadEnabled ?? true,
+          nagadNumber: data.nagadNumber || '01991523289',
+          rocketEnabled: data.rocketEnabled ?? true,
+          rocketNumber: data.rocketNumber || '01991523289'
+        })
+      }
+    } catch (error) {
+      console.error('Failed to load payment settings:', error)
+    }
+  }
 
   const loadUserInfo = async () => {
     try {
@@ -428,20 +456,110 @@ export default function CheckoutPage() {
               </CardHeader>
               <CardContent>
                 <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <div className="flex items-center space-x-2 border rounded-lg p-4 mb-3 cursor-pointer hover:bg-gray-50">
+                  {/* SSLCommerz option */}
+                  <div className={`flex items-center space-x-2 border rounded-lg p-3 sm:p-4 mb-2 sm:mb-3 cursor-pointer ${paymentMethod === 'sslcommerz' ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'}`}>
                     <RadioGroupItem value="sslcommerz" id="sslcommerz" />
                     <Label htmlFor="sslcommerz" className="flex-1 cursor-pointer">
-                      <div className="font-semibold">Online Payment (SSL Commerz)</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="font-semibold text-sm sm:text-base">💳 Online Payment (SSLCommerz)</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground">
                         Pay with bKash, Nagad, Cards, or Banking
                       </div>
                     </Label>
                   </div>
-                  <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-gray-50">
+
+                  {/* bKash Personal Send Money */}
+                  {paymentSettings.bkashEnabled && (
+                  <div className={`border rounded-lg p-3 sm:p-4 mb-2 sm:mb-3 cursor-pointer ${paymentMethod === 'bkash' ? 'border-pink-500 bg-pink-50' : 'hover:bg-gray-50'}`}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="bkash" id="bkash" />
+                      <Label htmlFor="bkash" className="flex-1 cursor-pointer">
+                        <div className="font-semibold text-sm sm:text-base text-pink-700">📱 bKash (Send Money)</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">
+                          Send money to our personal bKash number
+                        </div>
+                      </Label>
+                    </div>
+                    {paymentMethod === 'bkash' && (
+                      <div className="mt-3 p-3 bg-pink-100 rounded-lg text-sm space-y-2">
+                        <p className="font-bold text-pink-800">📲 bKash Number: {paymentSettings.bkashNumber}</p>
+                        <div className="text-pink-700 text-xs space-y-1">
+                          <p><strong>How to pay:</strong></p>
+                          <p>1️⃣ Open bKash App → Send Money</p>
+                          <p>2️⃣ Enter: <strong>{paymentSettings.bkashNumber}</strong></p>
+                          <p>3️⃣ Amount: <strong>৳{total}</strong></p>
+                          <p>4️⃣ Reference: <em>Your phone number</em></p>
+                          <p>5️⃣ Complete the transaction</p>
+                          <p className="mt-2 text-pink-800 font-semibold">⚠️ Keep the Transaction ID for confirmation!</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  )}
+
+                  {/* Nagad Personal Send Money */}
+                  {paymentSettings.nagadEnabled && (
+                  <div className={`border rounded-lg p-3 sm:p-4 mb-2 sm:mb-3 cursor-pointer ${paymentMethod === 'nagad' ? 'border-orange-500 bg-orange-50' : 'hover:bg-gray-50'}`}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="nagad" id="nagad" />
+                      <Label htmlFor="nagad" className="flex-1 cursor-pointer">
+                        <div className="font-semibold text-sm sm:text-base text-orange-700">📱 Nagad (Send Money)</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">
+                          Send money to our personal Nagad number
+                        </div>
+                      </Label>
+                    </div>
+                    {paymentMethod === 'nagad' && (
+                      <div className="mt-3 p-3 bg-orange-100 rounded-lg text-sm space-y-2">
+                        <p className="font-bold text-orange-800">📲 Nagad Number: {paymentSettings.nagadNumber}</p>
+                        <div className="text-orange-700 text-xs space-y-1">
+                          <p><strong>How to pay:</strong></p>
+                          <p>1️⃣ Open Nagad App → Send Money</p>
+                          <p>2️⃣ Enter: <strong>{paymentSettings.nagadNumber}</strong></p>
+                          <p>3️⃣ Amount: <strong>৳{total}</strong></p>
+                          <p>4️⃣ Reference: <em>Your phone number</em></p>
+                          <p>5️⃣ Complete the transaction</p>
+                          <p className="mt-2 text-orange-800 font-semibold">⚠️ Keep the Transaction ID for confirmation!</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  )}
+
+                  {/* Rocket Personal Send Money */}
+                  {paymentSettings.rocketEnabled && (
+                  <div className={`border rounded-lg p-3 sm:p-4 mb-2 sm:mb-3 cursor-pointer ${paymentMethod === 'rocket' ? 'border-purple-500 bg-purple-50' : 'hover:bg-gray-50'}`}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="rocket" id="rocket" />
+                      <Label htmlFor="rocket" className="flex-1 cursor-pointer">
+                        <div className="font-semibold text-sm sm:text-base text-purple-700">🚀 Rocket (Send Money)</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">
+                          Send money to our personal Rocket number
+                        </div>
+                      </Label>
+                    </div>
+                    {paymentMethod === 'rocket' && (
+                      <div className="mt-3 p-3 bg-purple-100 rounded-lg text-sm space-y-2">
+                        <p className="font-bold text-purple-800">📲 Rocket Number: {paymentSettings.rocketNumber}</p>
+                        <div className="text-purple-700 text-xs space-y-1">
+                          <p><strong>How to pay:</strong></p>
+                          <p>1️⃣ Dial *322# or open Rocket App</p>
+                          <p>2️⃣ Select Send Money</p>
+                          <p>3️⃣ Enter: <strong>{paymentSettings.rocketNumber}8</strong> (add 8 at end)</p>
+                          <p>4️⃣ Amount: <strong>৳{total}</strong></p>
+                          <p>5️⃣ Reference: <em>Your phone number</em></p>
+                          <p className="mt-2 text-purple-800 font-semibold">⚠️ Keep the Transaction ID for confirmation!</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  )}
+
+                  {/* Cash on Delivery */}
+                  <div className={`flex items-center space-x-2 border rounded-lg p-3 sm:p-4 cursor-pointer ${paymentMethod === 'cod' ? 'border-green-500 bg-green-50' : 'hover:bg-gray-50'}`}>
                     <RadioGroupItem value="cod" id="cod" />
                     <Label htmlFor="cod" className="flex-1 cursor-pointer">
-                      <div className="font-semibold">Cash on Delivery</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="font-semibold text-sm sm:text-base text-green-700">💵 Cash on Delivery</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground">
                         Pay when you receive the product
                       </div>
                     </Label>

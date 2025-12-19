@@ -26,6 +26,12 @@ interface SiteSettings {
   freeShippingMin: number
   codEnabled: boolean
   sslEnabled: boolean
+  bkashEnabled: boolean
+  bkashNumber: string
+  nagadEnabled: boolean
+  nagadNumber: string
+  rocketEnabled: boolean
+  rocketNumber: string
 }
 
 export default function AdminSettingsPage() {
@@ -42,7 +48,13 @@ export default function AdminSettingsPage() {
     shippingCost: 60,
     freeShippingMin: 2000,
     codEnabled: true,
-    sslEnabled: true
+    sslEnabled: true,
+    bkashEnabled: true,
+    bkashNumber: '01991523289',
+    nagadEnabled: true,
+    nagadNumber: '01991523289',
+    rocketEnabled: true,
+    rocketNumber: '01991523289'
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -353,8 +365,87 @@ export default function AdminSettingsPage() {
                 />
               </div>
             </div>
+            {/* Mobile Banking Payment Numbers */}
+            <div className="border-t pt-4 mt-4">
+              <Label className="text-base font-semibold mb-3 block">📱 Mobile Banking (Send Money)</Label>
+              <p className="text-sm text-muted-foreground mb-4">Enter your personal mobile banking numbers for customers to send money</p>
+              
+              {/* bKash */}
+              <div className="flex items-center justify-between p-4 border rounded-lg mb-3 bg-pink-50">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-pink-700">📱 bKash</p>
+                    <input 
+                      type="checkbox"
+                      checked={settings.bkashEnabled}
+                      onChange={(e) => handlePromoChange('bkashEnabled', e.target.checked)}
+                      className="w-4 h-4 text-pink-600 rounded"
+                    />
+                  </div>
+                  <Input 
+                    value={settings.bkashNumber}
+                    onChange={(e) => handlePromoChange('bkashNumber', e.target.value)}
+                    placeholder="01XXXXXXXXX"
+                    className="mt-2 max-w-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Nagad */}
+              <div className="flex items-center justify-between p-4 border rounded-lg mb-3 bg-orange-50">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-orange-700">📱 Nagad</p>
+                    <input 
+                      type="checkbox"
+                      checked={settings.nagadEnabled}
+                      onChange={(e) => handlePromoChange('nagadEnabled', e.target.checked)}
+                      className="w-4 h-4 text-orange-600 rounded"
+                    />
+                  </div>
+                  <Input 
+                    value={settings.nagadNumber}
+                    onChange={(e) => handlePromoChange('nagadNumber', e.target.value)}
+                    placeholder="01XXXXXXXXX"
+                    className="mt-2 max-w-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Rocket */}
+              <div className="flex items-center justify-between p-4 border rounded-lg mb-3 bg-purple-50">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-purple-700">🚀 Rocket</p>
+                    <input 
+                      type="checkbox"
+                      checked={settings.rocketEnabled}
+                      onChange={(e) => handlePromoChange('rocketEnabled', e.target.checked)}
+                      className="w-4 h-4 text-purple-600 rounded"
+                    />
+                  </div>
+                  <Input 
+                    value={settings.rocketNumber}
+                    onChange={(e) => handlePromoChange('rocketNumber', e.target.value)}
+                    placeholder="01XXXXXXXXX"
+                    className="mt-2 max-w-xs"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Rocket requires adding 8 at end for Send Money</p>
+                </div>
+              </div>
+            </div>
+
             <div className="pt-4 border-t">
-              <Button onClick={() => saveSettings({ codEnabled: settings.codEnabled, sslEnabled: settings.sslEnabled })} disabled={saving}>
+              <Button onClick={() => saveSettings({ 
+                codEnabled: settings.codEnabled, 
+                sslEnabled: settings.sslEnabled,
+                bkashEnabled: settings.bkashEnabled,
+                bkashNumber: settings.bkashNumber,
+                nagadEnabled: settings.nagadEnabled,
+                nagadNumber: settings.nagadNumber,
+                rocketEnabled: settings.rocketEnabled,
+                rocketNumber: settings.rocketNumber
+              })} disabled={saving}>
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                 Save Payment Settings
               </Button>

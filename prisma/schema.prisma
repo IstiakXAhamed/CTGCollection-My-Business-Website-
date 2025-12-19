@@ -693,6 +693,14 @@ model SiteSettings {
   codEnabled        Boolean  @default(true)
   sslEnabled        Boolean  @default(true)
   
+  // Mobile Banking (Personal Send Money)
+  bkashEnabled      Boolean  @default(true)
+  bkashNumber       String   @default("01991523289")
+  nagadEnabled      Boolean  @default(true)
+  nagadNumber       String   @default("01991523289")
+  rocketEnabled     Boolean  @default(true)
+  rocketNumber      String   @default("01991523289")
+  
   // Loyalty Points Settings
   pointsPerTaka     Float    @default(0.01)
   pointsValue       Float    @default(0.1)
