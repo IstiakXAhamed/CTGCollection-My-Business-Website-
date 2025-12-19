@@ -93,12 +93,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   <RoleBadge role={user.role} tier={user.tier} size="sm" />
                 </div>
                 
-                {/* Role Switcher for role-switched SuperAdmins */}
-                {(user.originalRole === 'superadmin' || user.isRoleSwitched) && (
-                  <div className="mt-3">
-                    <RoleSwitcher currentRole={user.role} />
-                  </div>
-                )}
+                {/* Role Switcher - only renders if user can switch (superadmin only) */}
+                <RoleSwitcher currentRole={user.role} />
                 
                 {/* Admin/Seller Link to Panel - also show for role-switched users */}
                 {(user.role === 'admin' || user.role === 'superadmin' || user.role === 'seller' || user.originalRole === 'superadmin') && (

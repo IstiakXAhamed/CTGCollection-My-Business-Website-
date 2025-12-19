@@ -89,11 +89,16 @@ export async function GET(request: NextRequest) {
     const tempRole = cookieStore.get('tempRole')?.value
     const originalRole = cookieStore.get('originalRole')?.value
 
+    // canSwitch is ONLY true if the user's actual role (from DB) is superadmin
+    // OR if they have the originalRole cookie set to superadmin (meaning they're currently role-switched)
+    const isActuallySuperAdmin = user.role === 'superadmin'
+    const wasOriginalIySuperAdmin = originalRole === 'superadmin'
+    
     return NextResponse.json({
       currentRole: tempRole || user.role,
       originalRole: originalRole || user.role,
-      isSwitched: !!tempRole && tempRole !== user.role,
-      canSwitch: user.role === 'superadmin' || originalRole === 'superadmin'
+      isSwitched: !!(tempRole && originalRole === 'superadmin'),
+      canSwitch: isActuallySuperAdmin || wasOriginalIySuperAdmin
     })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to get role status' }, { status: 500 })

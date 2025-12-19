@@ -103,7 +103,7 @@ export default function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcher
   const currentConfig = roleConfig[activeRole as keyof typeof roleConfig] || roleConfig.customer
 
   return (
-    <>
+    <div className="mt-3">
       {/* Switcher Button */}
       <div className="relative">
         <Button
@@ -226,6 +226,6 @@ export default function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcher
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   )
 }

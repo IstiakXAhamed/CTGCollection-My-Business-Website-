@@ -13,22 +13,35 @@ interface CartItem {
   color?: string
 }
 
+interface AppliedCoupon {
+  code: string
+  discountType: 'percentage' | 'fixed' | 'free_shipping'
+  discountValue: number
+  maxDiscount?: number
+  isFreeShipping?: boolean
+}
+
 interface CartStore {
   items: CartItem[]
+  appliedCoupon: AppliedCoupon | null
   _hasHydrated: boolean
   setHasHydrated: (state: boolean) => void
   addItem: (item: Omit<CartItem, 'id'>) => void
   removeItem: (id: string) => void
   updateQuantity: (id: string, quantity: number) => void
   clearCart: () => void
+  applyCoupon: (coupon: AppliedCoupon) => void
+  removeCoupon: () => void
   getTotalItems: () => number
   getTotalPrice: () => number
+  getDiscount: () => number
 }
 
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      appliedCoupon: null,
       _hasHydrated: false,
       
       setHasHydrated: (state) => {
@@ -79,7 +92,15 @@ export const useCartStore = create<CartStore>()(
       },
 
       clearCart: () => {
-        set({ items: [] })
+        set({ items: [], appliedCoupon: null })
+      },
+
+      applyCoupon: (coupon) => {
+        set({ appliedCoupon: coupon })
+      },
+
+      removeCoupon: () => {
+        set({ appliedCoupon: null })
       },
 
       getTotalItems: () => {
@@ -91,6 +112,21 @@ export const useCartStore = create<CartStore>()(
           (total, item) => total + item.price * item.quantity,
           0
         )
+      },
+
+      getDiscount: () => {
+        const coupon = get().appliedCoupon
+        if (!coupon) return 0
+        
+        const subtotal = get().getTotalPrice()
+        if (coupon.discountType === 'percentage') {
+          let discount = (subtotal * coupon.discountValue) / 100
+          if (coupon.maxDiscount && discount > coupon.maxDiscount) {
+            discount = coupon.maxDiscount
+          }
+          return Math.round(discount)
+        }
+        return coupon.discountValue
       },
     }),
     {

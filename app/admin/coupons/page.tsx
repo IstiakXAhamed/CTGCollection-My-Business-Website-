@@ -66,7 +66,9 @@ export default function AdminCouponsPage() {
     usageLimit: '',
     validFrom: new Date().toISOString().split('T')[0],
     validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    durationHours: '' // Quick duration option
+    durationHours: '', // Quick duration option
+    autoApply: false, // Auto-apply at checkout
+    targetAudience: 'all' // User category targeting
   })
   const [submitting, setSubmitting] = useState(false)
 
@@ -119,12 +121,14 @@ export default function AdminCouponsPage() {
           code: formData.code,
           description: formData.description,
           discountType: formData.discountType,
-          discountValue: parseFloat(formData.discountValue),
+          discountValue: formData.discountType === 'free_shipping' ? 0 : parseFloat(formData.discountValue),
           minOrderValue: formData.minOrderValue ? parseFloat(formData.minOrderValue) : null,
           maxDiscount: formData.maxDiscount ? parseFloat(formData.maxDiscount) : null,
           usageLimit: formData.usageLimit ? parseInt(formData.usageLimit) : null,
           validFrom: new Date(formData.validFrom).toISOString(),
-          validUntil: validUntil
+          validUntil: validUntil,
+          autoApply: formData.autoApply,
+          targetAudience: formData.targetAudience
         })
       })
 
@@ -140,7 +144,9 @@ export default function AdminCouponsPage() {
           usageLimit: '',
           validFrom: new Date().toISOString().split('T')[0],
           validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          durationHours: ''
+          durationHours: '',
+          autoApply: false,
+          targetAudience: 'all'
         })
         fetchCoupons()
         alert('Coupon created successfully!')
@@ -213,6 +219,8 @@ export default function AdminCouponsPage() {
                       Time Left
                     </div>
                   </th>
+                  <th className="text-left py-3 px-4">Target</th>
+                  <th className="text-left py-3 px-4">Auto-Apply</th>
                   <th className="text-left py-3 px-4">Status</th>
                   <th className="text-right py-3 px-4">Actions</th>
                 </tr>
@@ -225,13 +233,38 @@ export default function AdminCouponsPage() {
                       <div className="text-xs text-muted-foreground">{coupon.description}</div>
                     </td>
                     <td className="py-4 px-4 font-medium">
-                      {coupon.discountType === 'percentage' 
-                        ? `${coupon.discountValue}%` 
-                        : `৳${coupon.discountValue}`}
+                      {coupon.discountType === 'free_shipping' 
+                        ? '🚚 Free Shipping'
+                        : coupon.discountType === 'percentage' 
+                          ? `${coupon.discountValue}%` 
+                          : `৳${coupon.discountValue}`}
                     </td>
                     <td className="py-4 px-4">{coupon.usedCount} / {coupon.usageLimit || '∞'}</td>
                     <td className="py-4 px-4">
                       <CountdownTimer endDate={coupon.validUntil} />
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        coupon.targetAudience === 'all' 
+                          ? 'bg-gray-100 text-gray-600'
+                          : 'bg-orange-100 text-orange-700'
+                      }`}>
+                        {coupon.targetAudience === 'all' ? '🌍 All' 
+                          : coupon.targetAudience === 'new_customers' ? '🆕 New'
+                          : coupon.targetAudience === 'returning' ? '🔄 Returning'
+                          : coupon.targetAudience === 'vip' ? '⭐ VIP'
+                          : coupon.targetAudience?.startsWith('loyalty_') ? '🏅 Loyalty'
+                          : coupon.targetAudience || 'All'}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        coupon.autoApply 
+                          ? 'bg-purple-100 text-purple-800' 
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {coupon.autoApply ? '✓ Auto' : 'Manual'}
+                      </span>
                     </td>
                     <td className="py-4 px-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -282,8 +315,9 @@ export default function AdminCouponsPage() {
                   className="w-full h-10 px-3 border rounded-md"
                   required
                 >
-                  <option value="percentage">Percentage</option>
-                  <option value="fixed">Fixed Amount</option>
+                  <option value="percentage">Percentage (%)</option>
+                  <option value="fixed">Fixed Amount (৳)</option>
+                  <option value="free_shipping">🚚 Free Shipping</option>
                 </select>
               </div>
             </div>
@@ -297,19 +331,22 @@ export default function AdminCouponsPage() {
               />
             </div>
 
+            {/* Discount Value & Min Order - Only show value field if not free shipping */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Discount Value * {formData.discountType === 'percentage' ? '(%)' : '(BDT)'}</Label>
-                <Input
-                  type="number"
-                  value={formData.discountValue}
-                  onChange={(e) => setFormData({...formData, discountValue: e.target.value})}
-                  placeholder="50"
-                  required
-                  min="0"
-                />
-              </div>
-              <div>
+              {formData.discountType !== 'free_shipping' && (
+                <div>
+                  <Label>Discount Value * {formData.discountType === 'percentage' ? '(%)' : '(BDT)'}</Label>
+                  <Input
+                    type="number"
+                    value={formData.discountValue}
+                    onChange={(e) => setFormData({...formData, discountValue: e.target.value})}
+                    placeholder="50"
+                    required
+                    min="0"
+                  />
+                </div>
+              )}
+              <div className={formData.discountType === 'free_shipping' ? 'col-span-2' : ''}>
                 <Label>Min Order Value (BDT)</Label>
                 <Input
                   type="number"
@@ -322,17 +359,19 @@ export default function AdminCouponsPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Max Discount (BDT)</Label>
-                <Input
-                  type="number"
-                  value={formData.maxDiscount}
-                  onChange={(e) => setFormData({...formData, maxDiscount: e.target.value})}
-                  placeholder="500"
-                  min="0"
-                />
-              </div>
-              <div>
+              {formData.discountType !== 'free_shipping' && (
+                <div>
+                  <Label>Max Discount (BDT)</Label>
+                  <Input
+                    type="number"
+                    value={formData.maxDiscount}
+                    onChange={(e) => setFormData({...formData, maxDiscount: e.target.value})}
+                    placeholder="500"
+                    min="0"
+                  />
+                </div>
+              )}
+              <div className={formData.discountType === 'free_shipping' ? '' : ''}>
                 <Label>Usage Limit</Label>
                 <Input
                   type="number"
@@ -342,6 +381,30 @@ export default function AdminCouponsPage() {
                   min="1"
                 />
               </div>
+            </div>
+
+            {/* Target Audience */}
+            <div className="bg-orange-50 p-4 rounded-lg space-y-3">
+              <Label className="text-orange-800 font-semibold flex items-center gap-2">
+                👥 Target Audience
+              </Label>
+              <select
+                value={formData.targetAudience}
+                onChange={(e) => setFormData({...formData, targetAudience: e.target.value})}
+                className="w-full h-10 px-3 border rounded-md bg-white"
+              >
+                <option value="all">🌍 All Customers</option>
+                <option value="new_customers">🆕 New Customers (First Order)</option>
+                <option value="returning">🔄 Returning Customers</option>
+                <option value="vip">⭐ VIP Customers (5+ orders)</option>
+                <option value="loyalty_bronze">🥉 Bronze Tier Members</option>
+                <option value="loyalty_silver">🥈 Silver Tier Members</option>
+                <option value="loyalty_gold">🥇 Gold Tier Members</option>
+                <option value="loyalty_platinum">💎 Platinum Tier Members</option>
+              </select>
+              <p className="text-xs text-orange-600">
+                Only users matching this category will see and can use this coupon
+              </p>
             </div>
 
             {/* Quick Duration Buttons */}
@@ -399,6 +462,22 @@ export default function AdminCouponsPage() {
                   disabled={!!formData.durationHours}
                 />
               </div>
+            </div>
+
+            {/* Auto-Apply Toggle */}
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.autoApply}
+                  onChange={(e) => setFormData({...formData, autoApply: e.target.checked})}
+                  className="w-5 h-5 rounded border-purple-300 text-purple-600 focus:ring-purple-500"
+                />
+                <div>
+                  <p className="font-semibold text-purple-800">Auto-Apply at Checkout</p>
+                  <p className="text-xs text-purple-600">When enabled, this coupon will be automatically applied to customer carts if it gives the best discount</p>
+                </div>
+              </label>
             </div>
 
             <div className="flex justify-end gap-2 pt-4">

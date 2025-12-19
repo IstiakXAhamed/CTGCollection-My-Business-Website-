@@ -233,8 +233,8 @@ model Coupon {
   id            String    @id @default(uuid())
   code          String    @unique
   description   String?
-  discountType  String    // percentage, fixed
-  discountValue Float
+  discountType  String    // percentage, fixed, free_shipping
+  discountValue Float     // 0 for free_shipping type
   minOrderValue Float?
   maxDiscount   Float?
   validFrom     DateTime
@@ -242,6 +242,9 @@ model Coupon {
   usageLimit    Int?
   usedCount     Int       @default(0)
   isActive      Boolean   @default(true)
+  autoApply     Boolean   @default(false)  // If true, auto-apply at checkout
+  // User targeting
+  targetAudience String   @default("all")  // all, new_customers, returning, vip, loyalty_bronze, loyalty_silver, loyalty_gold, loyalty_platinum
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }

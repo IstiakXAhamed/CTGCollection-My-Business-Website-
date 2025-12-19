@@ -99,14 +99,39 @@ export default function CheckoutPage() {
   }
 
   // Calculate shipping based on district
-  const shippingCost = useMemo(() => {
+  const baseShippingCost = useMemo(() => {
     return calculateShippingCost(formData.district)
   }, [formData.district])
   
   const isCTG = CTG_DISTRICTS.some(d => d.toLowerCase() === formData.district.toLowerCase())
 
+  // Get coupon from cart store
+  const appliedCoupon = useCartStore((state) => state.appliedCoupon)
+  
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const total = subtotal + shippingCost
+  
+  // Calculate discount from coupon
+  let discount = 0
+  let isFreeShipping = false
+  
+  if (appliedCoupon) {
+    if (appliedCoupon.discountType === 'free_shipping') {
+      isFreeShipping = true
+      discount = 0 // No product discount, but shipping is free
+    } else if (appliedCoupon.discountType === 'percentage') {
+      discount = Math.round(subtotal * (appliedCoupon.discountValue / 100))
+      if (appliedCoupon.maxDiscount && discount > appliedCoupon.maxDiscount) {
+        discount = appliedCoupon.maxDiscount
+      }
+    } else {
+      discount = appliedCoupon.discountValue
+    }
+  }
+  
+  // Shipping is free if coupon is free_shipping type
+  const shippingCost = isFreeShipping ? 0 : baseShippingCost
+  
+  const total = Math.max(0, subtotal - discount + shippingCost)
 
   // Validate form
   const validateForm = (): boolean => {
@@ -182,6 +207,8 @@ export default function CheckoutPage() {
           total,
           subtotal,
           shippingCost,
+          discount,
+          couponCode: appliedCoupon?.code || null,
         }),
       })
 
@@ -454,16 +481,36 @@ export default function CheckoutPage() {
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
+                  {appliedCoupon && (discount > 0 || isFreeShipping) && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span className="flex items-center gap-1">
+                        {isFreeShipping ? '🚚 Free Shipping' : 'Discount'}
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-green-100">
+                          {appliedCoupon.code}
+                        </span>
+                      </span>
+                      <span className="font-semibold">
+                        {isFreeShipping ? `FREE (was ${formatPrice(baseShippingCost)})` : `-${formatPrice(discount)}`}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground flex items-center gap-1">
                       Shipping
-                      {formData.district && (
+                      {formData.district && !isFreeShipping && (
                         <span className={`text-xs px-1.5 py-0.5 rounded ${isCTG ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
                           {isCTG ? 'CTG' : 'Outside'}
                         </span>
                       )}
+                      {isFreeShipping && (
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-green-100 text-green-700">
+                          🎉 FREE
+                        </span>
+                      )}
                     </span>
-                    <span>{formatPrice(shippingCost)}</span>
+                    <span className={isFreeShipping ? 'text-green-600 font-semibold' : ''}>
+                      {isFreeShipping ? 'Free' : formatPrice(shippingCost)}
+                    </span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
                     <span>Total</span>

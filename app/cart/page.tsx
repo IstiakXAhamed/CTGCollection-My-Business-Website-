@@ -28,14 +28,21 @@ export default function CartPage() {
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null)
   const [mounted, setMounted] = useState(false)
   const [items, setItems] = useState<CartItem[]>([])
+  const [bestCouponLoading, setBestCouponLoading] = useState(false)
+  const [bestCouponSuggestion, setBestCouponSuggestion] = useState<any>(null)
 
   // Load cart from localStorage on mount
   useEffect(() => {
     // Small delay to allow Zustand persist to rehydrate from localStorage
     const loadCart = () => {
-      const storeItems = useCartStore.getState().items
-      console.log('Cart items from store:', storeItems.length, storeItems)
-      setItems(storeItems)
+      const store = useCartStore.getState()
+      console.log('Cart items from store:', store.items.length, store.items)
+      setItems(store.items)
+      // Load any previously applied coupon
+      if (store.appliedCoupon) {
+        setAppliedCoupon(store.appliedCoupon)
+        setCouponCode(store.appliedCoupon.code)
+      }
       setMounted(true)
     }
     
@@ -49,6 +56,9 @@ export default function CartPage() {
     const unsubscribe = useCartStore.subscribe((state) => {
       console.log('Cart store updated:', state.items.length)
       setItems(state.items)
+      if (state.appliedCoupon) {
+        setAppliedCoupon(state.appliedCoupon)
+      }
     })
     
     return () => {
@@ -56,6 +66,49 @@ export default function CartPage() {
       unsubscribe()
     }
   }, [])
+
+  // Auto-apply best coupon when cart items change (only if autoApply coupons exist)
+  useEffect(() => {
+    const fetchBestCoupon = async () => {
+      const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      if (subtotal <= 0 || appliedCoupon) return
+
+      setBestCouponLoading(true)
+      try {
+        const res = await fetch(`/api/coupons/best?total=${subtotal}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.found && data.coupon) {
+            // Auto-apply the best coupon and save to store
+            const couponData = {
+              code: data.coupon.code,
+              discountType: data.coupon.discountType as 'percentage' | 'fixed' | 'free_shipping',
+              discountValue: data.coupon.discountValue,
+              maxDiscount: data.coupon.maxDiscount,
+              isFreeShipping: data.coupon.isFreeShipping || data.coupon.discountType === 'free_shipping'
+            }
+            setAppliedCoupon(couponData)
+            setCouponCode(data.coupon.code)
+            setBestCouponSuggestion({
+              savings: data.savings,
+              message: data.message,
+              isFreeShipping: couponData.isFreeShipping
+            })
+            // Save to cart store for persistence
+            useCartStore.getState().applyCoupon(couponData)
+          }
+        }
+      } catch (error) {
+        console.log('Failed to fetch best coupon')
+      } finally {
+        setBestCouponLoading(false)
+      }
+    }
+
+    if (mounted && items.length > 0 && !appliedCoupon) {
+      fetchBestCoupon()
+    }
+  }, [mounted, items, appliedCoupon])
 
   const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return
@@ -75,15 +128,27 @@ export default function CartPage() {
       const res = await fetch(`/api/coupons/validate?code=${couponCode}`)
       if (res.ok) {
         const data = await res.json()
-        setAppliedCoupon(data.coupon)
+        const couponData = {
+          code: data.coupon.code,
+          discountType: data.coupon.discountType,
+          discountValue: data.coupon.discountValue,
+          maxDiscount: data.coupon.maxDiscount
+        }
+        setAppliedCoupon(couponData)
+        useCartStore.getState().applyCoupon(couponData)
+        setBestCouponSuggestion(null) // Clear auto-apply message
         alert('Coupon applied successfully!')
       } else {
         // Fallback mock coupons
         if (couponCode.toUpperCase() === 'WELCOME10') {
-          setAppliedCoupon({ code: 'WELCOME10', discountType: 'percentage', discountValue: 10 })
+          const couponData = { code: 'WELCOME10', discountType: 'percentage' as const, discountValue: 10 }
+          setAppliedCoupon(couponData)
+          useCartStore.getState().applyCoupon(couponData)
           alert('Coupon applied! 10% discount')
         } else if (couponCode.toUpperCase() === 'SAVE500') {
-          setAppliedCoupon({ code: 'SAVE500', discountType: 'fixed', discountValue: 500 })
+          const couponData = { code: 'SAVE500', discountType: 'fixed' as const, discountValue: 500 }
+          setAppliedCoupon(couponData)
+          useCartStore.getState().applyCoupon(couponData)
           alert('Coupon applied! ৳500 off')
         } else {
           alert('Invalid coupon code')
@@ -95,17 +160,23 @@ export default function CartPage() {
   }
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const shippingCost = subtotal >= 2000 ? 0 : (subtotal > 0 ? 100 : 0)
+  const baseShippingCost = subtotal >= 2000 ? 0 : (subtotal > 0 ? 100 : 0)
   
   let discount = 0
+  let isFreeShipping = false
+  
   if (appliedCoupon) {
-    if (appliedCoupon.discountType === 'percentage') {
+    if (appliedCoupon.discountType === 'free_shipping') {
+      isFreeShipping = true
+      discount = 0
+    } else if (appliedCoupon.discountType === 'percentage') {
       discount = Math.round(subtotal * (appliedCoupon.discountValue / 100))
     } else {
       discount = appliedCoupon.discountValue
     }
   }
   
+  const shippingCost = isFreeShipping ? 0 : baseShippingCost
   const total = Math.max(0, subtotal - discount + shippingCost)
 
   if (!mounted) {
@@ -253,18 +324,34 @@ export default function CartPage() {
                           value={couponCode}
                           onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                         />
-                        <Button onClick={applyCoupon} variant="outline">
-                          Apply
+                        <Button onClick={applyCoupon} variant="outline" disabled={bestCouponLoading}>
+                          {bestCouponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
                         </Button>
                       </div>
                       {appliedCoupon && (
-                        <p className="text-sm text-green-600 mt-2 flex items-center gap-1">
-                          ✓ {appliedCoupon.code} applied
+                        <div className="mt-2 p-2 bg-green-50 rounded-lg border border-green-200">
+                          <p className="text-sm text-green-700 flex items-center gap-1 font-medium">
+                            ✓ {appliedCoupon.code} applied
+                            {bestCouponSuggestion && (
+                              <span className="text-green-600 font-bold ml-1">
+                                (Auto-applied!)
+                              </span>
+                            )}
+                          </p>
+                          {bestCouponSuggestion && (
+                            <p className="text-xs text-green-600 mt-1">
+                              {bestCouponSuggestion.isFreeShipping 
+                                ? '🚚 Free shipping auto-applied!' 
+                                : `🎉 Best coupon auto-applied! You save ৳${bestCouponSuggestion.savings?.toFixed(0) || '0'}`}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      {!appliedCoupon && !bestCouponLoading && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          💡 We'll auto-apply the best coupon for you!
                         </p>
                       )}
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Try: WELCOME10 or SAVE500
-                      </p>
                     </div>
 
                     {/* Price Breakdown */}
@@ -273,15 +360,20 @@ export default function CartPage() {
                         <span className="text-muted-foreground">Subtotal</span>
                         <span className="font-semibold">{formatPrice(subtotal)}</span>
                       </div>
-                      {discount > 0 && (
+                      {(discount > 0 || isFreeShipping) && (
                         <div className="flex justify-between text-green-600">
-                          <span>Discount</span>
-                          <span className="font-semibold">-{formatPrice(discount)}</span>
+                          <span>{isFreeShipping ? '🚚 Free Shipping' : 'Discount'}</span>
+                          <span className="font-semibold">
+                            {isFreeShipping ? `FREE (was ${formatPrice(baseShippingCost)})` : `-${formatPrice(discount)}`}
+                          </span>
                         </div>
                       )}
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Shipping</span>
-                        <span className="font-semibold">
+                        <span className="text-muted-foreground">
+                          Shipping 
+                          {isFreeShipping && <span className="ml-1 text-xs text-green-600">🎉</span>}
+                        </span>
+                        <span className={`font-semibold ${isFreeShipping ? 'text-green-600' : ''}`}>
                           {shippingCost === 0 ? (
                             <span className="text-green-600">Free</span>
                           ) : (
@@ -289,7 +381,7 @@ export default function CartPage() {
                           )}
                         </span>
                       </div>
-                      {subtotal > 0 && subtotal < 2000 && (
+                      {subtotal > 0 && subtotal < 2000 && !isFreeShipping && (
                         <p className="text-xs text-blue-600">
                           Add {formatPrice(2000 - subtotal)} more for free shipping!
                         </p>
