@@ -254,7 +254,7 @@ export default function AIProductAssist({ productName, category, onSuggestionAcc
                 </div>
               )}
 
-              {analysis.suggestedVariants?.sizes?.length > 0 && (
+              {analysis.suggestedVariants?.sizes && analysis.suggestedVariants.sizes.length > 0 && (
                 <div className="p-2 bg-purple-50 rounded-lg">
                   <span className="text-purple-600 font-medium flex items-center gap-1">
                     <Ruler className="w-3 h-3" />
@@ -268,7 +268,7 @@ export default function AIProductAssist({ productName, category, onSuggestionAcc
                 </div>
               )}
 
-              {analysis.suggestedVariants?.colors?.length > 0 && (
+              {analysis.suggestedVariants?.colors && analysis.suggestedVariants.colors.length > 0 && (
                 <div className="p-2 bg-pink-50 rounded-lg sm:col-span-2">
                   <span className="text-pink-600 font-medium flex items-center gap-1">
                     <Palette className="w-3 h-3" />
