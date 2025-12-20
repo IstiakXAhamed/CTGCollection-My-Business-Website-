@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
          }))
 
          sendOrderConfirmation({
-           to: userEmail || guestEmail || '',
+           to: shippingDetails.email || guestEmail || '',
            orderNumber: order.orderNumber,
            customerName: shippingDetails.name || 'Customer',
            items: itemsForEmail,
