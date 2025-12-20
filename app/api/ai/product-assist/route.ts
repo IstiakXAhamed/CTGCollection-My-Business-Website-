@@ -4,7 +4,7 @@ import { verifyAuth } from '@/lib/auth'
 export const dynamic = 'force-dynamic'
 
 // Gemini API configuration
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent'
 
 // Check admin access
 async function checkAdmin(request: NextRequest) {
