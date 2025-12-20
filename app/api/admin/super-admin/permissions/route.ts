@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
@@ -9,7 +8,10 @@ export const dynamic = 'force-dynamic'
 export async function PUT(request: NextRequest) {
   const auth = await verifyAuth(request)
   
-  if (!auth || auth.role !== 'SUPER_ADMIN') {
+  // Handle both uppercase and lowercase role variants
+  const isSuperAdmin = auth && (auth.role === 'SUPER_ADMIN' || auth.role === 'superadmin')
+  
+  if (!auth || !isSuperAdmin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

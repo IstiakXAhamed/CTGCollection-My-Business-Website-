@@ -5,7 +5,7 @@
  * All AI calls go through this library for consistency and control.
  */
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent'
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent'
 
 export interface AIResponse {
   success: boolean
