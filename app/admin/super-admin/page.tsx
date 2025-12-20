@@ -25,6 +25,7 @@ import { GamificationSettings } from "@/components/admin/GamificationSettings"
 import { InternalChat } from "@/components/admin/InternalChat"
 import { CommissionSettings } from "@/components/admin/CommissionSettings"
 import { FeatureToggles } from "@/components/admin/FeatureToggles"
+import { PermissionCenter } from "@/components/admin/PermissionCenter"
 
 interface User {
   id: string
@@ -257,6 +258,11 @@ export default function SuperAdminPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Permission Management Center */}
+      <div className="mt-8">
+        <PermissionCenter />
+      </div>
 
       {/* Feature Toggles */}
       <div className="mt-8">
