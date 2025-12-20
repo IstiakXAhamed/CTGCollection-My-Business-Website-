@@ -19,15 +19,23 @@ export async function GET(request: NextRequest) {
   const role = searchParams.get('role') // Optional filter
 
   try {
-    // Build where clause - handle case insensitivity for roles
-    let whereClause: any = {}
-    
-    if (role && role !== 'all') {
-      // Case-insensitive role filter
-      whereClause.role = { equals: role, mode: 'insensitive' }
+    // Build where clause - only return admins and sellers, NOT customers
+    let whereClause: any = {
+      // Exclude customers - only show admin/seller roles (case-insensitive)
+      OR: [
+        { role: { equals: 'admin', mode: 'insensitive' } },
+        { role: { equals: 'seller', mode: 'insensitive' } },
+        { role: { equals: 'ADMIN', mode: 'insensitive' } },
+        { role: { equals: 'SELLER', mode: 'insensitive' } },
+      ]
     }
-    // If no role filter, get ALL users (admins, sellers, customers, but not super_admin)
-    // Super admin can manage anyone except themselves
+    
+    // If specific role filter is applied
+    if (role && role !== 'all') {
+      whereClause = {
+        role: { equals: role, mode: 'insensitive' }
+      }
+    }
 
     const users = await prisma.user.findMany({
       where: whereClause,
@@ -41,7 +49,7 @@ export async function GET(request: NextRequest) {
         isActive: true
       },
       orderBy: { createdAt: 'desc' },
-      take: 200 // Increased limit
+      take: 200
     })
     
     return NextResponse.json({ users })
