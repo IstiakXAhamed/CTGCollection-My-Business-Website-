@@ -1012,3 +1012,62 @@ export async function sendAccountDeletedEmail(to: string, customerName: string) 
   }
 }
 
+// ================== NOTIFICATION EMAILS ==================
+
+interface SendEmailOptions {
+  to: string
+  subject: string
+  html: string
+}
+
+async function sendEmail(options: SendEmailOptions) {
+  try {
+    await transporter.sendMail({
+      from: `"CTG Collection" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
+      ...options
+    })
+    return true
+  } catch (error) {
+    console.error('Email failed:', error)
+    return false
+  }
+}
+
+export async function sendRefundStatusEmail(userEmail: string, orderNumber: string, status: string, note?: string) {
+  const subject = `Refund Request ${status} - Order #${orderNumber}`
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #2563eb;">Refund Request Update</h2>
+      <p>Your refund request for Order <strong>#${orderNumber}</strong> has been <strong>${status}</strong>.</p>
+      ${note ? `<p><strong>Admin Note:</strong> ${note}</p>` : ''}
+      <p>If you have any questions, please contact support.</p>
+    </div>
+  `
+  return sendEmail({ to: userEmail, subject, html })
+}
+
+export async function sendPayoutStatusEmail(sellerEmail: string, amount: number, status: string, note?: string) {
+  const subject = `Payout Request ${status}`
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: ${status === 'paid' ? 'green' : '#2563eb'};">Payout Update</h2>
+      <p>Your payout request for <strong>${amount} BDT</strong> has been <strong>${status}</strong>.</p>
+      ${note ? `<p><strong>Note:</strong> ${note}</p>` : ''}
+      <p>Check your wallet dashboard for more details.</p>
+    </div>
+  `
+  return sendEmail({ to: sellerEmail, subject, html })
+}
+
+export async function sendNewOrderSellerEmail(sellerEmail: string, orderNumber: string, earnings: number) {
+  const subject = `New Order Received! #${orderNumber}`
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: green;">New Order! 🎉</h2>
+      <p>You have received a new order <strong>#${orderNumber}</strong>.</p>
+      <p>Estimated Earnings: <strong>${earnings} BDT</strong></p>
+      <p>Please login to your dashboard to process this order.</p>
+    </div>
+  `
+  return sendEmail({ to: sellerEmail, subject, html })
+}
