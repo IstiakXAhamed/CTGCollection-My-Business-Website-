@@ -115,22 +115,25 @@ export default function SuperAdminPage() {
   }
 
   const handleSavePermissions = async () => {
-    if (!permissionTarget) return
+    if (!permissionTarget || !password) return
 
     setProcessing(true)
     try {
       const res = await fetch('/api/admin/super-admin/permissions', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: permissionTarget.id, permissions: selectedPerms })
+        body: JSON.stringify({ userId: permissionTarget.id, permissions: selectedPerms, password })
       })
+      
+      const data = await res.json()
              
       if (res.ok) {
         toast({ title: 'Permissions Updated', description: `Updated for ${permissionTarget.name}` })
         fetchUsers() // Refresh list
         setPermissionTarget(null)
+        setPassword('')
       } else {
-        toast({ title: 'Error', description: 'Failed to update permissions', variant: 'destructive' })
+        toast({ title: 'Error', description: data.error || 'Failed to update permissions', variant: 'destructive' })
       }
     } finally {
       setProcessing(false)
@@ -239,12 +242,15 @@ export default function SuperAdminPage() {
       <Dialog open={!!permissionTarget} onOpenChange={(open) => !open && setPermissionTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Permissions</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="w-5 h-5 text-blue-600" />
+              Edit Permissions
+            </DialogTitle>
             <DialogDescription>
               Grant specific capabilities to {permissionTarget?.name}.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4 space-y-3">
+          <div className="py-4 space-y-3 max-h-64 overflow-y-auto">
             {PERMISSIONS_LIST.map(perm => (
               <div key={perm.id} className="flex items-center space-x-2 p-2 rounded hover:bg-gray-100">
                 <Checkbox 
@@ -255,15 +261,28 @@ export default function SuperAdminPage() {
                     else setSelectedPerms(selectedPerms.filter(p => p !== perm.id))
                   }}
                 />
-                <Label htmlFor={perm.id} className="cursor-pointer flex-1">
+                <Label htmlFor={perm.id} className="cursor-pointer flex-1 text-sm">
                   {perm.label}
                 </Label>
               </div>
             ))}
           </div>
+          <div className="border-t pt-4">
+            <Label className="flex items-center gap-2 text-amber-600">
+              <Lock className="w-4 h-4" />
+              Confirm with Password
+            </Label>
+            <Input 
+              type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1"
+              placeholder="Your current password"
+            />
+          </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setPermissionTarget(null)}>Cancel</Button>
-            <Button onClick={handleSavePermissions} disabled={processing}>
+            <Button variant="outline" onClick={() => { setPermissionTarget(null); setPassword('') }}>Cancel</Button>
+            <Button onClick={handleSavePermissions} disabled={processing || !password}>
               {processing && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
               Save Changes
             </Button>

@@ -170,28 +170,25 @@ export function GamificationSettings() {
           
           <div className="space-y-3">
             {config.prizes.map((prize) => (
-              <div key={prize.id} className="grid grid-cols-12 gap-2 item-center p-3 border rounded bg-white items-end">
-                <div className="col-span-3">
+              <div key={prize.id} className="grid grid-cols-2 sm:grid-cols-12 gap-2 p-3 border rounded bg-white items-end">
+                <div className="col-span-2 sm:col-span-3">
                   <Label className="text-xs">Label</Label>
-                  <Input value={prize.label} onChange={(e) => updatePrize(prize.id, 'label', e.target.value)} size={10} />
+                  <Input value={prize.label} onChange={(e) => updatePrize(prize.id, 'label', e.target.value)} />
                 </div>
-                <div className="col-span-3">
+                <div className="col-span-2 sm:col-span-3">
                   <Label className="text-xs">Coupon Code</Label>
-                  <Input value={prize.code || ''} onChange={(e) => updatePrize(prize.id, 'code', e.target.value)} placeholder="Wait..." />
+                  <Input value={prize.code || ''} onChange={(e) => updatePrize(prize.id, 'code', e.target.value)} placeholder="SPIN5" />
                 </div>
-                <div className="col-span-2">
+                <div className="col-span-1 sm:col-span-2">
                   <Label className="text-xs">Color</Label>
-                  <div className="flex gap-2">
-                     <Input 
-                       type="color" 
-                       value={prize.color} 
-                       onChange={(e) => updatePrize(prize.id, 'color', e.target.value)} 
-                       className="w-8 p-0 h-9 border-0"
-                     />
-                     <Input value={prize.color} onChange={(e) => updatePrize(prize.id, 'color', e.target.value)} className="text-xs" />
-                  </div>
+                  <Input 
+                    type="color" 
+                    value={prize.color} 
+                    onChange={(e) => updatePrize(prize.id, 'color', e.target.value)} 
+                    className="h-9 cursor-pointer"
+                  />
                 </div>
-                <div className="col-span-2">
+                <div className="col-span-1 sm:col-span-2">
                   <Label className="text-xs">Prob (%)</Label>
                   <Input 
                     type="number" 
@@ -199,7 +196,7 @@ export function GamificationSettings() {
                     onChange={(e) => updatePrize(prize.id, 'probability', parseFloat(e.target.value))} 
                   />
                 </div>
-                <div className="col-span-2 flex justify-end pb-1">
+                <div className="col-span-2 sm:col-span-2 flex justify-end pb-1">
                   <Button size="icon" variant="ghost" className="text-red-500 hover:bg-red-50" onClick={() => removePrize(prize.id)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
