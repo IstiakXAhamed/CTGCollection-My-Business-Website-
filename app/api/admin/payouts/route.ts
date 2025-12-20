@@ -53,7 +53,7 @@ export async function PUT(req: NextRequest) {
     // Send Email Notification
     if (updated.user?.email && newStatus !== 'pending') {
       import('@/lib/email').then(({ sendPayoutStatusEmail }) => {
-        sendPayoutStatusEmail(updated.user.email, updated.amount, newStatus, action === 'mark_paid' ? note : adminNote).catch(console.error)
+        sendPayoutStatusEmail(updated.user.email, updated.amount, newStatus, note || '').catch(console.error)
       })
     }
 
