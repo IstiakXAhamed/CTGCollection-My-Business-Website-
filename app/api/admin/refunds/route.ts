@@ -57,6 +57,10 @@ export async function PUT(req: NextRequest) {
         adminNote: note,
         processedAt: new Date(),
         processedBy: adminId
+      },
+      include: {
+        user: { select: { email: true } },
+        order: { select: { orderNumber: true } }
       }
     })
     
