@@ -27,6 +27,7 @@ import { CommissionSettings } from "@/components/admin/CommissionSettings"
 import { FeatureToggles } from "@/components/admin/FeatureToggles"
 import { PermissionCenter } from "@/components/admin/PermissionCenter"
 import { MultiVendorSettings } from "@/components/admin/MultiVendorSettings"
+import { AISettings } from "@/components/admin/AISettings"
 
 interface User {
   id: string
@@ -263,6 +264,11 @@ export default function SuperAdminPage() {
       {/* Multi-Vendor Marketplace Settings */}
       <div className="mt-8">
         <MultiVendorSettings />
+      </div>
+
+      {/* AI Settings (Gemini) */}
+      <div className="mt-8">
+        <AISettings />
       </div>
 
       {/* Permission Management Center */}

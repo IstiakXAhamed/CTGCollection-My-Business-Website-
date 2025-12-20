@@ -250,12 +250,14 @@ export function SpinWheel({
                     x={textX}
                     y={textY}
                     fill="white"
-                    fontSize="5"
+                    fontSize="4.5"
                     fontWeight="bold"
                     textAnchor="middle"
                     dominantBaseline="middle"
                     transform={`rotate(${textAngle}, ${textX}, ${textY})`}
-                    style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}
+                    stroke="rgba(0,0,0,0.3)"
+                    strokeWidth="0.3"
+                    paintOrder="stroke"
                   >
                     {prize.label}
                   </text>

@@ -376,6 +376,56 @@ export const ALL_PERMISSIONS: Permission[] = [
     category: 'feature',
     icon: Settings,
   },
+  
+  // ========== AI FEATURES ==========
+  {
+    id: 'use_ai_product_assist',
+    label: 'Use AI Product Assistant',
+    description: 'Generate descriptions, tags, and analyze products with AI',
+    category: 'feature',
+    icon: Sparkles,
+    defaultFor: ['admin', 'seller'],
+  },
+  {
+    id: 'use_ai_chat_assist',
+    label: 'Use AI Chat Assistant',
+    description: 'Get AI-powered suggestions for customer support',
+    category: 'feature',
+    icon: MessageSquare,
+    defaultFor: ['admin'],
+  },
+  {
+    id: 'use_ai_review_moderation',
+    label: 'Use AI Review Moderation',
+    description: 'AI-powered spam and inappropriate content detection',
+    category: 'feature',
+    icon: FileText,
+    defaultFor: ['admin'],
+  },
+  {
+    id: 'use_ai_seo_generator',
+    label: 'Use AI SEO Generator',
+    description: 'Generate SEO meta descriptions for pages',
+    category: 'feature',
+    icon: Sparkles,
+    defaultFor: ['admin'],
+  },
+  {
+    id: 'use_ai_analytics',
+    label: 'Use AI Analytics Insights',
+    description: 'Get AI-powered insights from sales data',
+    category: 'feature',
+    icon: BarChart3,
+    superAdminOnly: true,
+  },
+  {
+    id: 'manage_ai_settings',
+    label: 'Manage AI Settings',
+    description: 'Configure AI features and API keys',
+    category: 'restricted',
+    icon: Settings,
+    superAdminOnly: true,
+  },
 ]
 
 // Helper Functions

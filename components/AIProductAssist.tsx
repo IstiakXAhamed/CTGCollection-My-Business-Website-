@@ -1,86 +1,119 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, Loader2, Wand2, Tag, FileText, CheckCircle } from 'lucide-react'
+import { Sparkles, Loader2, Wand2, Tag, FileText, CheckCircle, Zap, Brain, TrendingUp, Palette, Ruler } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface AIProductAssistProps {
   productName: string
   category?: string
-  onSuggestionAccept: (field: string, value: string) => void
+  onSuggestionAccept: (field: string, value: any) => void
+  onAnalysisResult?: (analysis: any) => void
 }
 
-export default function AIProductAssist({ productName, category, onSuggestionAccept }: AIProductAssistProps) {
-  const [loading, setLoading] = useState<string | null>(null)
-  const [suggestions, setSuggestions] = useState<Record<string, string>>({})
-  const [showSuggestion, setShowSuggestion] = useState<string | null>(null)
+interface AnalysisResult {
+  productType?: string
+  suggestedCategory?: string
+  priceRange?: { min: number; max: number }
+  suggestedVariants?: { sizes: string[]; colors: string[] }
+  keywords?: string[]
+  confidence?: string
+}
 
-  const generateDescription = async () => {
-    if (!productName) return alert('Enter product name first')
-    setLoading('description')
+export default function AIProductAssist({ productName, category, onSuggestionAccept, onAnalysisResult }: AIProductAssistProps) {
+  const [loading, setLoading] = useState<string | null>(null)
+  const [suggestions, setSuggestions] = useState<Record<string, any>>({})
+  const [showSuggestion, setShowSuggestion] = useState<string | null>(null)
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
+  const [isFallback, setIsFallback] = useState(false)
+
+  const callAI = async (action: string) => {
+    if (!productName) {
+      alert('Enter product name first')
+      return null
+    }
+    
+    setLoading(action)
     try {
       const res = await fetch('/api/ai/product-assist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ action: 'description', productName, category })
+        body: JSON.stringify({ action, productName, category })
       })
+      
       if (res.ok) {
         const data = await res.json()
-        setSuggestions(prev => ({ ...prev, description: data.suggestion }))
-        setShowSuggestion('description')
+        setIsFallback(data.fallback || false)
+        return data
       } else {
         alert('AI generation failed. Check API key.')
+        return null
       }
     } catch (err) {
-      alert('Failed to generate description')
+      alert('Failed to connect to AI service')
+      return null
     } finally {
       setLoading(null)
+    }
+  }
+
+  const generateDescription = async () => {
+    const data = await callAI('description')
+    if (data?.suggestion) {
+      setSuggestions(prev => ({ ...prev, description: data.suggestion }))
+      setShowSuggestion('description')
     }
   }
 
   const generateTags = async () => {
-    if (!productName) return alert('Enter product name first')
-    setLoading('tags')
-    try {
-      const res = await fetch('/api/ai/product-assist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ action: 'tags', productName, category })
-      })
-      if (res.ok) {
-        const data = await res.json()
-        setSuggestions(prev => ({ ...prev, tags: data.suggestion }))
-        setShowSuggestion('tags')
-      }
-    } catch (err) {
-      alert('Failed to generate tags')
-    } finally {
-      setLoading(null)
+    const data = await callAI('tags')
+    if (data?.suggestion) {
+      setSuggestions(prev => ({ ...prev, tags: data.suggestion }))
+      setShowSuggestion('tags')
     }
   }
 
   const generateSEO = async () => {
-    if (!productName) return alert('Enter product name first')
-    setLoading('seo')
-    try {
-      const res = await fetch('/api/ai/product-assist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ action: 'seo', productName, category })
+    const data = await callAI('seo')
+    if (data?.suggestion) {
+      setSuggestions(prev => ({ ...prev, seo: data.suggestion }))
+      setShowSuggestion('seo')
+    }
+  }
+
+  const smartAnalyze = async () => {
+    const data = await callAI('analyze')
+    if (data) {
+      setAnalysis({
+        productType: data.productType,
+        suggestedCategory: data.suggestedCategory,
+        priceRange: data.priceRange,
+        suggestedVariants: data.suggestedVariants,
+        keywords: data.keywords,
+        confidence: data.confidence
       })
-      if (res.ok) {
-        const data = await res.json()
-        setSuggestions(prev => ({ ...prev, seo: data.suggestion }))
-        setShowSuggestion('seo')
-      }
-    } catch (err) {
-      alert('Failed to generate SEO')
-    } finally {
-      setLoading(null)
+      onAnalysisResult?.(data)
+    }
+  }
+
+  const autoFillAll = async () => {
+    const data = await callAI('complete')
+    if (data) {
+      // Apply all suggestions at once
+      if (data.description) onSuggestionAccept('description', data.description)
+      if (data.category) onSuggestionAccept('category', data.category)
+      if (data.suggestedPrice) onSuggestionAccept('basePrice', data.suggestedPrice)
+      if (data.salePrice) onSuggestionAccept('salePrice', data.salePrice)
+      if (data.tags) onSuggestionAccept('tags', data.tags)
+      if (data.seoTitle) onSuggestionAccept('seoTitle', data.seoTitle)
+      if (data.variants) onSuggestionAccept('variants', data.variants)
+      if (data.isFeatured !== undefined) onSuggestionAccept('isFeatured', data.isFeatured)
+      
+      setSuggestions({ complete: 'All fields populated by AI!' })
+      setShowSuggestion('complete')
     }
   }
 
@@ -91,19 +124,32 @@ export default function AIProductAssist({ productName, category, onSuggestionAcc
     }
   }
 
+  const acceptAnalysisSuggestion = (field: string, value: any) => {
+    onSuggestionAccept(field, value)
+  }
+
   return (
-    <div className="border rounded-xl p-4 bg-gradient-to-br from-purple-50 to-blue-50">
-      <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="w-5 h-5 text-purple-600" />
-        <h3 className="font-bold text-purple-800">AI Product Assistant</h3>
+    <div className="border rounded-xl p-4 bg-gradient-to-br from-purple-50 to-blue-50 space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-purple-600" />
+          <h3 className="font-bold text-purple-800">AI Product Assistant</h3>
+        </div>
+        {isFallback && (
+          <Badge variant="outline" className="text-amber-600 border-amber-300">
+            Fallback Mode
+          </Badge>
+        )}
       </div>
 
+      {/* Quick Actions */}
       <div className="flex flex-wrap gap-2">
         <Button 
           size="sm" 
           variant="outline"
           onClick={generateDescription}
-          disabled={loading === 'description'}
+          disabled={!!loading}
           className="gap-2"
         >
           {loading === 'description' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
@@ -114,7 +160,7 @@ export default function AIProductAssist({ productName, category, onSuggestionAcc
           size="sm" 
           variant="outline"
           onClick={generateTags}
-          disabled={loading === 'tags'}
+          disabled={!!loading}
           className="gap-2"
         >
           {loading === 'tags' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Tag className="w-4 h-4" />}
@@ -125,7 +171,7 @@ export default function AIProductAssist({ productName, category, onSuggestionAcc
           size="sm" 
           variant="outline"
           onClick={generateSEO}
-          disabled={loading === 'seo'}
+          disabled={!!loading}
           className="gap-2"
         >
           {loading === 'seo' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
@@ -133,13 +179,130 @@ export default function AIProductAssist({ productName, category, onSuggestionAcc
         </Button>
       </div>
 
+      {/* Smart Actions */}
+      <div className="flex flex-wrap gap-2 pt-2 border-t border-purple-200">
+        <Button 
+          size="sm" 
+          onClick={smartAnalyze}
+          disabled={!!loading}
+          className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+        >
+          {loading === 'analyze' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Brain className="w-4 h-4" />}
+          Smart Analyze
+        </Button>
+
+        <Button 
+          size="sm" 
+          onClick={autoFillAll}
+          disabled={!!loading}
+          className="gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+        >
+          {loading === 'complete' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+          Auto-Fill All Fields
+        </Button>
+      </div>
+
+      {/* Analysis Results */}
       <AnimatePresence>
-        {showSuggestion && suggestions[showSuggestion] && (
+        {analysis && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-4 p-3 bg-white rounded-lg border overflow-hidden"
+            className="p-4 bg-white rounded-lg border border-purple-200 space-y-3"
+          >
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold text-purple-700 flex items-center gap-2">
+                <Brain className="w-4 h-4" />
+                AI Analysis Results
+              </h4>
+              <Badge className={
+                analysis.confidence === 'high' ? 'bg-green-100 text-green-700' :
+                analysis.confidence === 'medium' ? 'bg-amber-100 text-amber-700' :
+                'bg-gray-100 text-gray-700'
+              }>
+                {analysis.confidence} confidence
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              {analysis.productType && (
+                <div className="p-2 bg-blue-50 rounded-lg">
+                  <span className="text-blue-600 font-medium">Product Type:</span>
+                  <p className="text-blue-800">{analysis.productType}</p>
+                </div>
+              )}
+
+              {analysis.suggestedCategory && (
+                <div className="p-2 bg-green-50 rounded-lg cursor-pointer hover:bg-green-100" 
+                     onClick={() => acceptAnalysisSuggestion('category', analysis.suggestedCategory)}>
+                  <span className="text-green-600 font-medium">Suggested Category:</span>
+                  <p className="text-green-800 flex items-center gap-1">
+                    {analysis.suggestedCategory}
+                    <CheckCircle className="w-3 h-3 text-green-500" />
+                  </p>
+                </div>
+              )}
+
+              {analysis.priceRange && (
+                <div className="p-2 bg-amber-50 rounded-lg">
+                  <span className="text-amber-600 font-medium flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    Price Range:
+                  </span>
+                  <p className="text-amber-800">৳{analysis.priceRange.min.toLocaleString()} - ৳{analysis.priceRange.max.toLocaleString()}</p>
+                </div>
+              )}
+
+              {analysis.suggestedVariants?.sizes?.length > 0 && (
+                <div className="p-2 bg-purple-50 rounded-lg">
+                  <span className="text-purple-600 font-medium flex items-center gap-1">
+                    <Ruler className="w-3 h-3" />
+                    Sizes:
+                  </span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {analysis.suggestedVariants.sizes.map(size => (
+                      <Badge key={size} variant="outline" className="text-xs">{size}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {analysis.suggestedVariants?.colors?.length > 0 && (
+                <div className="p-2 bg-pink-50 rounded-lg sm:col-span-2">
+                  <span className="text-pink-600 font-medium flex items-center gap-1">
+                    <Palette className="w-3 h-3" />
+                    Colors:
+                  </span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {analysis.suggestedVariants.colors.map(color => (
+                      <Badge key={color} variant="outline" className="text-xs">{color}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => setAnalysis(null)}
+              className="w-full"
+            >
+              Dismiss
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Suggestion Display */}
+      <AnimatePresence>
+        {showSuggestion && suggestions[showSuggestion] && showSuggestion !== 'complete' && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="p-3 bg-white rounded-lg border overflow-hidden"
           >
             <p className="text-sm font-semibold text-purple-600 mb-2 capitalize">{showSuggestion} Suggestion:</p>
             <p className="text-sm text-gray-700 whitespace-pre-wrap">{suggestions[showSuggestion]}</p>
@@ -152,6 +315,23 @@ export default function AIProductAssist({ productName, category, onSuggestionAcc
                 Dismiss
               </Button>
             </div>
+          </motion.div>
+        )}
+        
+        {showSuggestion === 'complete' && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="p-3 bg-green-50 rounded-lg border border-green-200"
+          >
+            <p className="text-green-700 font-medium flex items-center gap-2">
+              <CheckCircle className="w-5 h-5" />
+              All fields have been populated by AI! Review and adjust as needed.
+            </p>
+            <Button size="sm" variant="outline" onClick={() => setShowSuggestion(null)} className="mt-2">
+              Got it
+            </Button>
           </motion.div>
         )}
       </AnimatePresence>
