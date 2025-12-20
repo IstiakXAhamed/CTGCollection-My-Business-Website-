@@ -20,24 +20,24 @@ interface FeatureToggle {
 
 const FEATURE_TOGGLES: FeatureToggle[] = [
   // Multi-Vendor & Marketplace
-  { id: 'multiVendor', label: 'মাল্টি-ভেন্ডর মোড', description: 'একাধিক সেলারের শপ সক্ষম করুন', field: 'multiVendorEnabled', icon: ShoppingBag, category: 'marketplace' },
+  { id: 'multiVendor', label: 'Multi-Vendor Mode', description: 'Enable multiple seller shops', field: 'multiVendorEnabled', icon: ShoppingBag, category: 'marketplace' },
   
   // Payment Methods
-  { id: 'cod', label: 'ক্যাশ অন ডেলিভারি', description: 'COD পেমেন্ট অপশন', field: 'codEnabled', icon: Truck, category: 'payment' },
-  { id: 'ssl', label: 'SSLCommerz', description: 'কার্ড/ব্যাংক পেমেন্ট', field: 'sslEnabled', icon: CreditCard, category: 'payment' },
-  { id: 'bkash', label: 'bKash', description: 'bKash মোবাইল ব্যাংকিং', field: 'bkashEnabled', icon: CreditCard, category: 'payment' },
-  { id: 'nagad', label: 'Nagad', description: 'নগদ মোবাইল ব্যাংকিং', field: 'nagadEnabled', icon: CreditCard, category: 'payment' },
-  { id: 'rocket', label: 'Rocket', description: 'রকেট মোবাইল ব্যাংকিং', field: 'rocketEnabled', icon: CreditCard, category: 'payment' },
+  { id: 'cod', label: 'Cash on Delivery', description: 'COD payment option', field: 'codEnabled', icon: Truck, category: 'payment' },
+  { id: 'ssl', label: 'SSLCommerz', description: 'Card & bank payments', field: 'sslEnabled', icon: CreditCard, category: 'payment' },
+  { id: 'bkash', label: 'bKash', description: 'bKash mobile banking', field: 'bkashEnabled', icon: CreditCard, category: 'payment' },
+  { id: 'nagad', label: 'Nagad', description: 'Nagad mobile banking', field: 'nagadEnabled', icon: CreditCard, category: 'payment' },
+  { id: 'rocket', label: 'Rocket', description: 'Rocket mobile banking', field: 'rocketEnabled', icon: CreditCard, category: 'payment' },
   
   // Marketing & Engagement
-  { id: 'spinWheel', label: 'স্পিন হুইল', description: 'গেমিফাইড কুপন হুইল', field: 'spinWheelEnabled', icon: Gift, category: 'marketing' },
-  { id: 'promoBanner', label: 'প্রমো ব্যানার', description: 'টপ প্রমোশনাল ব্যানার', field: 'promoEnabled', icon: Sparkles, category: 'marketing' },
+  { id: 'spinWheel', label: 'Spin Wheel', description: 'Gamified coupon wheel', field: 'spinWheelEnabled', icon: Gift, category: 'marketing' },
+  { id: 'promoBanner', label: 'Promo Banner', description: 'Top promotional banner', field: 'promoEnabled', icon: Sparkles, category: 'marketing' },
   
   // Loyalty & Referral
-  { id: 'loyalty', label: 'লয়্যালটি প্রোগ্রাম', description: 'পয়েন্ট ও টিয়ার সিস্টেম', field: 'loyaltyEnabled', icon: Users, category: 'loyalty' },
+  { id: 'loyalty', label: 'Loyalty Program', description: 'Points & tier system', field: 'loyaltyEnabled', icon: Users, category: 'loyalty' },
   
   // Communication
-  { id: 'liveChat', label: 'লাইভ চ্যাট', description: 'কাস্টমার সাপোর্ট চ্যাট', field: 'chatEnabled', icon: MessageSquare, category: 'communication' },
+  { id: 'liveChat', label: 'Live Chat', description: 'Customer support chat', field: 'chatEnabled', icon: MessageSquare, category: 'communication' },
 ]
 
 export function FeatureToggles() {
@@ -99,13 +99,13 @@ export function FeatureToggles() {
       })
 
       if (res.ok) {
-        toast({ title: 'সেভ হয়েছে', description: 'ফিচার সেটিংস আপডেট হয়েছে।' })
+        toast({ title: 'Saved', description: 'Feature settings updated successfully.' })
       } else {
         const data = await res.json()
-        toast({ title: 'এরর', description: data.error || 'সেভ করতে সমস্যা হয়েছে', variant: 'destructive' })
+        toast({ title: 'Error', description: data.error || 'Failed to save settings', variant: 'destructive' })
       }
     } catch (error) {
-      toast({ title: 'এরর', description: 'সেভ করতে সমস্যা হয়েছে', variant: 'destructive' })
+      toast({ title: 'Error', description: 'Failed to save settings', variant: 'destructive' })
     } finally {
       setSaving(false)
     }
@@ -113,11 +113,11 @@ export function FeatureToggles() {
 
   const getCategory = (cat: string) => {
     const cats: Record<string, { label: string; color: string }> = {
-      marketplace: { label: 'মার্কেটপ্লেস', color: 'bg-blue-100 text-blue-700' },
-      payment: { label: 'পেমেন্ট', color: 'bg-green-100 text-green-700' },
-      marketing: { label: 'মার্কেটিং', color: 'bg-purple-100 text-purple-700' },
-      loyalty: { label: 'লয়্যালটি', color: 'bg-amber-100 text-amber-700' },
-      communication: { label: 'কমিউনিকেশন', color: 'bg-pink-100 text-pink-700' },
+      marketplace: { label: 'Marketplace', color: 'bg-blue-100 text-blue-700' },
+      payment: { label: 'Payment', color: 'bg-green-100 text-green-700' },
+      marketing: { label: 'Marketing', color: 'bg-purple-100 text-purple-700' },
+      loyalty: { label: 'Loyalty', color: 'bg-amber-100 text-amber-700' },
+      communication: { label: 'Communication', color: 'bg-pink-100 text-pink-700' },
     }
     return cats[cat] || { label: cat, color: 'bg-gray-100 text-gray-700' }
   }
@@ -146,13 +146,13 @@ export function FeatureToggles() {
           <div>
             <CardTitle className="flex items-center gap-2 text-blue-700">
               <Settings2 className="w-6 h-6" />
-              ফিচার কন্ট্রোল
+              Feature Control
             </CardTitle>
-            <CardDescription>সাইটের ফিচারগুলো সক্ষম বা অক্ষম করুন</CardDescription>
+            <CardDescription>Enable or disable site features</CardDescription>
           </div>
           <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-700">
             {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-            সেভ করুন
+            Save Changes
           </Button>
         </div>
       </CardHeader>
