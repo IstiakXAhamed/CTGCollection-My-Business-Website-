@@ -73,8 +73,8 @@ export function CommissionSettings({ canEdit = false }: { canEdit?: boolean }) {
         
         {/* Commission Rate */}
         <div className="space-y-3">
-          <Label className="text-base font-semibold">Default Platform Commission</Label>
-          <div className="flex items-center gap-2 max-w-xs">
+          <Label className="text-sm sm:text-base font-semibold">Default Platform Commission</Label>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:max-w-xs">
             <div className="relative w-full">
               <Input 
                 type="number" 
@@ -85,9 +85,9 @@ export function CommissionSettings({ canEdit = false }: { canEdit?: boolean }) {
               />
               <span className="absolute right-3 top-2.5 text-gray-400">%</span>
             </div>
-            {!canEdit && <Badge variant="secondary">Read Only</Badge>}
+            {!canEdit && <Badge variant="secondary" className="whitespace-nowrap">Read Only</Badge>}
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="text-xs sm:text-sm text-gray-500">
             Percentage deducted from each order before seller payout.
           </p>
         </div>
@@ -96,7 +96,7 @@ export function CommissionSettings({ canEdit = false }: { canEdit?: boolean }) {
 
         {/* Coupon Logic */}
         <div className="space-y-3">
-          <Label className="text-base font-semibold flex items-center gap-2">
+          <Label className="text-sm sm:text-base font-semibold flex items-center gap-2">
             <Ticket className="w-4 h-4" />
             Coupon Cost Responsibility
           </Label>
@@ -104,34 +104,34 @@ export function CommissionSettings({ canEdit = false }: { canEdit?: boolean }) {
             value={policy} 
             onValueChange={setPolicy} 
             disabled={!canEdit}
-            className="flex flex-col gap-3"
+            className="flex flex-col gap-2 sm:gap-3"
           >
-            <div className="flex items-start space-x-2 border p-3 rounded-lg hover:bg-gray-50 transition">
-              <RadioGroupItem value="platform" id="r1" className="mt-1" />
-              <div className="grid gap-1.5 leading-none">
-                <Label htmlFor="r1" className="cursor-pointer font-medium">Platform Bears Cost</Label>
-                <p className="text-sm text-gray-500">
-                  Platform pays for discounts. Seller receives full product price minus commission.
+            <div className="flex items-start space-x-2 border p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition">
+              <RadioGroupItem value="platform" id="r1" className="mt-0.5 sm:mt-1" />
+              <div className="grid gap-1 leading-none">
+                <Label htmlFor="r1" className="cursor-pointer font-medium text-sm sm:text-base">Platform Bears Cost</Label>
+                <p className="text-xs sm:text-sm text-gray-500">
+                  Platform pays for discounts. Seller receives full price minus commission.
                 </p>
               </div>
             </div>
             
-            <div className="flex items-start space-x-2 border p-3 rounded-lg hover:bg-gray-50 transition">
-              <RadioGroupItem value="shop" id="r2" className="mt-1" />
-              <div className="grid gap-1.5 leading-none">
-                <Label htmlFor="r2" className="cursor-pointer font-medium">Shop Bears Cost</Label>
-                <p className="text-sm text-gray-500">
-                  Seller pays for discounts. Discount value is deducted from seller earnings.
+            <div className="flex items-start space-x-2 border p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition">
+              <RadioGroupItem value="shop" id="r2" className="mt-0.5 sm:mt-1" />
+              <div className="grid gap-1 leading-none">
+                <Label htmlFor="r2" className="cursor-pointer font-medium text-sm sm:text-base">Shop Bears Cost</Label>
+                <p className="text-xs sm:text-sm text-gray-500">
+                  Seller pays for discounts. Discount deducted from earnings.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start space-x-2 border p-3 rounded-lg hover:bg-gray-50 transition">
-              <RadioGroupItem value="shared" id="r3" className="mt-1" />
-              <div className="grid gap-1.5 leading-none">
-                <Label htmlFor="r3" className="cursor-pointer font-medium">Shared (50/50)</Label>
-                <p className="text-sm text-gray-500">
-                  Cost is split equally between Platform and Seller.
+            <div className="flex items-start space-x-2 border p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition">
+              <RadioGroupItem value="shared" id="r3" className="mt-0.5 sm:mt-1" />
+              <div className="grid gap-1 leading-none">
+                <Label htmlFor="r3" className="cursor-pointer font-medium text-sm sm:text-base">Shared (50/50)</Label>
+                <p className="text-xs sm:text-sm text-gray-500">
+                  Cost split equally between Platform and Seller.
                 </p>
               </div>
             </div>

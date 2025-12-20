@@ -22,9 +22,9 @@ export interface PromoBanner {
 
 // Size presets
 export const SIZE_PRESETS = {
-  compact: { py: 'py-2', height: 'min-h-[40px]' },
-  normal: { py: 'py-3', height: 'min-h-[50px]' },
-  large: { py: 'py-4', height: 'min-h-[65px]' }
+  compact: { py: 'py-1 sm:py-2', height: 'min-h-[32px] sm:min-h-[40px]' },
+  normal: { py: 'py-2 sm:py-3', height: 'min-h-[40px] sm:min-h-[50px]' },
+  large: { py: 'py-3 sm:py-4', height: 'min-h-[50px] sm:min-h-[65px]' }
 }
 
 export const FONT_SIZE_PRESETS = {
@@ -216,7 +216,7 @@ export default function UnifiedPromoBanner() {
       zap: Zap, star: Star, heart: Heart, flame: Flame
     }
     const IconComponent = iconMap[iconName] || Sparkles
-    return <IconComponent className="w-6 h-6" />
+    return <IconComponent className="w-4 h-4 sm:w-6 sm:h-6" />
   }
 
   if (!isVisible || banners.length === 0) return null
@@ -274,8 +274,8 @@ export default function UnifiedPromoBanner() {
               {getIcon(currentBanner.icon)}
             </motion.span>
 
-            {/* Message - Larger */}
-            <span className="font-bold text-base md:text-xl tracking-wide text-center">
+            {/* Message - Responsive */}
+            <span className="font-bold text-xs sm:text-base md:text-xl tracking-wide text-center line-clamp-1 sm:line-clamp-none">
               {currentBanner.message}
             </span>
 
@@ -285,7 +285,7 @@ export default function UnifiedPromoBanner() {
                 onClick={() => handleCopyCode(currentBanner.code!)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-full transition-all text-sm md:text-base font-bold shadow-lg hover:shadow-xl border-2 border-white/50"
+                className="flex items-center gap-1 sm:gap-2 bg-white text-gray-900 px-2 sm:px-4 py-1 sm:py-2 rounded-full transition-all text-xs sm:text-sm md:text-base font-bold shadow-lg hover:shadow-xl"
               >
                 <span className="tracking-widest">{currentBanner.code}</span>
                 {copiedCode === currentBanner.code ? (
