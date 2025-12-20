@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Test the API
-    const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${apiKey}`
+    const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`
     
     const response = await fetch(testUrl, {
       method: 'POST',
