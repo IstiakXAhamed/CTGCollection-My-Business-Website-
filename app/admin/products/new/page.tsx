@@ -12,6 +12,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useToast } from '@/hooks/use-toast'
 import AIProductAssist from '@/components/AIProductAssist'
+import { AIImageGenerator } from '@/components/ai/AIImageGenerator'
 
 type Variant = {
   size: string
@@ -226,6 +227,16 @@ export default function NewProductPage() {
                 }
               }}
             />
+
+            {/* AI Image Generator */}
+            {formData.name && (
+              <AIImageGenerator 
+                productName={formData.name}
+                onImageSelect={(imageData) => {
+                  setImages(prev => [...prev, imageData])
+                }}
+              />
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="category">Category *</Label>

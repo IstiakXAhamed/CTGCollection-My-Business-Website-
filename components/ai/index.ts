@@ -9,6 +9,7 @@ export { AIAnnouncementGenerator } from './AIAnnouncementGenerator'
 export { AISEOGenerator } from './AISEOGenerator'
 export { AITranslator } from './AITranslator'
 export { AIOrderInsights } from './AIOrderInsights'
+export { AIImageGenerator } from './AIImageGenerator'
 
 // Usage example:
-// import { AIChatAssist, AIReviewAssist, AICouponGenerator } from '@/components/ai'
+// import { AIChatAssist, AIImageGenerator } from '@/components/ai'
