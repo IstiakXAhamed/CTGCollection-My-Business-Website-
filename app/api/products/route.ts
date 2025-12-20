@@ -26,22 +26,9 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'createdAt'
     const order = searchParams.get('order') || 'desc'
 
-    // Build where clause
+    // Build where clause - simplified to fix display issue
     const where: any = { 
       isActive: true
-    }
-
-    // Shop visibility filter - show main store products OR active vendor products
-    // Only apply this in multi-vendor mode
-    if (!slug) {
-      where.AND = [
-        {
-          OR: [
-            { shopId: null },           // Main store products are always visible
-            { shop: { isActive: true } } // Vendor products visible only if shop is active
-          ]
-        }
-      ]
     }
 
     // If slug is provided, fetch only that specific product
@@ -54,13 +41,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      where.AND = where.AND || []
-      where.AND.push({
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } }
-        ]
-      })
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } }
+      ]
     }
 
     if (minPrice || maxPrice) {
@@ -83,6 +67,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch products with count
+    console.log('Fetching products with where:', JSON.stringify(where))
+    
     const [products, total] = await Promise.all([
       db.product.findMany({
         where,
@@ -93,10 +79,6 @@ export async function GET(request: NextRequest) {
             where: { isApproved: true },
             include: { user: { select: { name: true } } },
             orderBy: { createdAt: 'desc' }
-          },
-          // Shop info for multi-vendor mode
-          shop: {
-            select: { id: true, name: true, slug: true, isVerified: true, logo: true }
           }
         },
         orderBy,
@@ -105,6 +87,8 @@ export async function GET(request: NextRequest) {
       }),
       db.product.count({ where })
     ])
+    
+    console.log('Found products:', total)
 
     // Fetch settings for multi-vendor check
     const settings = await db.siteSettings.findFirst()
