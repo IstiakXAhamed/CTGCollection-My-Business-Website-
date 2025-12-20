@@ -53,6 +53,10 @@ model User {
   // Internal Chat
   sentMessages     InternalMessage[] @relation("SentMessages")
   receivedMessages InternalMessage[] @relation("ReceivedMessages")
+  
+  // Financial
+  payoutRequests   PayoutRequest[]
+  refundRequests   RefundRequest[]
 
   // Performance indexes
   @@index([role])
@@ -218,6 +222,7 @@ model Order {
   address         Address   @relation(fields: [addressId], references: [id])
   items           OrderItem[]
   payment         Payment?
+  refundRequests  RefundRequest[]
 
   // Performance indexes
   @@index([userId])
