@@ -88,13 +88,19 @@ export default function AdminProductsPage() {
   }
 
   const toggleFeatured = async (product: any) => {
+    // Optimistic update - update UI FIRST for instant feedback
+    const previousValue = product.isFeatured
+    setProducts(products.map(p =>
+      p.id === product.id ? { ...p, isFeatured: !p.isFeatured } : p
+    ))
+
     try {
       const res = await fetch(`/api/admin/products/${product.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...product,
-          isFeatured: !product.isFeatured,
+          isFeatured: !previousValue,
           variants: product.variants.map((v: any) => ({
             size: v.size,
             color: v.color,
@@ -106,28 +112,40 @@ export default function AdminProductsPage() {
       })
 
       if (res.ok) {
-        // Update local state
-        setProducts(products.map(p =>
-          p.id === product.id ? { ...p, isFeatured: !p.isFeatured } : p
-        ))
         toast({
           title: 'Updated!',
-          description: `Featured status ${!product.isFeatured ? 'enabled' : 'disabled'}`,
+          description: `Featured status ${!previousValue ? 'enabled' : 'disabled'}`,
         })
+      } else {
+        // Revert on error
+        setProducts(products.map(p =>
+          p.id === product.id ? { ...p, isFeatured: previousValue } : p
+        ))
+        toast({ title: 'Error', description: 'Failed to update', variant: 'destructive' })
       }
     } catch (error) {
+      // Revert on error
+      setProducts(products.map(p =>
+        p.id === product.id ? { ...p, isFeatured: previousValue } : p
+      ))
       console.error('Failed to toggle featured:', error)
     }
   }
 
   const toggleActive = async (product: any) => {
+    // Optimistic update - update UI FIRST for instant feedback
+    const previousValue = product.isActive
+    setProducts(products.map(p =>
+      p.id === product.id ? { ...p, isActive: !p.isActive } : p
+    ))
+
     try {
       const res = await fetch(`/api/admin/products/${product.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...product,
-          isActive: !product.isActive,
+          isActive: !previousValue,
           variants: product.variants.map((v: any) => ({
             size: v.size,
             color: v.color,
@@ -139,16 +157,22 @@ export default function AdminProductsPage() {
       })
 
       if (res.ok) {
-        // Update local state
-        setProducts(products.map(p =>
-          p.id === product.id ? { ...p, isActive: !p.isActive } : p
-        ))
         toast({
           title: 'Updated!',
-          description: `Product ${!product.isActive ? 'activated' : 'deactivated'}`,
+          description: `Product ${!previousValue ? 'activated' : 'deactivated'}`,
         })
+      } else {
+        // Revert on error
+        setProducts(products.map(p =>
+          p.id === product.id ? { ...p, isActive: previousValue } : p
+        ))
+        toast({ title: 'Error', description: 'Failed to update', variant: 'destructive' })
       }
     } catch (error) {
+      // Revert on error
+      setProducts(products.map(p =>
+        p.id === product.id ? { ...p, isActive: previousValue } : p
+      ))
       console.error('Failed to toggle active:', error)
     }
   }
