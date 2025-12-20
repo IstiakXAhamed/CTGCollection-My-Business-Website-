@@ -24,6 +24,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { GamificationSettings } from "@/components/admin/GamificationSettings"
 import { InternalChat } from "@/components/admin/InternalChat"
 import { CommissionSettings } from "@/components/admin/CommissionSettings"
+import { FeatureToggles } from "@/components/admin/FeatureToggles"
 
 interface User {
   id: string
@@ -226,6 +227,11 @@ export default function SuperAdminPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Feature Toggles */}
+      <div className="mt-8">
+        <FeatureToggles />
+      </div>
 
       <div className="mt-8 mb-8">
          <CommissionSettings canEdit={true} />
