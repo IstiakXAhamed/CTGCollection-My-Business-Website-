@@ -321,78 +321,190 @@ export default function NewProductPage() {
           </CardContent>
         </Card>
 
-        {/* Variants */}
+        {/* Variants - Improved */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Product Variants</CardTitle>
-              <Button type="button" size="sm" onClick={addVariant}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Variant
-              </Button>
+              <div>
+                <CardTitle>Product Variants</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">Select sizes and colors, then set stock for each combination</p>
+              </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {variants.map((variant, index) => (
-              <div key={index} className="p-4 border rounded-lg space-y-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-sm">Variant {index + 1}</span>
-                  {variants.length > 1 && (
-                    <Button
+          <CardContent className="space-y-6">
+            {/* Preset Sizes */}
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">📏 Available Sizes (click to toggle)</Label>
+              <div className="flex flex-wrap gap-2">
+                {['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'Free Size'].map(size => {
+                  const isSelected = variants.some(v => v.size === size)
+                  return (
+                    <button
+                      key={size}
                       type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => removeVariant(index)}
+                      onClick={() => {
+                        if (isSelected) {
+                          setVariants(prev => prev.filter(v => v.size !== size))
+                        } else {
+                          // Add variant with this size and default color
+                          setVariants(prev => [...prev, { size, color: 'Default', stock: 0, sku: '' }])
+                        }
+                      }}
+                      className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${
+                        isSelected 
+                          ? 'bg-blue-600 text-white border-blue-600' 
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400'
+                      }`}
                     >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  )}
+                      {size}
+                    </button>
+                  )
+                })}
+              </div>
+              <Input
+                placeholder="অথবা কাস্টম সাইজ লিখুন (e.g., 32, 34, 36)"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    const value = (e.target as HTMLInputElement).value.trim()
+                    if (value && !variants.some(v => v.size === value)) {
+                      setVariants(prev => [...prev, { size: value, color: 'Default', stock: 0, sku: '' }])
+                      ;(e.target as HTMLInputElement).value = ''
+                    }
+                  }
+                }}
+                className="max-w-xs"
+              />
+            </div>
+
+            {/* Preset Colors */}
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">🎨 Available Colors</Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { name: 'Black', hex: '#000000' },
+                  { name: 'White', hex: '#FFFFFF' },
+                  { name: 'Red', hex: '#EF4444' },
+                  { name: 'Blue', hex: '#3B82F6' },
+                  { name: 'Green', hex: '#22C55E' },
+                  { name: 'Yellow', hex: '#EAB308' },
+                  { name: 'Pink', hex: '#EC4899' },
+                  { name: 'Purple', hex: '#A855F7' },
+                  { name: 'Orange', hex: '#F97316' },
+                  { name: 'Gray', hex: '#6B7280' },
+                  { name: 'Navy', hex: '#1E3A5F' },
+                  { name: 'Maroon', hex: '#7F1D1D' },
+                ].map(color => {
+                  const isSelected = variants.some(v => v.color === color.name)
+                  return (
+                    <button
+                      key={color.name}
+                      type="button"
+                      onClick={() => {
+                        if (!isSelected) {
+                          // Add this color to all existing sizes or create default
+                          const sizes = Array.from(new Set(variants.map(v => v.size)))
+                          if (sizes.length === 0 || (sizes.length === 1 && sizes[0] === '')) {
+                            setVariants(prev => [...prev.filter(v => v.color !== 'Default'), { size: 'M', color: color.name, stock: 0, sku: '' }])
+                          } else {
+                            const newVariants = sizes.map(size => ({ size, color: color.name, stock: 0, sku: '' }))
+                            setVariants(prev => [...prev.filter(v => v.color !== 'Default'), ...newVariants])
+                          }
+                        }
+                      }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 transition-all ${
+                        isSelected 
+                          ? 'border-blue-600 bg-blue-50' 
+                          : 'border-gray-200 hover:border-gray-400'
+                      }`}
+                    >
+                      <span 
+                        className="w-5 h-5 rounded-full border border-gray-300" 
+                        style={{ backgroundColor: color.hex }}
+                      />
+                      <span className="text-sm">{color.name}</span>
+                      {isSelected && <span className="text-blue-600">✓</span>}
+                    </button>
+                  )
+                })}
+              </div>
+              <Input
+                placeholder="অথবা কাস্টম কালার লিখুন (e.g., Teal, Coral)"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    const value = (e.target as HTMLInputElement).value.trim()
+                    if (value) {
+                      const sizes = Array.from(new Set(variants.map(v => v.size).filter(s => s)))
+                      if (sizes.length === 0) sizes.push('M')
+                      const newVariants = sizes.map(size => ({ size, color: value, stock: 0, sku: '' }))
+                      setVariants(prev => [...prev, ...newVariants])
+                      ;(e.target as HTMLInputElement).value = ''
+                    }
+                  }
+                }}
+                className="max-w-xs"
+              />
+            </div>
+
+            {/* Variant List with Stock */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-semibold">📦 Stock per Variant ({variants.length} variants)</Label>
+                <div className="flex gap-2">
+                  <Button 
+                    type="button" 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => {
+                      setVariants(prev => prev.map(v => ({ ...v, stock: 50 })))
+                    }}
+                  >
+                    সব ৫০ সেট করুন
+                  </Button>
+                  <Button type="button" size="sm" onClick={addVariant}>
+                    <Plus className="w-4 h-4 mr-1" />
+                    ম্যানুয়াল যোগ
+                  </Button>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                  <div className="space-y-1">
-                    <Label htmlFor={`size-${index}`}>Size</Label>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto">
+                {variants.map((variant, index) => (
+                  <div key={index} className="flex items-center gap-2 p-3 border rounded-lg bg-gray-50">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">{variant.size || 'N/A'}</span>
+                        <span className="text-gray-400">×</span>
+                        <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded">{variant.color || 'N/A'}</span>
+                      </div>
+                    </div>
                     <Input
-                      id={`size-${index}`}
-                      value={variant.size}
-                      onChange={(e) => updateVariant(index, 'size', e.target.value)}
-                      placeholder="S, M, L, XL"
-                    />
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <Label htmlFor={`color-${index}`}>Color</Label>
-                    <Input
-                      id={`color-${index}`}
-                      value={variant.color}
-                      onChange={(e) => updateVariant(index, 'color', e.target.value)}
-                      placeholder="Red, Blue, etc."
-                    />
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <Label htmlFor={`stock-${index}`}>Stock</Label>
-                    <Input
-                      id={`stock-${index}`}
                       type="number"
                       value={variant.stock}
                       onChange={(e) => updateVariant(index, 'stock', parseInt(e.target.value) || 0)}
-                      placeholder="100"
+                      className="w-20 text-center"
+                      placeholder="Stock"
                     />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => removeVariant(index)}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
                   </div>
-                  
-                  <div className="space-y-1">
-                    <Label htmlFor={`sku-${index}`}>SKU (Optional)</Label>
-                    <Input
-                      id={`sku-${index}`}
-                      value={variant.sku}
-                      onChange={(e) => updateVariant(index, 'sku', e.target.value)}
-                      placeholder="TSH-M-RED"
-                    />
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
+              
+              {variants.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                  উপরে সাইজ ও কালার সিলেক্ট করুন অথবা "ম্যানুয়াল যোগ" করুন
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 

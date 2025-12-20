@@ -28,10 +28,19 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: any = { 
-      isActive: true,
-      OR: [
-        { shopId: null },           // Main store products are always visible
-        { shop: { isActive: true } } // Vendor products visible only if shop is active
+      isActive: true
+    }
+
+    // Shop visibility filter - show main store products OR active vendor products
+    // Only apply this in multi-vendor mode
+    if (!slug) {
+      where.AND = [
+        {
+          OR: [
+            { shopId: null },           // Main store products are always visible
+            { shop: { isActive: true } } // Vendor products visible only if shop is active
+          ]
+        }
       ]
     }
 
@@ -45,16 +54,19 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
-      ]
+      where.AND = where.AND || []
+      where.AND.push({
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } }
+        ]
+      })
     }
 
     if (minPrice || maxPrice) {
-      where.salePrice = {}
-      if (minPrice) where.salePrice.gte = parseFloat(minPrice)
-      if (maxPrice) where.salePrice.lte = parseFloat(maxPrice)
+      where.basePrice = {}
+      if (minPrice) where.basePrice.gte = parseFloat(minPrice)
+      if (maxPrice) where.basePrice.lte = parseFloat(maxPrice)
     }
 
     if (featured === 'true') where.isFeatured = true
