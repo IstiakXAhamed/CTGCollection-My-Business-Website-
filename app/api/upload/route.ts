@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       const arrayBuffer = await file.arrayBuffer()
       const buffer = Buffer.from(arrayBuffer)
       
-      return new Promise((resolve, reject) => {
+      return new Promise<NextResponse>((resolve) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           { 
             folder: `ctg-collection/${finalFolder}`, 
