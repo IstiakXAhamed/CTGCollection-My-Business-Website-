@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 // Assign all products without a seller to the first SuperAdmin
 export async function POST(request: NextRequest) {
   try {

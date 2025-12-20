@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { createToken } from '@/lib/auth'
 import { cookies } from 'next/headers'
 
+export const dynamic = 'force-dynamic'
+
 const handler = NextAuth({
   providers: [
     GoogleProvider({

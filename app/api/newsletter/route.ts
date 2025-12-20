@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendEmailWithAttachments } from '@/lib/email'
 
+export const dynamic = 'force-dynamic'
+
 // POST - Subscribe to newsletter
 export async function POST(request: NextRequest) {
   try {

@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
 import nodemailer from 'nodemailer'
 
+export const dynamic = 'force-dynamic'
+
 // Check admin access
 async function checkAdmin(request: NextRequest) {
   const user = await verifyAuth(request)

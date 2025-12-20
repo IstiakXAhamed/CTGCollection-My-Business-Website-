@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createBkashPayment, executeBkashPayment } from '@/lib/bkash'
 
+export const dynamic = 'force-dynamic'
+
 // POST - Create bKash payment
 export async function POST(request: NextRequest) {
   try {

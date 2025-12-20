@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcrypt'
 
+export const dynamic = 'force-dynamic'
+
 const SETUP_KEY = process.env.ADMIN_SETUP_KEY || 'CTGCOLLECTION2024SETUP'
 
 export async function POST(request: NextRequest) {

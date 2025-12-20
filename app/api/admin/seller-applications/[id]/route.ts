@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 const db = prisma as any
 
 // PUT - Approve or reject application (admin/superadmin)

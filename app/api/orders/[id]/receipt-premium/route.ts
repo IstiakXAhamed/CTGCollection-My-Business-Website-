@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth } from '@/lib/auth'
 import { savePremiumReceiptToFile } from '@/lib/receipt-premium'
 
+export const dynamic = 'force-dynamic'
+
 // GET - Generate premium receipt for an order
 export async function GET(
   request: NextRequest,

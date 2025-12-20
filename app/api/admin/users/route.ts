@@ -4,6 +4,8 @@ import { verifyAuth, createToken, setAuthCookie } from '@/lib/auth'
 import { notifyRoleChange, notifyAccountDeactivated, notifyAccountReactivated } from '@/lib/notifications'
 import { sendRoleChangeEmail, sendAccountDeactivatedEmail, sendAccountReactivatedEmail, sendAccountDeletedEmail } from '@/lib/email'
 
+export const dynamic = 'force-dynamic'
+
 // Helper to check if user is superadmin
 async function checkSuperAdmin(request: NextRequest) {
   const user = await verifyAuth(request)

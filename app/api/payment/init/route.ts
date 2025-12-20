@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 // SSL Commerz configuration
 const SSLCOMMERZ_CONFIG = {
   storeId: process.env.SSLCOMMERZ_STORE_ID || 'test_store',

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 // DELETE - Delete coupon
 export async function DELETE(
   request: NextRequest,

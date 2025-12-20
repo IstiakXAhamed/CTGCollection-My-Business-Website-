@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
 import { hasUserPurchased, validateReview } from '@/lib/reviews'
 
+export const dynamic = 'force-dynamic'
+
 // GET reviews for a product
 export async function GET(
   request: NextRequest,

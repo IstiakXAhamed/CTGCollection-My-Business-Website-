@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
 import { notifyNewOrder, notifyOrderConfirmed } from '@/lib/notifications'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()

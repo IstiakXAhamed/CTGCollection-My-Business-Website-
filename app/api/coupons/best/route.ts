@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 // Helper to check if user matches target audience
 async function checkUserAudience(userId: string | null, targetAudience: string): Promise<boolean> {
   if (targetAudience === 'all') return true

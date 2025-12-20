@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 // GET - Fetch reviews for a product, with myReview option to get current user's review
 export async function GET(request: NextRequest) {
   try {

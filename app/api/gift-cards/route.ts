@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 
+export const dynamic = 'force-dynamic'
+
 // POST - Create gift card
 export async function POST(request: NextRequest) {
   try {

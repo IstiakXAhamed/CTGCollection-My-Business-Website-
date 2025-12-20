@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendEmailWithAttachments } from '@/lib/email'
 
+export const dynamic = 'force-dynamic'
+
 // Generate 6-digit code
 function generateCode() {
   return Math.floor(100000 + Math.random() * 900000).toString()

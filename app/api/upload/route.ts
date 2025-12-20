@@ -4,6 +4,8 @@ import { existsSync } from 'fs'
 import path from 'path'
 import { verifyAuth } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 // Configure upload limits
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_TYPES = [

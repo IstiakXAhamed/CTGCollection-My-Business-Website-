@@ -4,6 +4,8 @@ import { executeBkashPayment } from '@/lib/bkash'
 import { sendOrderConfirmationWithPDF } from '@/lib/email'
 import { generateReceiptPDF } from '@/lib/pdf-generator'
 
+export const dynamic = 'force-dynamic'
+
 // GET - bKash callback after customer approves payment
 export async function GET(request: NextRequest) {
   try {

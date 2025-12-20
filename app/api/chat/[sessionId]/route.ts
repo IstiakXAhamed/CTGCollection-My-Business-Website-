@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
 import { notifyNewChatMessage } from '@/lib/notifications'
 
+export const dynamic = 'force-dynamic'
+
 // GET messages for a session
 export async function GET(
   request: NextRequest,

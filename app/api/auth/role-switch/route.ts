@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth } from '@/lib/auth'
 import { cookies } from 'next/headers'
 
+export const dynamic = 'force-dynamic'
+
 // POST - Switch to a different role (SuperAdmin only)
 export async function POST(request: NextRequest) {
   try {

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 // Diagnostic endpoint to check current JWT token contents
 export async function GET(request: NextRequest) {
   try {

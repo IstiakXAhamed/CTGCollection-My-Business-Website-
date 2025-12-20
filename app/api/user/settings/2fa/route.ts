@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
 import { createVerificationCode, verifyCode, sendVerificationEmail } from '@/lib/verification'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Verify user is logged in

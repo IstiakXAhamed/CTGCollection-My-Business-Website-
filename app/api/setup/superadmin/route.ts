@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { hashPassword } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 // This endpoint creates the superadmin account
 // It only works once - if superadmin exists, it will upgrade them
 export async function GET() {

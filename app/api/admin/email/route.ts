@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
 import nodemailer from 'nodemailer'
 
+export const dynamic = 'force-dynamic'
+
 // GET - Get all newsletter subscribers
 export async function GET(request: NextRequest) {
   try {

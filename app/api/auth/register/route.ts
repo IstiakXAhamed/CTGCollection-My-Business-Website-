@@ -7,6 +7,8 @@ import { notifyWelcome, notifyNewRegistration } from '@/lib/notifications'
 import { sendLoyaltyUpdateEmail } from '@/lib/email'
 import crypto from 'crypto'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()

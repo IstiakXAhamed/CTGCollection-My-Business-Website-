@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
 import crypto from 'crypto'
 
+export const dynamic = 'force-dynamic'
+
 // GET - Get user's loyalty status
 export async function GET(request: NextRequest) {
   try {

@@ -4,6 +4,8 @@ import { verifyAuth } from '@/lib/auth'
 import { sendTierUpdateEmail } from '@/lib/email'
 import { notifyTierChange } from '@/lib/notifications'
 
+export const dynamic = 'force-dynamic'
+
 // POST - Assign tier to user (Superadmin ONLY)
 export async function POST(request: NextRequest) {
   try {
