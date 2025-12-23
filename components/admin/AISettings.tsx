@@ -37,6 +37,7 @@ export function AISettings() {
   const [apiKeyValid, setApiKeyValid] = useState<boolean | null>(null)
   const [showApiKey, setShowApiKey] = useState(false)
   const [settings, setSettings] = useState({
+    enabled: true,
     apiKey: '',
     features: {} as Record<string, boolean>,
     maxTokens: 1024,
@@ -53,6 +54,7 @@ export function AISettings() {
       if (res.ok) {
         const data = await res.json()
         setSettings({
+          enabled: typeof data.enabled === 'boolean' ? data.enabled : true,
           apiKey: data.apiKey || '',
           features: data.features || {},
           maxTokens: data.maxTokens || 1024,
@@ -104,6 +106,13 @@ export function AISettings() {
     }))
   }
 
+  const toggleGlobal = (enabled: boolean) => {
+    setSettings(prev => ({
+      ...prev,
+      enabled
+    }))
+  }
+
   const handleSave = async () => {
     setSaving(true)
     try {
@@ -149,13 +158,24 @@ export function AISettings() {
               Configure Google Gemini AI features across your site
             </CardDescription>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-            Save Settings
-          </Button>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border shadow-sm">
+                <span className={`text-sm font-medium ${settings.enabled ? 'text-green-600' : 'text-gray-500'}`}>
+                    {settings.enabled ? 'Integration Active' : 'Integration Disabled'}
+                </span>
+                <Switch
+                    checked={settings.enabled}
+                    onCheckedChange={toggleGlobal}
+                />
+            </div>
+            <Button onClick={handleSave} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                Save Settings
+            </Button>
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className={`space-y-6 ${!settings.enabled ? 'opacity-60 pointer-events-none' : ''}`}>
         {/* API Key Configuration */}
         <div className="p-4 bg-white rounded-lg border space-y-4">
           <h4 className="font-semibold text-gray-900 flex items-center gap-2">

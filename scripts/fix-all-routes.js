@@ -46,7 +46,7 @@ function fixRouteFile(filePath) {
 }
 
 // Main
-const apiDir = path.join(__dirname, 'app', 'api');
+const apiDir = path.join(__dirname, '..', 'app', 'api');
 const routeFiles = findRouteFiles(apiDir);
 
 console.log(`Found ${routeFiles.length} route files\n`);

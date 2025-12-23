@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth } from '@/lib/auth'
-import { readFileSync, writeFileSync, existsSync } from 'fs'
-import { join } from 'path'
+import { readAIConfig, writeAIConfig } from '@/lib/ai-config'
 
 export const dynamic = 'force-dynamic'
-
-// AI config file path (stored locally for now)
-const AI_CONFIG_PATH = join(process.cwd(), 'data', 'ai-config.json')
 
 // Check super admin access
 async function checkSuperAdmin(request: NextRequest) {
@@ -15,47 +11,6 @@ async function checkSuperAdmin(request: NextRequest) {
     return null
   }
   return user
-}
-
-// Read AI config from file
-function readAIConfig() {
-  try {
-    if (existsSync(AI_CONFIG_PATH)) {
-      const data = readFileSync(AI_CONFIG_PATH, 'utf-8')
-      return JSON.parse(data)
-    }
-  } catch (e) {
-    console.error('Failed to read AI config:', e)
-  }
-  
-  // Default config
-  return {
-    features: {
-      product_assist: true,
-      chat_assist: false,
-      review_moderation: false,
-      seo_generator: false,
-      analytics_insights: false,
-    },
-    maxTokens: 1024,
-    temperature: 0.7,
-  }
-}
-
-// Write AI config to file
-function writeAIConfig(config: any) {
-  try {
-    // Ensure data directory exists
-    const dataDir = join(process.cwd(), 'data')
-    if (!existsSync(dataDir)) {
-      require('fs').mkdirSync(dataDir, { recursive: true })
-    }
-    writeFileSync(AI_CONFIG_PATH, JSON.stringify(config, null, 2))
-    return true
-  } catch (e) {
-    console.error('Failed to write AI config:', e)
-    return false
-  }
 }
 
 // GET AI settings
@@ -90,9 +45,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Super Admin access required' }, { status: 401 })
     }
 
-    const { features, maxTokens, temperature } = await request.json()
+    const body = await request.json()
+    const { enabled, features, maxTokens, temperature } = body
 
     const config = {
+      enabled: typeof enabled === 'boolean' ? enabled : true,
       features: features || {},
       maxTokens: maxTokens || 1024,
       temperature: temperature || 0.7,

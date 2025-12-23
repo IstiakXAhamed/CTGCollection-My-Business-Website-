@@ -1,5 +1,6 @@
 // AI Assistant for E-commerce
 // Uses Gemini API for intelligent features
+import { readAIConfig } from './ai-config'
 
 const GEMINI_API_KEY = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
 
@@ -10,10 +11,16 @@ interface ProductData {
   price?: number
 }
 
+// Check if AI is enabled globally
+function isAIEnabled(): boolean {
+  const config = readAIConfig()
+  return config.enabled
+}
+
 // Generate product description using AI
 export async function generateProductDescription(product: ProductData): Promise<string> {
-  if (!GEMINI_API_KEY) {
-    // Fallback to template-based description if no API key
+  if (!GEMINI_API_KEY || !isAIEnabled()) {
+    // Fallback to template-based description if no API key or AI disabled
     return generateTemplateDescription(product)
   }
 
@@ -66,7 +73,7 @@ export async function generateSEOTags(product: ProductData): Promise<{
   metaDescription: string
   keywords: string[]
 }> {
-  if (!GEMINI_API_KEY) {
+  if (!GEMINI_API_KEY || !isAIEnabled()) {
     return {
       metaTitle: `${product.name} - Buy Online | CTG Collection`,
       metaDescription: `Shop ${product.name} from ${product.category} at best prices. Quality products with fast delivery in Bangladesh.`,
@@ -125,7 +132,7 @@ export async function aiChatResponse(
     currentPage?: string
   }
 ): Promise<string> {
-  if (!GEMINI_API_KEY) {
+  if (!GEMINI_API_KEY || !isAIEnabled()) {
     return getDefaultChatResponse(message)
   }
 
@@ -176,7 +183,7 @@ Keep response under 100 words. Be conversational.`
 
 // Smart product search with synonyms
 export async function smartSearch(query: string): Promise<string[]> {
-  if (!GEMINI_API_KEY) {
+  if (!GEMINI_API_KEY || !isAIEnabled()) {
     return [query]
   }
 
