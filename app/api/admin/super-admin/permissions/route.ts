@@ -16,9 +16,9 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    const { userId, permissions, password } = await request.json()
+    const { targetUserId, permissions, password } = await request.json()
     
-    if (!userId || !Array.isArray(permissions)) {
+    if (!targetUserId || !Array.isArray(permissions)) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
     }
 
@@ -43,7 +43,7 @@ export async function PUT(request: NextRequest) {
 
     // Update user permissions
     const updatedUser = await prisma.user.update({
-      where: { id: userId },
+      where: { id: targetUserId },
       data: { permissions },
       select: { id: true, email: true, permissions: true }
     })

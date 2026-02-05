@@ -35,6 +35,7 @@ import { Button } from '@/components/ui/button'
 import AdminNotificationBell from '@/components/AdminNotificationBell'
 import RoleBadge from '@/components/RoleBadge'
 import RoleSwitcher from '@/components/RoleSwitcher'
+import { getDefaultPermissionsForRole } from '@/lib/permissions-config'
 
 // Menu items - filtered by role and permissions
 const getMenuItems = (role: string, permissions: string[] = []) => {
@@ -178,7 +179,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
 
   const isSuperAdmin = user?.role === 'superadmin'
-  const menuItems = getMenuItems(user?.role || 'admin')
+  const isRoleSwitched = user?.isRoleSwitched || false
+  const originalRole = user?.originalRole || user?.role
+  
+  // When superadmin switches roles, use default permissions for that role
+  // This allows them to see what that role would see with standard permissions
+  let effectivePermissions = user?.permissions || []
+  if (isRoleSwitched && originalRole === 'superadmin' && (user?.role === 'admin' || user?.role === 'seller')) {
+    effectivePermissions = getDefaultPermissionsForRole(user.role as 'admin' | 'seller')
+  }
+  
+  const menuItems = getMenuItems(user?.role || 'admin', effectivePermissions)
 
   return (
     <div className="min-h-screen bg-gray-100">

@@ -58,6 +58,7 @@ export async function GET(request: Request) {
         realRole: freshUser.role,  // Keep track of actual role
         originalRole: originalRole || freshUser.role,  // For role switcher component
         isRoleSwitched,  // Flag to indicate if role is switched
+        permissions: freshUser.permissions || [],  // Return permissions for menu generation
         tier: freshUser.loyaltyPoints?.tier?.name || null  // null = No Tier assigned
       }
     })

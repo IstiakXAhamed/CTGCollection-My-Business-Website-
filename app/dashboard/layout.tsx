@@ -150,7 +150,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     <Link href="/admin">
                       <Button variant="outline" size="sm" className="w-full gap-2 text-purple-600 border-purple-200 hover:bg-purple-50">
                         <ArrowLeft className="w-4 h-4" />
-                        Back to Admin Panel
+                        {user.role === 'seller' ? 'Go to Seller Panel' : 'Back to Admin Panel'}
                       </Button>
                     </Link>
                   </div>
