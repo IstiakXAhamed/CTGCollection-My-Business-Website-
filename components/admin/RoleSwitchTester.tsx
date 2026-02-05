@@ -6,26 +6,32 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
 import { 
   Shuffle, Loader2, RefreshCw, Eye, Package, ShoppingCart, 
-  Tag
+  Tag, Sparkles, Users, Crown, Store, Settings, ChevronDown
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { 
   ALL_PERMISSIONS,
-  PERMISSION_CATEGORIES,
+  PERMISSION_TEMPLATES,
   getDefaultPermissionsForRole,
   Permission
 } from '@/lib/permissions-config'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export function RoleSwitchTester() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [testRole, setTestRole] = useState<'admin' | 'seller'>('seller')
   const [testPermissions, setTestPermissions] = useState<string[]>([])
-  const [useCustomPermissions, setUseCustomPermissions] = useState(false)
   const [currentRoleStatus, setCurrentRoleStatus] = useState<any>(null)
+  const [showCustomize, setShowCustomize] = useState(false)
   
   // Fetch current role status
   useEffect(() => {
@@ -34,10 +40,8 @@ export function RoleSwitchTester() {
   
   // Set default permissions when role changes
   useEffect(() => {
-    if (!useCustomPermissions) {
-      setTestPermissions(getDefaultPermissionsForRole(testRole))
-    }
-  }, [testRole, useCustomPermissions])
+    setTestPermissions(getDefaultPermissionsForRole(testRole))
+  }, [testRole])
   
   const fetchRoleStatus = async () => {
     try {
@@ -54,12 +58,13 @@ export function RoleSwitchTester() {
   const handleSwitchRole = async () => {
     setLoading(true)
     try {
+      // ALWAYS send testPermissions - this is critical!
       const res = await fetch('/api/auth/role-switch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           targetRole: testRole,
-          testPermissions: useCustomPermissions ? testPermissions : undefined 
+          testPermissions: testPermissions // Always send the permissions
         })
       })
       
@@ -68,9 +73,7 @@ export function RoleSwitchTester() {
       if (res.ok) {
         toast({
           title: `Switched to ${testRole.toUpperCase()}`,
-          description: useCustomPermissions 
-            ? `Testing with ${testPermissions.length} custom permissions`
-            : 'Using default permissions for this role',
+          description: `Testing with ${testPermissions.length} permissions`,
         })
         // Reload to apply role switch
         setTimeout(() => window.location.reload(), 500)
@@ -110,23 +113,43 @@ export function RoleSwitchTester() {
     }
   }
   
-  const selectAllForRole = () => {
-    const rolePerms = ALL_PERMISSIONS
-      .filter((p: Permission) => p.category === (testRole === 'seller' ? 'seller' : 'admin'))
-      .map((p: Permission) => p.id)
-    setTestPermissions(rolePerms)
-  }
-  
-  const clearAll = () => {
-    setTestPermissions([])
+  // Apply a template
+  const applyTemplate = (templateId: string) => {
+    const templates: Record<string, string[]> = {
+      'full_admin': PERMISSION_TEMPLATES.fullAdmin.permissions,
+      'limited_admin': PERMISSION_TEMPLATES.limitedAdmin.permissions,
+      'full_seller': PERMISSION_TEMPLATES.fullSeller.permissions,
+      'restricted_seller': PERMISSION_TEMPLATES.restrictedSeller.permissions,
+      'empty': [],
+    }
+    
+    if (templates[templateId]) {
+      setTestPermissions(templates[templateId])
+      toast({
+        title: 'Template Applied',
+        description: `Loaded ${templateId.replace('_', ' ')} permissions`,
+      })
+    }
   }
 
-  // Get permissions to display based on test role
+  // Get permissions filtered by role category
   const roleCategory = testRole === 'seller' ? 'seller' : 'admin'
   const permissionsToShow = ALL_PERMISSIONS.filter((p: Permission) => 
     p.category === roleCategory || p.category === 'feature'
   )
-
+  
+  // Templates for the current role
+  const roleTemplates = testRole === 'seller' 
+    ? [
+        { id: 'full_seller', name: 'Full Seller', desc: 'All seller permissions' },
+        { id: 'restricted_seller', name: 'Restricted Seller', desc: 'View only access' },
+        { id: 'empty', name: 'No Permissions', desc: 'Empty slate' },
+      ]
+    : [
+        { id: 'full_admin', name: 'Full Admin', desc: 'All admin permissions' },
+        { id: 'limited_admin', name: 'Limited Admin', desc: 'Basic access only' },
+        { id: 'empty', name: 'No Permissions', desc: 'Empty slate' },
+      ]
   
   return (
     <Card className="border-indigo-200 shadow-sm">
@@ -136,13 +159,13 @@ export function RoleSwitchTester() {
           Role Switch Testing
         </CardTitle>
         <CardDescription>
-          Test the platform as different roles with customizable permissions
+          Test the platform as different roles with specific permissions
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-4">
+      <CardContent className="pt-4 space-y-4">
         {/* Current Status */}
-        {currentRoleStatus?.isRoleSwitched && (
-          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
+        {currentRoleStatus?.isSwitched && (
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
             <div>
               <span className="text-amber-800 font-medium">Currently viewing as: </span>
               <Badge variant="secondary" className="ml-2 bg-amber-100">{currentRoleStatus.currentRole}</Badge>
@@ -155,94 +178,127 @@ export function RoleSwitchTester() {
         )}
         
         {/* Role Selection */}
-        <div className="flex items-center gap-4 mb-4">
-          <Label className="font-medium">Test as:</Label>
+        <div className="flex items-center gap-4">
+          <Label className="font-medium min-w-[80px]">Test as:</Label>
           <div className="flex gap-2">
             <Button 
               size="sm" 
               variant={testRole === 'seller' ? 'default' : 'outline'}
               onClick={() => setTestRole('seller')}
+              className="gap-1"
             >
+              <Store className="w-4 h-4" />
               Seller
             </Button>
             <Button 
               size="sm"
               variant={testRole === 'admin' ? 'default' : 'outline'}
               onClick={() => setTestRole('admin')}
+              className="gap-1"
             >
+              <Crown className="w-4 h-4" />
               Admin
             </Button>
           </div>
         </div>
         
-        {/* Custom Permissions Toggle */}
-        <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
-          <Switch 
-            checked={useCustomPermissions}
-            onCheckedChange={setUseCustomPermissions}
-          />
-          <div>
-            <Label className="font-medium">Use Custom Permissions</Label>
-            <p className="text-xs text-muted-foreground">
-              {useCustomPermissions 
-                ? 'Select specific permissions to test' 
-                : `Using default ${testRole} permissions`}
-            </p>
+        {/* Quick Templates */}
+        <div className="flex items-center gap-4">
+          <Label className="font-medium min-w-[80px]">Template:</Label>
+          <Select onValueChange={applyTemplate}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select a template..." />
+            </SelectTrigger>
+            <SelectContent>
+              {roleTemplates.map(t => (
+                <SelectItem key={t.id} value={t.id}>
+                  <span className="font-medium">{t.name}</span>
+                  <span className="text-xs text-gray-500 ml-2">({t.desc})</span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {/* Summary of current permissions */}
+        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4 text-blue-600" />
+              <span className="font-medium text-blue-800">
+                {testPermissions.length} Permissions Selected
+              </span>
+            </div>
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              onClick={() => setShowCustomize(!showCustomize)}
+              className="gap-1 text-blue-700"
+            >
+              <ChevronDown className={`w-4 h-4 transition-transform ${showCustomize ? 'rotate-180' : ''}`} />
+              {showCustomize ? 'Hide Details' : 'Customize'}
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {testPermissions.slice(0, 5).map(p => (
+              <Badge key={p} variant="outline" className="text-xs bg-white">
+                {p.replace('seller_', '').replace('manage_', '').replace(/_/g, ' ')}
+              </Badge>
+            ))}
+            {testPermissions.length > 5 && (
+              <Badge variant="outline" className="text-xs bg-white">
+                +{testPermissions.length - 5} more
+              </Badge>
+            )}
+            {testPermissions.length === 0 && (
+              <span className="text-xs text-gray-500 italic">No permissions - will see minimal menu</span>
+            )}
           </div>
         </div>
         
-        {/* Permission Selection (when custom is enabled) */}
-        {useCustomPermissions && (
-          <div className="border rounded-lg p-4 mb-4 max-h-64 overflow-y-auto">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-medium text-gray-700">Select Permissions:</span>
+        {/* Custom Permission Selection (expandable) */}
+        {showCustomize && (
+          <div className="border rounded-lg p-3 max-h-48 overflow-y-auto bg-gray-50">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium text-gray-700">
+                {testRole === 'seller' ? 'Seller' : 'Admin'} Permissions:
+              </span>
               <div className="flex gap-2">
-                <Button size="sm" variant="ghost" onClick={selectAllForRole}>
-                  Select All {testRole}
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  onClick={() => setTestPermissions(permissionsToShow.map(p => p.id))}
+                  className="text-xs h-7"
+                >
+                  Select All
                 </Button>
-                <Button size="sm" variant="ghost" onClick={clearAll}>
-                  Clear
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  onClick={() => setTestPermissions([])}
+                  className="text-xs h-7"
+                >
+                  Clear All
                 </Button>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1">
               {permissionsToShow.map((perm: Permission) => (
                 <label 
                   key={perm.id}
-                  className="flex items-center gap-2 text-sm p-1 rounded hover:bg-gray-100 cursor-pointer"
+                  className="flex items-center gap-2 text-sm p-1.5 rounded hover:bg-white cursor-pointer"
                 >
                   <Checkbox 
                     checked={testPermissions.includes(perm.id)}
                     onCheckedChange={() => togglePermission(perm.id)}
                   />
-                  <span className="truncate">{perm.label}</span>
+                  <span className="truncate text-xs">{perm.label}</span>
                 </label>
               ))}
             </div>
           </div>
         )}
-        
-        {/* Preview */}
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <Eye className="w-4 h-4 text-blue-600" />
-            <span className="font-medium text-blue-800">Preview: Menu items you'll see</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline"><Package className="w-3 h-3 mr-1" /> Dashboard</Badge>
-            {(testPermissions.some(p => p.includes('product')) || !useCustomPermissions) && (
-              <Badge variant="outline"><Package className="w-3 h-3 mr-1" /> Products</Badge>
-            )}
-            {(testPermissions.some(p => p.includes('order')) || !useCustomPermissions) && (
-              <Badge variant="outline"><ShoppingCart className="w-3 h-3 mr-1" /> Orders</Badge>
-            )}
-            {testPermissions.includes('seller_create_coupons') && (
-              <Badge variant="outline"><Tag className="w-3 h-3 mr-1" /> Coupons</Badge>
-            )}
-            <Badge variant="outline">Receipt Lookup</Badge>
-          </div>
-        </div>
         
         {/* Action Button */}
         <Button 
@@ -252,7 +308,7 @@ export function RoleSwitchTester() {
         >
           {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           <Shuffle className="w-4 h-4 mr-2" />
-          Switch to {testRole.charAt(0).toUpperCase() + testRole.slice(1)} Role
+          Switch to {testRole.charAt(0).toUpperCase() + testRole.slice(1)} with {testPermissions.length} Permissions
         </Button>
       </CardContent>
     </Card>

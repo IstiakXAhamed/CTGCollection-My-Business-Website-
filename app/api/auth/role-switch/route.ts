@@ -115,3 +115,38 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to get role status' }, { status: 500 })
   }
 }
+
+// DELETE - Revert to original role (clear role switch)
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = await verifyAuth(request)
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const cookieStore = await cookies()
+    const originalRole = cookieStore.get('originalRole')?.value
+
+    // Only allow revert if currently role-switched
+    if (!originalRole || originalRole !== 'superadmin') {
+      return NextResponse.json({ error: 'Not in a role switch session' }, { status: 400 })
+    }
+
+    const response = NextResponse.json({
+      success: true,
+      message: 'Reverted to Super Admin',
+      currentRole: 'superadmin'
+    })
+
+    // Clear all role switch cookies
+    response.cookies.set('tempRole', '', { httpOnly: true, path: '/', maxAge: 0 })
+    response.cookies.set('originalRole', '', { httpOnly: true, path: '/', maxAge: 0 })
+    response.cookies.set('testPermissions', '', { httpOnly: true, path: '/', maxAge: 0 })
+
+    return response
+  } catch (error) {
+    console.error('Role revert error:', error)
+    return NextResponse.json({ error: 'Failed to revert role' }, { status: 500 })
+  }
+}
