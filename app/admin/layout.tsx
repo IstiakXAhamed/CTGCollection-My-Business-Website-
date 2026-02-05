@@ -31,7 +31,8 @@ import {
   X,
   ShieldAlert,
   Wallet,
-  Sparkles
+  Sparkles,
+  TrendingUp
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AdminNotificationBell from '@/components/AdminNotificationBell'
