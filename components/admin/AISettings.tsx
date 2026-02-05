@@ -67,6 +67,11 @@ export function AISettings() {
     features: {} as Record<string, boolean>,
     maxTokens: 1024,
     temperature: 0.7,
+    // NEW: Default language and tone for all AI features
+    defaultLanguage: 'en' as 'en' | 'bn',
+    defaultTone: 'professional' as 'professional' | 'luxury' | 'friendly' | 'urgent' | 'casual',
+    // NEW: Rate limiting
+    rateLimitPerMinute: 60,
   })
 
   useEffect(() => {
@@ -84,6 +89,9 @@ export function AISettings() {
           features: data.features || {},
           maxTokens: data.maxTokens || 1024,
           temperature: data.temperature || 0.7,
+          defaultLanguage: data.defaultLanguage || 'en',
+          defaultTone: data.defaultTone || 'professional',
+          rateLimitPerMinute: data.rateLimitPerMinute || 60,
         })
         setApiKeyValid(data.apiKeyValid)
       }
@@ -376,10 +384,78 @@ export function AISettings() {
         </div>
 
         {/* Advanced Settings */}
-        <div className="p-4 bg-white rounded-lg border space-y-4">
-          <h4 className="font-semibold text-gray-900">⚙️ Advanced Settings</h4>
+        <div className="p-4 bg-white rounded-lg border space-y-6">
+          <h4 className="font-semibold text-gray-900 flex items-center gap-2">⚙️ Advanced Settings & Defaults</h4>
           
+          {/* Default Language & Tone */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Default Language */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                Default Language
+              </Label>
+              <div className="flex rounded-lg overflow-hidden border">
+                <button
+                  type="button"
+                  onClick={() => setSettings(prev => ({ ...prev, defaultLanguage: 'en' }))}
+                  className={`flex-1 py-2 px-4 text-sm font-medium transition-all ${
+                    settings.defaultLanguage === 'en' 
+                      ? 'bg-indigo-600 text-white' 
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  🇺🇸 English
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSettings(prev => ({ ...prev, defaultLanguage: 'bn' }))}
+                  className={`flex-1 py-2 px-4 text-sm font-medium transition-all ${
+                    settings.defaultLanguage === 'bn' 
+                      ? 'bg-indigo-600 text-white' 
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  🇧🇩 বাংলা
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">Default output language for AI</p>
+            </div>
+
+            {/* Default Tone */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Default Tone
+              </Label>
+              <div className="flex flex-wrap gap-1">
+                {[
+                  { value: 'professional', emoji: '💼', label: 'Pro' },
+                  { value: 'luxury', emoji: '✨', label: 'Luxury' },
+                  { value: 'friendly', emoji: '😊', label: 'Friendly' },
+                  { value: 'urgent', emoji: '🔥', label: 'Urgent' },
+                  { value: 'casual', emoji: '👋', label: 'Casual' },
+                ].map(tone => (
+                  <button
+                    key={tone.value}
+                    type="button"
+                    onClick={() => setSettings(prev => ({ ...prev, defaultTone: tone.value as any }))}
+                    className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
+                      settings.defaultTone === tone.value
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {tone.emoji} {tone.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500">Default writing style for AI content</p>
+            </div>
+          </div>
+
+          {/* API Settings */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t">
             <div className="space-y-2">
               <Label>Max Tokens</Label>
               <Input
@@ -389,7 +465,7 @@ export function AISettings() {
                 min={256}
                 max={8192}
               />
-              <p className="text-xs text-gray-500">Maximum response length (256-8192)</p>
+              <p className="text-xs text-gray-500">Response length (256-8192)</p>
             </div>
             <div className="space-y-2">
               <Label>Temperature</Label>
@@ -401,7 +477,18 @@ export function AISettings() {
                 min={0}
                 max={1}
               />
-              <p className="text-xs text-gray-500">Creativity level (0 = focused, 1 = creative)</p>
+              <p className="text-xs text-gray-500">Creativity (0=focused, 1=creative)</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Rate Limit</Label>
+              <Input
+                type="number"
+                value={settings.rateLimitPerMinute}
+                onChange={(e) => setSettings(prev => ({ ...prev, rateLimitPerMinute: parseInt(e.target.value) || 60 }))}
+                min={1}
+                max={100}
+              />
+              <p className="text-xs text-gray-500">Requests per minute (Gemini Free: 60)</p>
             </div>
           </div>
         </div>
