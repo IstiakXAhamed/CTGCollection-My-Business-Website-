@@ -86,11 +86,14 @@ export default function Navbar() {
             <Image 
               src="/logo.png" 
               alt="Silk Mart" 
-              width={48} 
-              height={48}
-              className="object-contain"
+              width={56} 
+              height={56}
+              className="object-contain w-10 h-10 sm:w-14 sm:h-14"
+              priority
             />
-            <span className="text-lg font-bold hidden sm:block">Silk Mart</span>
+            <span className="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Silk Mart
+            </span>
           </Link>
 
           {/* Desktop Navigation - Fixed width */}
