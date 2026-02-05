@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
 import { notifyNewOrder, notifyOrderConfirmed } from '@/lib/notifications'
+import { logInventoryChange } from '@/lib/inventory-log'
 
 export const dynamic = 'force-dynamic'
 
@@ -154,10 +155,23 @@ export async function POST(request: NextRequest) {
           })
           
           if (variant) {
+            const previousStock = variant.stock
             await prisma.productVariant.update({
               where: { id: item.variantId },
               data: { stock: { decrement: item.quantity } }
             })
+            
+            // Log inventory change
+            await logInventoryChange(
+              item.productId,
+              previousStock,
+              previousStock - item.quantity,
+              'order',
+              userId || 'guest',
+              order.id,
+              item.variantId,
+              `Order #${orderNumber} - ${item.quantity} units sold`
+            )
           }
         } catch (stockError) {
           // Log but don't fail the order if stock update fails

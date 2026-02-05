@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Try to fetch logs - if model doesn't exist yet, return empty
     try {
-      const logs = await (prisma as any).inventoryLog.findMany({
+      const rawLogs = await (prisma as any).inventoryLog.findMany({
         where: {
           ...(reason ? { reason } : {}),
           ...(productId ? { productId } : {})
@@ -36,6 +36,20 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
         take: 100
       })
+      
+      // Fetch product details for logs
+      const productIds = [...new Set(rawLogs.map((l: any) => l.productId))]
+      const products = await prisma.product.findMany({
+        where: { id: { in: productIds as string[] } },
+        select: { id: true, name: true, sku: true }
+      })
+      const productMap = new Map(products.map(p => [p.id, p]))
+      
+      // Attach product to each log
+      const logs = rawLogs.map((log: any) => ({
+        ...log,
+        product: productMap.get(log.productId) || { name: 'Unknown Product', sku: null }
+      }))
 
       // Get stats
       const allLogs = await (prisma as any).inventoryLog.findMany()
@@ -60,7 +74,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Create inventory log entry
+// POST - Create inventory log entry (for manual adjustments)
 export async function POST(request: NextRequest) {
   try {
     const admin = await checkAdmin(request)
@@ -77,6 +91,7 @@ export async function POST(request: NextRequest) {
 
     const change = newStock - previousStock
 
+    // Create the inventory log
     const log = await (prisma as any).inventoryLog.create({
       data: {
         productId,
@@ -90,6 +105,18 @@ export async function POST(request: NextRequest) {
         notes
       }
     })
+
+    // Also update the actual stock if this is a manual adjustment/restock
+    if (variantId && (reason === 'adjustment' || reason === 'restock' || reason === 'damaged' || reason === 'return')) {
+      try {
+        await prisma.productVariant.update({
+          where: { id: variantId },
+          data: { stock: newStock }
+        })
+      } catch (e) {
+        console.error('Could not update variant stock:', e)
+      }
+    }
 
     return NextResponse.json({ success: true, log })
   } catch (error: any) {
