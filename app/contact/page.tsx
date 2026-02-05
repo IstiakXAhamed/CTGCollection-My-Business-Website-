@@ -265,7 +265,7 @@ export default function ContactPage() {
         <div className="container mx-auto px-4">
           {settings?.googleMapsEmbed ? (
             <div 
-              className="rounded-xl overflow-hidden h-96"
+              className="rounded-xl overflow-hidden h-96 [&>iframe]:w-full [&>iframe]:h-full"
               dangerouslySetInnerHTML={{ __html: settings.googleMapsEmbed }}
             />
           ) : (

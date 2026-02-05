@@ -160,7 +160,7 @@ export default function AdminDashboard() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5 sm:mb-1 truncate">{stat.title}</p>
-                      <p className="text-base sm:text-lg lg:text-2xl font-bold truncate">{stat.value}</p>
+                      <p className="text-base sm:text-lg lg:text-xl font-bold truncate tracking-tight" title={String(stat.value)}>{stat.value}</p>
                     </div>
                     <div className={`w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-full ${stat.bgColor} flex items-center justify-center flex-shrink-0`}>
                       <Icon className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ${stat.color}`} />

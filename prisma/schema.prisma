@@ -663,7 +663,28 @@ model SiteSettings {
   storeName         String   @default("CTG Collection")
   storeTagline      String   @default("Premium E-Commerce Store")
   storeDescription  String?  @db.Text
-  
+  logo              String?
+
+  // Stats
+  stat1Value        String   @default("10,000+")
+  stat1Label        String   @default("Products Sold")
+  stat2Value        String   @default("5,000+")
+  stat2Label        String   @default("Happy Customers")
+  stat3Value        String   @default("100+")
+  stat3Label        String   @default("Brands")
+  stat4Value        String   @default("4.8")
+  stat4Label        String   @default("Average Rating")
+
+  // Values/Features
+  value1Title       String   @default("Quality First")
+  value1Desc        String   @default("We carefully select every product to ensure the highest quality standards.")
+  value2Title       String   @default("Fast Delivery")
+  value2Desc        String   @default("Nationwide delivery within 2-5 business days.")
+  value3Title       String   @default("Customer Love")
+  value3Desc        String   @default("Our customers are at the heart of everything we do.")
+  value4Title       String   @default("Local Pride")
+  value4Desc        String   @default("Proudly serving Bangladesh with the best local and international products.")
+
   // Contact Info (using original db column names)
   storeEmail        String   @default("support@ctgcollection.com")
   email2            String?

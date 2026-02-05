@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Logo } from '@/components/Logo'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,11 +30,11 @@ export default function AdminLoginPage() {
       const data = await res.json()
 
       if (res.ok) {
-        // Allow both admin and superadmin roles
-        if (data.user.role === 'admin' || data.user.role === 'superadmin') {
+        // Allow admin, superadmin, and seller roles
+        if (['admin', 'superadmin', 'seller'].includes(data.user.role)) {
           router.push('/admin')
         } else {
-          setError('Access denied. Admin privileges required.')
+          setError('Access denied. Admin/Seller privileges required.')
         }
       } else {
         setError(data.error || 'Login failed')
@@ -49,8 +50,13 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center pb-8">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-            <Lock className="w-8 h-8 text-white" />
+          <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+            <Logo 
+              width={80} 
+              height={80}
+              className="w-full h-full object-contain"
+              priority
+            />
           </div>
           <h1 className="text-3xl font-bold mb-2">Admin Login</h1>
           <p className="text-muted-foreground">Silk Mart Admin Panel</p>

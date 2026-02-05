@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { Logo } from '@/components/Logo'
 import {
   LayoutDashboard,
   Package,
@@ -229,8 +230,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <Menu className="w-5 h-5" />
             </button>
             
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-lg sm:text-xl font-bold text-white">C</span>
+            <div className="flex items-center justify-center">
+              <Logo 
+                width={40} 
+                height={40}
+                className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+                priority
+              />
             </div>
             <div className="hidden sm:block">
               <h1 className="text-lg sm:text-xl font-bold">Silk Mart</h1>

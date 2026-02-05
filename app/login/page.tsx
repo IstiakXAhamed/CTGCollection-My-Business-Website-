@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 
@@ -85,7 +86,7 @@ export default function LoginPage() {
       useAuthStore.getState().setUser(data.user)
 
       // Redirect based on role
-      if (data.user.role === 'admin' || data.user.role === 'superadmin') {
+      if (['admin', 'superadmin', 'seller'].includes(data.user.role)) {
         window.location.href = '/admin'
       } else {
         window.location.href = '/'
@@ -113,41 +114,51 @@ export default function LoginPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        <Card>
-          <CardHeader className="space-y-1">
+        <Card className="bg-white/95 backdrop-blur-sm shadow-xl border-0">
+          <CardHeader className="space-y-1 pb-2">
             <div className="flex justify-center mb-4">
-              <Link href="/" className="text-3xl font-bold text-gradient">
-                Silk Mart
+              <Link href="/" className="flex items-center gap-2">
+                <Image 
+                  src="/logo.png" 
+                  alt="Silk Mart" 
+                  width={48} 
+                  height={48}
+                  className="w-10 h-10 object-contain"
+                  priority
+                />
+                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Silk Mart
+                </span>
               </Link>
             </div>
-            <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
-            <CardDescription className="text-center">
-              Sign in to your account
+            <CardTitle className="text-2xl text-center font-bold text-gray-900">Welcome back</CardTitle>
+            <CardDescription className="text-center text-gray-500">
+              Sign in to your account to continue
             </CardDescription>
           </CardHeader>
           <CardContent>
             {registered && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm">
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm font-medium">
                 Account created successfully! Please sign in.
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm font-medium">
                   {error}
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="you@example.com"
-                    className="pl-10"
+                    className="pl-10 bg-white border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-gray-900"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required
@@ -156,14 +167,14 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <Input
                     id="password"
                     type="password"
                     placeholder="••••••••"
-                    className="pl-10"
+                    className="pl-10 bg-white border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-gray-900"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     required
@@ -175,7 +186,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setRememberMe(!rememberMe)}
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors"
                 >
                   {rememberMe ? (
                     <CheckSquare className="w-4 h-4 text-blue-600" />
@@ -184,22 +195,26 @@ export default function LoginPage() {
                   )}
                   Remember me
                 </button>
-                <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 font-medium hover:underline">
                   Forgot password?
                 </Link>
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                {loading ? 'Signing in...' : 'Sign In'}
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-11" size="lg" disabled={loading}>
+                {loading ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" /> Signing in...
+                    </span>
+                ) : 'Sign In'}
               </Button>
 
               {/* OR Divider */}
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-gray-300" />
+                  <span className="w-full border-t border-gray-200" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
+                  <span className="bg-white px-2 text-gray-500 font-medium">Or continue with</span>
                 </div>
               </div>
 
@@ -207,7 +222,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => signIn('google', { callbackUrl: '/' })}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors text-gray-700 font-medium shadow-sm"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -215,19 +230,19 @@ export default function LoginPage() {
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                <span className="font-medium text-gray-700">Continue with Google</span>
+                Continue with Google
               </button>
             </form>
 
             <div className="mt-6 text-center text-sm">
-              <span className="text-muted-foreground">Don't have an account? </span>
-              <Link href="/register" className="text-blue-600 hover:underline font-semibold">
+              <span className="text-gray-500">Don't have an account? </span>
+              <Link href="/register" className="text-blue-600 hover:text-blue-700 font-bold hover:underline">
                 Sign up
               </Link>
             </div>
 
             <div className="mt-4 text-center">
-              <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+              <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                 ← Back to Home
               </Link>
             </div>

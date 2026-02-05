@@ -4,10 +4,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ShoppingCart, User, Search, Menu, Heart, LogOut, Settings, Package, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Logo } from '@/components/Logo'
 import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import NotificationBell from '@/components/NotificationBell'
 import { useCartStore } from '@/store/cart'
+import RoleBadge from '@/components/RoleBadge'
 
 interface UserData {
   id: string
@@ -77,18 +79,16 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full max-w-[100vw] border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Fixed width container - same on all pages */}
       <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo - Fixed width */}
           <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
-            <Image 
-              src="/logo.png" 
-              alt="Silk Mart" 
+            <Logo 
               width={56} 
               height={56}
-              className="object-contain w-10 h-10 sm:w-14 sm:h-14"
+              className="w-10 h-10 sm:w-14 sm:h-14"
               priority
             />
             <span className="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -212,12 +212,8 @@ export default function Navbar() {
                     <div className="absolute right-0 mt-2 w-56 rounded-lg bg-white border shadow-lg z-50">
                       <div className="p-3 border-b">
                         <p className="font-semibold">{user.name}</p>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                        {(user.role === 'admin' || user.role === 'superadmin') && (
-                          <span className={`inline-block mt-1 px-2 py-0.5 text-xs rounded-full ${user.role === 'superadmin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
-                            {user.role === 'superadmin' ? 'Super Admin' : 'Admin'}
-                          </span>
-                        )}
+                        <p className="text-sm text-muted-foreground mb-2">{user.email}</p>
+                        <RoleBadge role={user.role} size="sm" />
                       </div>
                       <div className="py-2">
                         <Link 

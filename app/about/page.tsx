@@ -6,58 +6,40 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ShoppingBag, Users, Award, Truck, Shield, Heart, Star, Globe, Loader2 } from 'lucide-react'
-
-const stats = [
-  { icon: ShoppingBag, value: '10,000+', label: 'Products Sold' },
-  { icon: Users, value: '5,000+', label: 'Happy Customers' },
-  { icon: Award, value: '100+', label: 'Brands' },
-  { icon: Star, value: '4.8', label: 'Average Rating' },
-]
-
-const values = [
-  {
-    icon: Shield,
-    title: 'Quality First',
-    description: 'We carefully select every product to ensure the highest quality standards for our customers.'
-  },
-  {
-    icon: Truck,
-    title: 'Fast Delivery',
-    description: 'Nationwide delivery within 2-5 business days. Free shipping on orders over ৳2000.'
-  },
-  {
-    icon: Heart,
-    title: 'Customer Love',
-    description: 'Our customers are at the heart of everything we do. Your satisfaction is our priority.'
-  },
-  {
-    icon: Globe,
-    title: 'Local Pride',
-    description: 'Proudly serving Bangladesh with the best selection of local and international products.'
-  },
-]
+import { useSiteSettings } from '@/hooks/useSiteSettings'
 
 export default function AboutPage() {
-  const [settings, setSettings] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const { settings } = useSiteSettings()
 
-  useEffect(() => {
-    fetchSettings()
-  }, [])
+  const stats = [
+    { icon: ShoppingBag, value: settings?.stat1Value || '10,000+', label: settings?.stat1Label || 'Products Sold' },
+    { icon: Users, value: settings?.stat2Value || '5,000+', label: settings?.stat2Label || 'Happy Customers' },
+    { icon: Award, value: settings?.stat3Value || '100+', label: settings?.stat3Label || 'Brands' },
+    { icon: Star, value: settings?.stat4Value || '4.8', label: settings?.stat4Label || 'Average Rating' },
+  ]
 
-  const fetchSettings = async () => {
-    try {
-      const res = await fetch('/api/settings')
-      if (res.ok) {
-        const data = await res.json()
-        setSettings(data.settings)
-      }
-    } catch (err) {
-      console.error('Failed to fetch settings:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const values = [
+    {
+      icon: Shield,
+      title: settings?.value1Title || 'Quality First',
+      description: settings?.value1Desc || 'We carefully select every product to ensure the highest quality standards for our customers.'
+    },
+    {
+      icon: Truck,
+      title: settings?.value2Title || 'Fast Delivery',
+      description: settings?.value2Desc || 'Nationwide delivery within 2-5 business days. Free shipping on orders over ৳2000.'
+    },
+    {
+      icon: Heart,
+      title: settings?.value3Title || 'Customer Love',
+      description: settings?.value3Desc || 'Our customers are at the heart of everything we do. Your satisfaction is our priority.'
+    },
+    {
+      icon: Globe,
+      title: settings?.value4Title || 'Local Pride',
+      description: settings?.value4Desc || 'Proudly serving Bangladesh with the best selection of local and international products.'
+    },
+  ]
 
   return (
     <div className="min-h-screen">

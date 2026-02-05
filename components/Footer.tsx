@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { Logo } from '@/components/Logo'
 import { Facebook, Instagram, Twitter, Youtube, MapPin, Phone, Mail, CreditCard, Truck, ShieldCheck, Headphones, Linkedin } from 'lucide-react'
 
 const footerLinks = {
@@ -97,9 +99,12 @@ export function Footer() {
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8">
           <div className="col-span-2 lg:col-span-2">
             <Link href="/" className="inline-flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-xl font-bold">C</span>
-              </div>
+              <Logo 
+                width={40} 
+                height={40}
+                className="w-10 h-10 object-contain"
+                priority
+              />
               <span className="text-2xl font-bold">{settings?.storeName || 'Silk Mart'}</span>
             </Link>
             <p className="text-gray-400 mb-6 max-w-md">
