@@ -93,8 +93,16 @@ export default function OrderDetailPage() {
       const data = await res.json()
       
       if (res.ok && data.receiptUrl) {
-        // Open receipt in new tab
-        window.open(data.receiptUrl, '_blank')
+        // Mobile-friendly: Create a temporary link and click it
+        // This avoids popup blocker issues on mobile browsers
+        const link = document.createElement('a')
+        link.href = data.receiptUrl
+        link.target = '_blank'
+        link.rel = 'noopener noreferrer'
+        // For better mobile compatibility, briefly add to DOM, click, then remove
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
       } else {
         alert(data.error || 'Receipt not available yet')
       }
@@ -112,7 +120,14 @@ export default function OrderDetailPage() {
       const data = await res.json()
       
       if (res.ok && data.receiptUrl) {
-        window.open(data.receiptUrl, '_blank')
+        // Mobile-friendly download
+        const link = document.createElement('a')
+        link.href = data.receiptUrl
+        link.target = '_blank'
+        link.rel = 'noopener noreferrer'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
       } else {
         alert(data.error || 'Premium receipt not available')
       }
