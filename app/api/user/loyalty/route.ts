@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
       transactions: loyalty.transactions,
       referral: {
         code: referralCode,
-        link: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/register?ref=${referralCode}`,
+        link: `${process.env.NEXT_PUBLIC_URL}/register?ref=${referralCode}`,
         totalReferrals: referralStats._count || 0,
         completedReferrals,
         bonusPerReferral: settings.referralBonusReferrer

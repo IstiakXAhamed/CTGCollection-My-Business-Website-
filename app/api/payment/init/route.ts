@@ -48,10 +48,10 @@ export async function POST(request: NextRequest) {
       total_amount: amount,
       currency: 'BDT',
       tran_id: tranId,
-      success_url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/payment/success`,
-      fail_url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/payment/fail`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/payment/cancel`,
-      ipn_url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/payment/ipn`,
+      success_url: `${process.env.NEXT_PUBLIC_URL}/api/payment/success`,
+      fail_url: `${process.env.NEXT_PUBLIC_URL}/api/payment/fail`,
+      cancel_url: `${process.env.NEXT_PUBLIC_URL}/api/payment/cancel`,
+      ipn_url: `${process.env.NEXT_PUBLIC_URL}/api/payment/ipn`,
       
       // Customer info - with fallbacks to prevent SSLCommerz validation errors
       cus_name: customerInfo?.name || order.address?.name || 'Customer',

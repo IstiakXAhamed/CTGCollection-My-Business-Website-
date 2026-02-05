@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
                 <p style="margin: 10px 0 0 0; color: #888; font-size: 14px;">Use at checkout for your discount!</p>
               </div>
             ` : ''}
-            <a href="${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/shop" class="button">Start Shopping →</a>
+            <a href="${process.env.NEXT_PUBLIC_URL}/shop" class="button">Start Shopping →</a>
           </div>
           <div class="footer">
             <p>CTG Collection - Premium E-Commerce Store</p>

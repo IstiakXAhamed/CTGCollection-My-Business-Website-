@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
           <p style="color: #999; font-size: 12px; text-align: center;">
             You received this email because you subscribed to CTG Collection newsletter.
-            <br><a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/unsubscribe" style="color: #667eea;">Unsubscribe</a>
+            <br><a href="${process.env.NEXT_PUBLIC_URL}/unsubscribe" style="color: #667eea;">Unsubscribe</a>
           </p>
         </div>
       </div>

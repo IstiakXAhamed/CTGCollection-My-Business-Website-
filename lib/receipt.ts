@@ -56,7 +56,8 @@ export const RECEIPT_TEMPLATES = {
   '17': { name: 'Amber Warm', description: 'Warm orange theme' },
   '18': { name: 'Slate Modern', description: 'Cool slate gray' },
   '19': { name: 'Teal Fresh', description: 'Fresh teal modern' },
-  '20': { name: 'Signature CTG', description: 'Premium brand signature' }
+  '20': { name: 'Signature CTG', description: 'Premium brand signature' },
+  '21': { name: 'Premium Minimal', description: 'Clean, elegant, monochrome with warranty focus' }
 }
 
 
@@ -1165,31 +1166,125 @@ ${o.discount>0?`<div class="total-row"><span>Discount</span><span>-৳${o.discou
 <div class="gold-bar"></div>
 <div class="footer">THANK YOU FOR CHOOSING CTG COLLECTION</div></div>${printBtn('#d4af37')}</body></html>`
 
-// Template 21: Midnight Navy
+// Template 21: Premium Minimal - Clean, elegant, monochrome with warranty focus
 const template21 = (o: OrderData, logo?: string) => `
 <!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice ${o.orderNumber}</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter';background:#0f172a;padding:40px}
-.receipt{max-width:700px;margin:0 auto;background:#1e293b;border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3)}
-.header{background:#0f172a;color:#60a5fa;padding:40px;text-align:center;border-bottom:2px solid #334155}
-.header h1{font-size:24px}.body{padding:32px;color:#e2e8f0}
-table{width:100%;border-collapse:collapse;margin:20px 0}th{background:#334155;padding:12px;text-align:left;color:#94a3b8}
-td{padding:12px;border-bottom:1px solid #334155;color:#e2e8f0}
-.totals{background:#0f172a;padding:20px;border-radius:8px;color:#fff;margin-top:20px}
-.total-row{display:flex;justify-content:space-between;padding:6px 0}.total-row.grand{font-size:20px;color:#60a5fa;border-top:1px solid #334155;padding-top:12px;margin-top:8px}
-.footer{text-align:center;padding:24px;color:#64748b;font-size:12px}
-${printStyles}</style></head><body><div class="receipt">
-<div class="header">${logo?`<img src="${logo}" style="height:50px;margin-bottom:12px">`:''}
-<h1>CTG Collection</h1></div>
-<div class="body"><div style="text-align:center;margin-bottom:20px;color:#94a3b8">${o.orderNumber} • ${formatDate(o.createdAt)}</div>
-<table><thead><tr><th>Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>
-${o.items.map(i=>`<tr><td>${i.product.name}<br><span style="color:#64748b;font-size:11px">${getVariant(i.variantInfo)}</span></td><td style="text-align:center">${i.quantity}</td><td style="text-align:right">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
-</tbody></table><div class="totals">
-<div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
-<div class="total-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
-${o.discount>0?`<div class="total-row"><span>Discount</span><span>-৳${o.discount.toLocaleString()}</span></div>`:''}
-<div class="total-row grand"><span>Total</span><span>৳${o.total.toLocaleString()}</span></div></div></div>
-<div class="footer">Thank you for choosing CTG Collection</div></div>${printBtn('#60a5fa')}</body></html>`
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#f8fafc;padding:40px;color:#1e293b;line-height:1.5;font-size:14px}
+.receipt{max-width:800px;margin:0 auto;background:#fff;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);border:1px solid #e2e8f0}
+.header{padding:40px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:flex-start}
+.logo-area{flex:1}
+.logo-area h1{font-size:24px;font-weight:600;letter-spacing:-0.5px;color:#0f172a;margin-bottom:4px}
+.logo-area p{font-size:13px;color:#64748b}
+.invoice-details{text-align:right}
+.invoice-details h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:4px;font-weight:600}
+.invoice-details p{font-size:16px;font-weight:500;color:#0f172a}
+.meta-grid{display:grid;grid-template-columns:repeat(3,1fr);padding:30px 40px;gap:20px;border-bottom:1px solid #e2e8f0;background:#fafafa}
+.meta-item h3{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;margin-bottom:6px;font-weight:600}
+.meta-item p{font-size:14px;color:#334155;font-weight:500}
+.table-container{padding:0 40px}
+table{width:100%;border-collapse:collapse;margin:30px 0}
+th{text-align:left;padding:12px 0;border-bottom:2px solid #0f172a;color:#0f172a;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px}
+td{padding:16px 0;border-bottom:1px solid #e2e8f0;vertical-align:top}
+.item-main{display:flex;flex-direction:column;gap:4px}
+.item-name{font-weight:500;color:#0f172a;font-size:14px}
+.item-variant{color:#64748b;font-size:12px}
+.warranty-badge{display:inline-flex;align-items:center;gap:4px;background:#f1f5f9;padding:2px 8px;border-radius:4px;font-size:11px;color:#475569;margin-top:4px;width:fit-content;border:1px solid #cbd5e1}
+.totals-area{padding:0 40px 40px;display:flex;justify-content:flex-end}
+.totals-box{width:300px}
+.total-row{display:flex;justify-content:space-between;padding:8px 0;color:#64748b}
+.grand-total{display:flex;justify-content:space-between;padding:16px 0;border-top:2px solid #0f172a;margin-top:8px;font-weight:600;font-size:18px;color:#0f172a}
+.footer{text-align:center;padding:30px;background:#fafafa;border-top:1px solid #e2e8f0;color:#64748b;font-size:12px}
+${printStyles}
+</style></head><body>
+<div class="receipt">
+  <div class="header">
+    <div class="logo-area">
+      ${logo ? `<img src="${logo}" style="height:40px;margin-bottom:16px;display:block">` : ''}
+      <h1>CTG Collection</h1>
+      <p>Premium E-Commerce Store</p>
+    </div>
+    <div class="invoice-details">
+      <h2>Invoice Number</h2>
+      <p>${o.orderNumber}</p>
+      <div style="margin-top:12px">
+        <h2>Date</h2>
+        <p>${formatDate(o.createdAt)}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="meta-grid">
+    <div class="meta-item">
+      <h3>Billed To</h3>
+      <p>${o.address.name}</p>
+      <p>${o.address.phone}</p>
+      <p>${o.address.address}</p>
+    </div>
+    <div class="meta-item">
+      <h3>Shipping To</h3>
+      <p>${o.address.city}, ${o.address.district}</p>
+      <p>${o.address.postalCode || ''}</p>
+    </div>
+    <div class="meta-item">
+      <h3>Payment Method</h3>
+      <p style="text-transform:uppercase">${o.paymentMethod === 'cod' ? 'Cash on Delivery' : o.paymentMethod}</p>
+      <p>${o.paymentStatus === 'paid' ? '✅ PAID' : '⏳ PENDING'}</p>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:50%">Item Description</th>
+          <th style="text-align:center;width:15%">Qty</th>
+          <th style="text-align:right;width:15%">Price</th>
+          <th style="text-align:right;width:20%">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${o.items.map(i => `
+        <tr>
+          <td>
+            <div class="item-main">
+              <span class="item-name">${i.product.name}</span>
+              ${i.variantInfo ? `<span class="item-variant">${getVariant(i.variantInfo)}</span>` : ''}
+              ${i.product.hasWarranty ? `
+                <div class="warranty-badge">
+                  <span>🛡️</span>
+                  <span>${i.product.warrantyPeriod || 'Warranty Included'}</span>
+                </div>
+              ` : ''}
+            </div>
+          </td>
+          <td style="text-align:center">${i.quantity}</td>
+          <td style="text-align:right">৳${i.price.toLocaleString()}</td>
+          <td style="text-align:right;font-weight:500">৳${(i.price * i.quantity).toLocaleString()}</td>
+        </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="totals-area">
+    <div class="totals-box">
+      <div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
+      <div class="total-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
+      ${o.discount > 0 ? `<div class="total-row" style="color:#16a34a"><span>Discount</span><span>-৳${o.discount.toLocaleString()}</span></div>` : ''}
+      <div class="grand-total"><span>Total Due</span><span>৳${o.total.toLocaleString()}</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Thank you for shopping with CTG Collection</p>
+    <p style="margin-top:8px">For support, contact us at ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@ctgcollection.com'}</p>
+  </div>
+</div>
+${printBtn('#0f172a')}
+</body></html>`
 
 // Template 22-35: Similar structure with different color schemes
 const template22 = (o: OrderData, logo?: string) => template21(o, logo).replace(/#0f172a/g,'#14532d').replace(/#1e293b/g,'#166534').replace(/#60a5fa/g,'#22c55e').replace(/#334155/g,'#15803d')
