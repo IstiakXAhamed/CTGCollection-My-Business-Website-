@@ -8,6 +8,7 @@ interface Toast {
   description?: string
   variant?: "default" | "destructive"
   duration?: number
+  className?: string
 }
 
 interface ToastContextValue {
@@ -53,9 +54,9 @@ function ToastContainer({ toasts, dismiss }: { toasts: Toast[]; dismiss: (id: st
         <div
           key={toast.id}
           className={`p-4 rounded-lg shadow-lg transform transition-all duration-300 ${
-            toast.variant === "destructive"
+            toast.className ?? (toast.variant === "destructive"
               ? "bg-red-500 text-white"
-              : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+              : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700")
           }`}
           onClick={() => dismiss(toast.id)}
         >
