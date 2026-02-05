@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
       })
       
       // Fetch product details for logs
-      const productIds = [...new Set(rawLogs.map((l: any) => l.productId))]
+      const productIds = Array.from(new Set(rawLogs.map((l: any) => l.productId)))
       const products = await prisma.product.findMany({
         where: { id: { in: productIds as string[] } },
         select: { id: true, name: true, sku: true }

@@ -56,8 +56,13 @@ export const RECEIPT_TEMPLATES = {
   '17': { name: 'Amber Warm', description: 'Warm orange theme' },
   '18': { name: 'Slate Modern', description: 'Cool slate gray' },
   '19': { name: 'Teal Fresh', description: 'Fresh teal modern' },
-  '20': { name: 'Signature CTG', description: 'Premium brand signature' },
-  '21': { name: 'Premium Minimal', description: 'Clean, elegant, monochrome with warranty focus' }
+  '20': { name: 'Signature Silk', description: 'Premium brand signature' },
+  '21': { name: 'Premium Minimal', description: 'Clean, elegant, monochrome with warranty focus' },
+  '22': { name: 'Editorial Minimalist', description: 'High-fashion editorial layout' },
+  '23': { name: 'Architectural Grid', description: 'Technical blueprint aesthetic' },
+  '24': { name: 'Luxury Serif', description: 'High-end boutique elegance' },
+  '25': { name: 'Warranty Shield', description: 'Trust-focused with badge details' },
+  '26': { name: 'Signature Brand', description: 'Artistic layout with signature' }
 }
 
 
@@ -216,7 +221,7 @@ ${printStyles}
     <div class="header-content">
       <div class="brand">
         ${logo ? `<img src="${logo}" style="height:48px;border-radius:8px">` : '<div style="width:48px;height:48px;background:#1a365d;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px">C</div>'}
-        <div><h1>CTG Collection</h1><p>Premium Fashion & Lifestyle</p></div>
+        <div><h1>Silk Mart</h1><p>Premium Fashion & Lifestyle</p></div>
       </div>
       <div class="invoice-box">
         <h2>Invoice</h2>
@@ -243,7 +248,7 @@ ${printStyles}
     ${o.items.filter(i=>i.product.hasWarranty).length>0?`<div class="warranty"><h4>🛡️ Warranty Coverage</h4><ul>${o.items.filter(i=>i.product.hasWarranty).map(i=>`<li>${i.product.name} - ${i.product.warrantyPeriod||'Warranty'}</li>`).join('')}</ul></div>`:''}
     ${o.verificationCode?`<div class="verify"><span style="font-size:12px;color:#666">Verification Code</span><span class="verify-code">${o.verificationCode}</span></div>`:''}
   </div>
-  <div class="footer"><p>Thank you for shopping with CTG Collection! • ctgcollection2@gmail.com</p></div>
+  <div class="footer"><p>Thank you for shopping with Silk Mart! • support@silkmart.com</p></div>
 </div>
 ${printBtn('#1a365d')}
 </body></html>`
@@ -283,7 +288,7 @@ ${printStyles}
 </style></head><body>
 <div class="receipt">
   <div class="header">
-    <div class="brand"><h1>CTG COLLECTION</h1></div>
+    <div class="brand"><h1>SILK MART</h1></div>
     <div class="invoice-info"><div>Invoice</div><div class="num">${o.orderNumber}</div><div style="margin-top:8px">${formatDate(o.createdAt)}</div></div>
   </div>
   <div class="section">
@@ -307,7 +312,7 @@ ${printStyles}
     <div>${o.paymentMethod==='cod'?'Cash on Delivery':'Online Payment'} • ${o.paymentStatus==='paid'?'Paid':'Pending'}</div>
     ${o.verificationCode?`<div class="verify-code">${o.verificationCode}</div>`:''}
   </div>
-  <div class="footer">CTG Collection • ctgcollection2@gmail.com</div>
+  <div class="footer">CTG Collection • support@silkmart.com</div>
 </div>
 ${printBtn('#111')}
 </body></html>`
@@ -350,7 +355,7 @@ ${printStyles}
 <div class="receipt">
   <div class="header">
     ${logo ? `<img src="${logo}" style="height:50px;margin-bottom:12px">` : ''}
-    <div class="brand"><h1>CTG Collection</h1><p>PREMIUM FASHION</p></div>
+    <div class="brand"><h1>Silk Mart</h1><p>PREMIUM FASHION</p></div>
     <div class="invoice-num">INVOICE ${o.orderNumber}</div>
     <div style="margin-top:12px;font-size:13px;color:#888">${formatDate(o.createdAt)}</div>
   </div>
@@ -371,7 +376,7 @@ ${printStyles}
     </div>
     ${o.verificationCode?`<div class="verify"><div class="verify-label">Verification Code</div><div class="verify-code">${o.verificationCode}</div></div>`:''}
   </div>
-  <div class="footer"><p>Thank you for choosing CTG Collection</p></div>
+  <div class="footer"><p>Thank you for choosing Silk Mart</p></div>
 </div>
 ${printBtn('#c9a959')}
 </body></html>`
@@ -416,7 +421,7 @@ ${printStyles}
 <div class="receipt">
   <div class="header">
     <div class="header-top">
-      <div class="brand">${logo ? `<img src="${logo}" style="height:40px;border-radius:6px">` : ''}<h1>CTG Collection</h1></div>
+      <div class="brand">${logo ? `<img src="${logo}" style="height:40px;border-radius:6px">` : ''}<h1>Silk Mart</h1></div>
       <div class="invoice-badge">INVOICE</div>
     </div>
     <div class="header-info">
@@ -487,7 +492,7 @@ ${printStyles}
 <div class="receipt">
   <div class="header">
     ${logo ? `<img src="${logo}" style="height:50px;margin-bottom:12px;border-radius:12px">` : ''}
-    <div class="brand"><h1>CTG Collection</h1><p>Premium Fashion & Lifestyle</p></div>
+    <div class="brand"><h1>Silk Mart</h1><p>Premium Fashion & Lifestyle</p></div>
     <div class="invoice-num">${o.orderNumber} • ${formatDate(o.createdAt)}</div>
   </div>
   <div class="body">
@@ -551,7 +556,7 @@ ${printStyles}
   <div class="gold-line"></div>
   <div class="header">
     ${logo ? `<img src="${logo}" style="height:50px;margin-bottom:16px;border-radius:8px">` : ''}
-    <h1>CTG COLLECTION</h1>
+    <h1>SILK MART</h1>
     <p>PREMIUM FASHION & LIFESTYLE</p>
     <div class="invoice-badge">${o.orderNumber} • ${formatDate(o.createdAt)}</div>
   </div>
@@ -612,7 +617,7 @@ ${printStyles}
 <div class="receipt">
   <div class="header">
     ${logo ? `<img src="${logo}" style="height:40px;margin-bottom:16px">` : ''}
-    <h1>CTG COLLECTION</h1>
+    <h1>SILK MART</h1>
     <p>Premium Fashion</p>
   </div>
   <div class="invoice-num">Invoice<span>${o.orderNumber}</span>${formatDate(o.createdAt)}</div>
@@ -673,7 +678,7 @@ ${printStyles}
 <div class="receipt"><div class="inner">
   <div class="header">
     ${logo ? `<img src="${logo}" style="height:45px;margin-bottom:12px">` : ''}
-    <h1>CTG COLLECTION</h1>
+    <h1>SILK MART</h1>
     <p>Premium Fashion & Lifestyle</p>
   </div>
   <div class="dotted"></div>
@@ -738,7 +743,7 @@ ${printStyles}
 </style></head><body>
 <div class="receipt">
   <div class="header">
-    <div class="brand">${logo ? `<img src="${logo}" style="height:40px;margin-bottom:8px">` : ''}<h1>CTG Collection</h1><p>Premium Fashion & Lifestyle</p></div>
+    <div class="brand">${logo ? `<img src="${logo}" style="height:40px;margin-bottom:8px">` : ''}<h1>Silk Mart</h1><p>Premium Fashion & Lifestyle</p></div>
     <div class="invoice-box"><div class="label">INVOICE</div><div class="number">${o.orderNumber}</div><div class="date">${formatDate(o.createdAt)}</div></div>
   </div>
   <div class="body">
@@ -761,7 +766,7 @@ ${printStyles}
       ${o.verificationCode?`<span class="verify-code">${o.verificationCode}</span>`:''}
     </div>
   </div>
-  <div class="footer">Thank you for shopping with CTG Collection • ctgcollection2@gmail.com</div>
+  <div class="footer">Thank you for shopping with Silk Mart • support@silkmart.com</div>
 </div>
 ${printBtn('#0f172a')}
 </body></html>`
@@ -800,10 +805,10 @@ ${printStyles}
 </style></head><body>
 <div class="receipt">
   <div class="header">
-    <div class="monogram">CTG</div>
+    <div class="monogram">SM</div>
     <div class="header-content">
       ${logo ? `<img src="${logo}" style="height:45px;margin-bottom:12px;border-radius:8px">` : ''}
-      <h1>CTG Collection</h1>
+      <h1>Silk Mart</h1>
       <p>PREMIUM FASHION & LIFESTYLE</p>
       <div class="badge">INVOICE ${o.orderNumber}</div>
     </div>
@@ -826,7 +831,7 @@ ${printStyles}
     </div>
     ${o.verificationCode?`<div class="verify"><div style="font-size:10px;color:#94a3b8;margin-bottom:6px">VERIFICATION</div><div class="verify-code">${o.verificationCode}</div></div>`:''}
   </div>
-  <div class="footer">Thank you for choosing CTG Collection</div>
+  <div class="footer">Thank you for choosing Silk Mart</div>
 </div>
 ${printBtn('#1e3a5f')}
 </body></html>`
@@ -854,7 +859,7 @@ td{padding:14px 12px;border-bottom:1px solid #f1f5f9}
 ${printStyles}</style></head><body>
 <div class="receipt">
 <div class="header">${logo?`<img src="${logo}" style="height:45px;margin-bottom:12px">`:''}
-<h1>CTG Collection</h1><p>Premium Fashion</p>
+<h1>Silk Mart</h1><p>Premium Fashion</p>
 <div class="badge">${o.orderNumber} • ${formatDate(o.createdAt)}</div></div>
 <div class="body"><div class="info">
 <div class="info-box"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
@@ -867,7 +872,7 @@ ${o.items.map(i=>`<tr><td><strong>${i.product.name}</strong><br><span style="col
 <div class="total-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
 ${o.discount>0?`<div class="total-row"><span>Discount</span><span>-৳${o.discount.toLocaleString()}</span></div>`:''}
 <div class="total-row grand"><span>Total</span><span>৳${o.total.toLocaleString()}</span></div></div></div>
-<div class="footer">Thank you! • ctgcollection2@gmail.com</div>
+<div class="footer">Thank you! • support@silkmart.com</div>
 </div>${printBtn('#3b82f6')}</body></html>`
 
 // Template 12: Executive Gray - Sophisticated gray theme
@@ -923,7 +928,7 @@ const template13 = (o: OrderData, logo?: string) => `
 .footer{text-align:center;padding:24px;color:#64748b;font-size:12px}
 ${printStyles}</style></head><body><div class="receipt">
 <div class="header">${logo?`<img src="${logo}" style="height:40px;margin-bottom:10px">`:''}
-<h1>CTG Collection</h1><p>Premium Fashion</p>
+<h1>Silk Mart</h1><p>Premium Fashion</p>
 <div class="invoice-badge">${o.orderNumber}</div></div>
 <div class="body"><div style="text-align:center;color:#64748b;font-size:12px;margin-bottom:20px">${formatDate(o.createdAt)}</div>
 <div class="cards"><div class="card"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
@@ -956,7 +961,7 @@ const template14 = (o: OrderData, logo?: string) => `
 .footer{text-align:center;padding:24px;color:#be185d;font-size:12px}
 ${printStyles}</style></head><body><div class="receipt">
 <div class="header">${logo?`<img src="${logo}" style="height:40px;margin-bottom:12px">`:''}
-<h1>CTG Collection</h1><p>Premium Fashion</p></div>
+<h1>Silk Mart</h1><p>Premium Fashion</p></div>
 <div class="body"><div class="invoice-info"><div style="color:#9ca3af;font-size:11px">Invoice</div>
 <div class="num">${o.orderNumber}</div><div style="color:#9ca3af;font-size:12px">${formatDate(o.createdAt)}</div></div>
 <div class="cards"><div class="card"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
@@ -987,7 +992,7 @@ td{padding:14px 12px;border-bottom:1px solid #ecfdf5}
 .footer{text-align:center;padding:24px;color:#6b7280;font-size:12px}
 ${printStyles}</style></head><body><div class="receipt">
 <div class="header"><div class="brand">${logo?`<img src="${logo}" style="height:36px;margin-bottom:8px">`:''}
-<h1>CTG Collection</h1><p>Premium Fashion</p></div>
+<h1>Silk Mart</h1><p>Premium Fashion</p></div>
 <div class="invoice-box"><span>Invoice</span><strong>${o.orderNumber}</strong><span>${formatDate(o.createdAt)}</span></div></div>
 <div class="body"><div class="info">
 <div class="info-card"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
@@ -1021,7 +1026,7 @@ const template16 = (o: OrderData, logo?: string) => `
 .footer{text-align:center;padding:24px;color:#7c3aed;font-size:12px}
 ${printStyles}</style></head><body><div class="receipt">
 <div class="header">${logo?`<img src="${logo}" style="height:45px;margin-bottom:12px">`:''}
-<h1>CTG Collection</h1><p>Premium Fashion</p>
+<h1>Silk Mart</h1><p>Premium Fashion</p>
 <div class="badge">${o.orderNumber} • ${formatDate(o.createdAt)}</div></div>
 <div class="body"><div class="info-grid">
 <div class="info-box"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
@@ -1052,7 +1057,7 @@ td{padding:12px 10px;border-bottom:1px solid #fef3c7}
 .footer{text-align:center;padding:24px;color:#b45309;font-size:12px}
 ${printStyles}</style></head><body><div class="receipt">
 <div class="header">${logo?`<img src="${logo}" style="height:40px;margin-bottom:10px">`:''}
-<h1>CTG Collection</h1><p>Premium Fashion</p></div>
+<h1>Silk Mart</h1><p>Premium Fashion</p></div>
 <div class="body"><div class="invoice-row"><span style="color:#b45309">Invoice: <strong>${o.orderNumber}</strong></span><span style="color:#92400e">${formatDate(o.createdAt)}</span></div>
 <div class="cards"><div class="card"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
 <div class="card"><h4>DELIVERY</h4><p>${o.address.city}, ${o.address.district}</p></div></div>
@@ -1117,7 +1122,7 @@ const template19 = (o: OrderData, logo?: string) => `
 .footer{text-align:center;padding:24px;color:#0d9488;font-size:12px}
 ${printStyles}</style></head><body><div class="receipt">
 <div class="header">${logo?`<img src="${logo}" style="height:42px;margin-bottom:12px">`:''}
-<h1>CTG Collection</h1><p>Premium Fashion</p>
+<h1>Silk Mart</h1><p>Premium Fashion</p>
 <div class="invoice-pill">${o.orderNumber} • ${formatDate(o.createdAt)}</div></div>
 <div class="body"><div class="info-cards">
 <div class="card"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
@@ -1151,7 +1156,7 @@ td{padding:14px 12px;border-bottom:1px solid #f1f5f9}
 ${printStyles}</style></head><body><div class="receipt">
 <div class="gold-bar"></div>
 <div class="header">${logo?`<img src="${logo}" style="height:50px;margin-bottom:16px">`:''}
-<h1>CTG</h1><p>COLLECTION</p>
+<h1>Silk</h1><p>MART</p>
 <div class="badge">${o.orderNumber}</div></div>
 <div class="body"><div style="text-align:center;color:#94a3b8;font-size:12px;margin-bottom:28px">${formatDate(o.createdAt)}</div>
 <div class="info"><div class="info-box"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
@@ -1164,7 +1169,7 @@ ${o.items.map(i=>`<tr><td><strong>${i.product.name}</strong><br><span style="col
 ${o.discount>0?`<div class="total-row"><span>Discount</span><span>-৳${o.discount.toLocaleString()}</span></div>`:''}
 <div class="total-row grand"><span>TOTAL</span><span>৳${o.total.toLocaleString()}</span></div></div></div>
 <div class="gold-bar"></div>
-<div class="footer">THANK YOU FOR CHOOSING CTG COLLECTION</div></div>${printBtn('#d4af37')}</body></html>`
+<div class="footer">THANK YOU FOR CHOOSING SILK MART</div></div>${printBtn('#d4af37')}</body></html>`
 
 // Template 21: Premium Minimal - Clean, elegant, monochrome with warranty focus
 const template21 = (o: OrderData, logo?: string) => `
@@ -1203,7 +1208,7 @@ ${printStyles}
   <div class="header">
     <div class="logo-area">
       ${logo ? `<img src="${logo}" style="height:40px;margin-bottom:16px;display:block">` : ''}
-      <h1>CTG Collection</h1>
+      <h1>Silk Mart</h1>
       <p>Premium E-Commerce Store</p>
     </div>
     <div class="invoice-details">
@@ -1279,19 +1284,349 @@ ${printStyles}
   </div>
 
   <div class="footer">
-    <p>Thank you for shopping with CTG Collection</p>
+    <p>Thank you for shopping with Silk Mart</p>
     <p style="margin-top:8px">For support, contact us at ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@ctgcollection.com'}</p>
   </div>
 </div>
 ${printBtn('#0f172a')}
 </body></html>`
 
-// Template 22-35: Similar structure with different color schemes
-const template22 = (o: OrderData, logo?: string) => template21(o, logo).replace(/#0f172a/g,'#14532d').replace(/#1e293b/g,'#166534').replace(/#60a5fa/g,'#22c55e').replace(/#334155/g,'#15803d')
-const template23 = (o: OrderData, logo?: string) => template21(o, logo).replace(/#0f172a/g,'#7f1d1d').replace(/#1e293b/g,'#991b1b').replace(/#60a5fa/g,'#f87171').replace(/#334155/g,'#b91c1c')
-const template24 = (o: OrderData, logo?: string) => template21(o, logo).replace(/#0f172a/g,'#78350f').replace(/#1e293b/g,'#92400e').replace(/#60a5fa/g,'#fbbf24').replace(/#334155/g,'#b45309')
-const template25 = (o: OrderData, logo?: string) => template1(o, logo).replace(/#1a365d/g,'#0ea5e9').replace(/#fff/g,'#f0f9ff')
-const template26 = (o: OrderData, logo?: string) => template1(o, logo).replace(/#1a365d/g,'#ea580c').replace(/#fff/g,'#fff7ed')
+// Template 22: Editorial Minimalist - High-fashion magazine style
+const template22 = (o: OrderData, logo?: string) => `
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice ${o.orderNumber}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Lato',sans-serif;background:#f9f9f9;padding:60px;color:#111}
+.receipt{max-width:800px;margin:0 auto;background:#fff;padding:80px;box-shadow:0 30px 60px rgba(0,0,0,0.05);position:relative}
+.header{text-align:center;margin-bottom:60px;position:relative}
+.brand h1{font-family:'Playfair Display',serif;font-size:36px;letter-spacing:1px;font-weight:400;margin-bottom:8px}
+.brand p{font-size:10px;text-transform:uppercase;letter-spacing:3px;color:#888}
+.meta-line{display:flex;justify-content:center;gap:30px;margin-top:24px;border-top:1px solid #eee;border-bottom:1px solid #eee;padding:12px 0}
+.meta-item{font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.meta-item span{font-weight:600;margin-left:6px}
+.address-section{display:flex;justify-content:space-between;margin:60px 0;font-size:12px;line-height:1.8}
+.address-col h4{font-family:'Playfair Display',serif;font-size:16px;margin-bottom:12px;font-style:italic;font-weight:400}
+.items-table{width:100%;border-collapse:collapse;margin:60px 0}
+.items-table th{text-align:left;font-family:'Playfair Display',serif;font-style:italic;font-weight:400;font-size:14px;border-bottom:1px solid #111;padding-bottom:12px}
+.items-table td{padding:20px 0;border-bottom:1px solid #eee;font-size:13px}
+.totals-section{display:flex;justify-content:flex-end;margin-top:40px}
+.totals-box{width:300px}
+.totals-row{display:flex;justify-content:space-between;margin-bottom:10px;font-size:12px}
+.totals-row.grand{font-size:18px;font-family:'Playfair Display',serif;border-top:1px solid #111;padding-top:16px;margin-top:10px;font-style:italic}
+.footer{text-align:center;margin-top:80px;font-size:10px;letter-spacing:2px;color:#888;text-transform:uppercase}
+${printStyles}
+</style></head><body>
+<div class="receipt">
+  <div class="header">
+    ${logo ? `<img src="${logo}" style="height:60px;margin-bottom:20px">` : ''}
+    <div class="brand"><h1>Silk Mart</h1><p>Est. 2024</p></div>
+    <div class="meta-line">
+      <div class="meta-item">No. <span>${o.orderNumber}</span></div>
+      <div class="meta-item">Date <span>${formatDate(o.createdAt)}</span></div>
+      <div class="meta-item">Status <span>${o.paymentStatus.toUpperCase()}</span></div>
+    </div>
+  </div>
+  <div class="address-section">
+    <div class="address-col">
+      <h4>Billed To</h4>
+      <p>${o.address.name}<br>${o.user?.email || ''}<br>${o.address.phone}</p>
+    </div>
+    <div class="address-col" style="text-align:right">
+      <h4>Shipped To</h4>
+      <p>${o.address.address}<br>${o.address.city}, ${o.address.district}</p>
+    </div>
+  </div>
+  <table class="items-table">
+    <thead><tr><th>Item Description</th><th>Variant</th><th>Qty</th><th style="text-align:right">Price</th></tr></thead>
+    <tbody>
+      ${o.items.map(i => `<tr><td>${i.product.name}</td><td>${getVariant(i.variantInfo)}</td><td>${i.quantity}</td><td style="text-align:right">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
+    </tbody>
+  </table>
+  <div class="totals-section">
+    <div class="totals-box">
+      <div class="totals-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
+      <div class="totals-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
+      ${o.discount > 0 ? `<div class="totals-row"><span>Discount</span><span>-৳${o.discount.toLocaleString()}</span></div>` : ''}
+      <div class="totals-row grand"><span>Total</span><span>৳${o.total.toLocaleString()}</span></div>
+    </div>
+  </div>
+  <div class="footer">Thank you for your patronage • support@silkmart.com</div>
+</div>
+${printBtn('#111')}
+</body></html>`
+
+// Template 23: Architectural Grid - Technical blueprint style
+const template23 = (o: OrderData, logo?: string) => `
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice ${o.orderNumber}</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Space Mono',monospace;background:#f0f2f5;padding:40px;color:#333}
+.receipt{max-width:800px;margin:0 auto;background:#fff;border:2px solid #333;padding:20px;box-shadow:10px 10px 0px rgba(0,0,0,0.1)}
+.grid-container{display:grid;grid-template-columns:repeat(12, 1fr);gap:20px;border-bottom:2px solid #333;padding-bottom:20px;margin-bottom:20px}
+.header-l{grid-column:span 8}
+.header-r{grid-column:span 4;text-align:right;border-left:1px solid #333;padding-left:20px}
+h1{font-size:24px;text-transform:uppercase;letter-spacing:-1px}
+.label{font-size:10px;text-transform:uppercase;color:#666;margin-bottom:4px}
+.value{font-size:14px;font-weight:700}
+.info-section{display:grid;grid-template-columns:1fr 1fr;gap:20px;border-bottom:2px solid #333;padding-bottom:20px;margin-bottom:20px}
+.info-box{background:#f0f0f0;padding:15px;border:1px solid #333}
+.items-table{width:100%;border-collapse:collapse;margin-bottom:20px;border:1px solid #333}
+.items-table th{background:#333;color:#fff;padding:10px;text-align:left;font-size:11px}
+.items-table td{padding:12px 10px;border-bottom:1px solid #333;font-size:12px}
+.item-meta{font-size:10px;color:#666}
+.totals-grid{display:grid;grid-template-columns:repeat(2, 1fr);gap:20px}
+.total-box{border:1px solid #333;padding:15px}
+.total-row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px}
+.total-row.grand{font-weight:700;font-size:16px;border-top:1px dashed #333;padding-top:10px;margin-top:10px}
+.footer{text-align:center;font-size:10px;margin-top:40px;border-top:1px solid #333;padding-top:10px}
+${printStyles}
+</style></head><body>
+<div class="receipt">
+  <div class="grid-container">
+    <div class="header-l">
+      <h1>Silk Mart</h1>
+      <p style="font-size:11px">SYSTEM GENERATED INVOICE // V.2.0</p>
+    </div>
+    <div class="header-r">
+      <div class="label">INVOICE ID</div>
+      <div class="value">#${o.orderNumber}</div>
+      <div class="label" style="margin-top:10px">DATE_TIME</div>
+      <div class="value">${formatDate(o.createdAt)}</div>
+    </div>
+  </div>
+  <div class="info-section">
+    <div class="info-box"><div class="label">CLIENT_DATA</div><div>${o.address.name}</div><div>${o.address.phone}</div></div>
+    <div class="info-box"><div class="label">DESTINATION</div><div>${o.address.address}</div><div>${o.address.city}, ${o.address.district}</div></div>
+  </div>
+  <table class="items-table">
+    <thead><tr><th>ITEM_SPEC</th><th>VARIANT_ID</th><th>QTY_UNIT</th><th style="text-align:right">COST_CALC</th></tr></thead>
+    <tbody>
+      ${o.items.map(i => `<tr><td>${i.product.name}${i.product.hasWarranty?' [WARRANTY_ACTIVE]':''}</td><td>${getVariant(i.variantInfo)}</td><td>${i.quantity}</td><td style="text-align:right">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
+    </tbody>
+  </table>
+  <div class="totals-grid">
+    <div>
+      <div class="label">PAYMENT_STATUS</div>
+      <div class="value" style="color:${o.paymentStatus==='paid'?'#000':'red'}">${o.paymentStatus.toUpperCase()}</div>
+      <div class="label" style="margin-top:10px">METHOD</div>
+      <div class="value">${o.paymentMethod==='cod'?'CASH_ON_DELIVERY':'DIGITAL_PAYMENT'}</div>
+    </div>
+    <div class="total-box">
+      <div class="total-row"><span>SUB_TOTAL</span><span>৳${o.subtotal.toLocaleString()}</span></div>
+      <div class="total-row"><span>SHIPPING_FEE</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
+      ${o.discount > 0 ? `<div class="total-row"><span>PROMO_DISC</span><span>-৳${o.discount.toLocaleString()}</span></div>` : ''}
+      <div class="total-row grand"><span>FINAL_TOTAL</span><span>৳${o.total.toLocaleString()}</span></div>
+    </div>
+  </div>
+  <div class="footer">END OF TRANSMISSION // SILK MART SYSTEMS</div>
+</div>
+${printBtn('#333')}
+</body></html>`
+
+// Template 24: Luxury Serif - High-end boutique
+const template24 = (o: OrderData, logo?: string) => `
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice ${o.orderNumber}</title>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Montserrat',sans-serif;background:#1a1a1a;padding:50px;color:#f0f0f0}
+.receipt{max-width:750px;margin:0 auto;background:#111;color:#d4af37;padding:60px 80px;box-shadow:0 20px 40px rgba(0,0,0,0.5);border:1px solid #333}
+.header{text-align:center;margin-bottom:60px;position:relative}
+.header:after{content:'';display:block;width:40px;height:2px;background:#d4af37;margin:30px auto 0}
+.brand h1{font-family:'Bodoni Moda',serif;font-size:42px;letter-spacing:2px;font-weight:400;color:#fff}
+.invoice-num{text-align:center;font-size:12px;letter-spacing:4px;color:#888;margin-bottom:50px}
+.info-row{display:flex;justify-content:space-between;margin-bottom:60px;font-size:12px;color:#aaa;line-height:2}
+.items-list{margin-bottom:60px;border-top:1px solid #333;border-bottom:1px solid #333}
+.item-row{padding:25px 0;display:flex;justify-content:space-between;align-items:center}
+.item-row:not(:last-child){border-bottom:1px solid #222}
+.item-name{font-family:'Bodoni Moda',serif;font-size:18px;color:#fff;margin-bottom:4px}
+.item-meta{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#666}
+.totals{text-align:right}
+.total-row{display:flex;justify-content:flex-end;gap:40px;margin-bottom:12px;font-size:13px;color:#888}
+.total-row.grand{font-size:24px;font-family:'Bodoni Moda',serif;color:#d4af37;margin-top:20px}
+.footer{text-align:center;margin-top:80px;font-size:9px;letter-spacing:3px;color:#555}
+${printStyles}
+</style></head><body>
+<div class="receipt">
+  <div class="header">
+    ${logo ? `<img src="${logo}" style="height:50px;margin-bottom:20px;filter:invert(1)">` : ''}
+    <h1>Silk Mart</h1>
+  </div>
+  <div class="invoice-num">No. ${o.orderNumber} • ${formatDate(o.createdAt)}</div>
+  <div class="info-row">
+    <div>
+      <div style="color:#d4af37;margin-bottom:10px">PREPARED FOR</div>
+      <div>${o.address.name}</div>
+      <div>${o.address.city}</div>
+    </div>
+    <div style="text-align:right">
+      <div style="color:#d4af37;margin-bottom:10px">DELIVERY TO</div>
+      <div>${o.address.address}</div>
+      <div>${o.address.district}</div>
+    </div>
+  </div>
+  <div class="items-list">
+    ${o.items.map(i => `<div class="item-row"><div><div class="item-name">${i.product.name}</div><div class="item-meta">${getVariant(i.variantInfo)} / QTY ${i.quantity}</div></div><div style="font-size:16px">৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}
+  </div>
+  <div class="totals">
+    <div class="total-row"><span>SUBTOTAL</span><span>৳${o.subtotal.toLocaleString()}</span></div>
+    <div class="total-row"><span>SHIPPING</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
+    ${o.discount > 0 ? `<div class="total-row"><span>DISCOUNT</span><span>-৳${o.discount.toLocaleString()}</span></div>` : ''}
+    <div class="total-row grand"><span>TOTAL</span><span>৳${o.total.toLocaleString()}</span></div>
+  </div>
+  <div class="footer">AUTHENTIC LUXURY • SILK MART</div>
+</div>
+${printBtn('#d4af37')}
+</body></html>`
+
+// Template 25: Warranty Shield - Trust & Verified
+const template25 = (o: OrderData, logo?: string) => `
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice ${o.orderNumber}</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Roboto',sans-serif;background:#f3f6f8;padding:40px;color:#1e293b}
+.receipt{max-width:700px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+.shield-header{background:#0e7490;color:#fff;padding:30px;display:flex;justify-content:space-between;align-items:center}
+.shield-title h1{font-size:24px;font-weight:700;display:flex;align-items:center;gap:10px}
+.trust-badge{background:rgba(255,255,255,0.2);padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px}
+.verified-bar{background:#0891b2;color:#fff;padding:10px 30px;font-size:12px;display:flex;justify-content:space-between;font-weight:500}
+.body{padding:30px}
+.warranty-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:30px}
+.w-box{border:1px solid #e2e8f0;padding:15px;border-radius:8px;position:relative}
+.w-box h4{font-size:11px;color:#64748b;margin-bottom:5px;text-transform:uppercase}
+.w-box-icon{position:absolute;top:15px;right:15px;color:#cbd5e1;font-size:20px}
+.product-item{background:#f8fafc;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid #e2e8f0}
+.p-header{display:flex;justify-content:space-between;margin-bottom:8px}
+.p-name{font-weight:600;font-size:14px}
+.p-price{font-weight:700}
+.p-warranty{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#166534;background:#dcfce7;padding:4px 10px;border-radius:4px;margin-top:8px}
+.totals-area{background:#ecfeff;padding:20px;border-radius:8px;margin-top:20px;border:1px solid #cffafe}
+.t-row{display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px}
+.t-row.final{font-weight:700;font-size:18px;color:#0e7490;border-top:1px solid #a5f3fc;padding-top:10px;margin-top:10px}
+.footer{text-align:center;padding:20px;font-size:12px;color:#64748b}
+${printStyles}
+</style></head><body>
+<div class="receipt">
+  <div class="shield-header">
+    <div class="shield-title">
+       ${logo ? `<img src="${logo}" style="height:36px;border-radius:4px">` : ''}
+       <span>Silk Mart</span>
+    </div>
+    <div class="trust-badge">🛡️ Verified Purchase</div>
+  </div>
+  <div class="verified-bar">
+    <span>Pass ID: ${o.verificationCode || 'N/A'}</span>
+    <span>Date: ${formatDate(o.createdAt)}</span>
+  </div>
+  <div class="body">
+    <div class="warranty-grid">
+       <div class="w-box"><h4>Customer</h4><div style="font-weight:500">${o.address.name}</div><div>${o.address.phone}</div><div class="w-box-icon">👤</div></div>
+       <div class="w-box"><h4>Delivery</h4><div>${o.address.city}, ${o.address.district}</div><div class="w-box-icon">📍</div></div>
+    </div>
+    <div class="items-list">
+      <h3 style="font-size:12px;color:#64748b;margin-bottom:12px;text-transform:uppercase">Product Manifest</h3>
+      ${o.items.map(i => `
+        <div class="product-item">
+          <div class="p-header">
+            <span class="p-name">${i.product.name}</span>
+            <span class="p-price">৳${(i.price*i.quantity).toLocaleString()}</span>
+          </div>
+          <div style="font-size:12px;color:#64748b">${getVariant(i.variantInfo)} x ${i.quantity}</div>
+          ${i.product.hasWarranty ? `<div class="p-warranty">🛡️ Covered: ${i.product.warrantyPeriod || 'Standard Warranty'}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+    <div class="totals-area">
+       <div class="t-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
+       <div class="t-row"><span>Shipping & Handling</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
+       ${o.discount > 0 ? `<div class="t-row" style="color:#059669"><span>Promotional Savings</span><span>-৳${o.discount.toLocaleString()}</span></div>` : ''}
+       <div class="t-row final"><span>Amount Paid</span><span>৳${o.total.toLocaleString()}</span></div>
+    </div>
+  </div>
+  <div class="footer">Thank you for shopping with Silk Mart. All warranty claims require this receipt.</div>
+</div>
+${printBtn('#0e7490')}
+</body></html>`
+
+// Template 26: Signature Brand - Artistic
+const template26 = (o: OrderData, logo?: string) => `
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice ${o.orderNumber}</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Jost',sans-serif;background:#fff;padding:50px;color:#2c3e50}
+.receipt{max-width:700px;margin:0 auto;position:relative}
+.sidebar{position:absolute;top:0;left:-20px;bottom:0;width:5px;background:#e74c3c}
+.header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:60px}
+h1{font-family:'Dancing Script',cursive;font-size:48px;color:#e74c3c;line-height:1}
+.invoice-label{font-weight:600;letter-spacing:1px;font-size:14px}
+.invoice-id{font-size:24px;font-weight:300}
+.grid{display:grid;grid-template-columns:1fr 1.5fr;gap:40px;margin-bottom:50px}
+.col-label{font-size:11px;color:#95a5a6;text-transform:uppercase;margin-bottom:8px;letter-spacing:1px}
+.col-content{font-size:15px;line-height:1.6}
+table{width:100%;border-collapse:collapse;margin-bottom:40px}
+th{text-align:left;font-weight:500;color:#95a5a6;font-size:12px;padding:15px 0;border-bottom:1px solid #eee}
+td{padding:20px 0;border-bottom:1px solid #f9f9f9;font-size:15px}
+.t-price{text-align:right;font-weight:500}
+.grand-box{background:#fdf2f1;padding:30px;border-radius:0 20px 0 20px;width:300px;margin-left:auto}
+.grand-row{display:flex;justify-content:space-between;margin-bottom:10px}
+.grand-total{font-size:24px;color:#e74c3c;font-weight:600;border-top:2px solid #edc2be;padding-top:15px;margin-top:10px}
+.sign-area{margin-top:60px;text-align:right}
+.sign-line{display:inline-block;width:200px;border-top:1px solid #ccc;padding-top:10px;text-align:center;font-size:12px;color:#95a5a6}
+.signature{font-family:'Dancing Script',cursive;font-size:24px;color:#e74c3c;display:block;margin-bottom:-10px}
+.footer{margin-top:50px;font-size:10px;color:#bdc3c7;text-align:center}
+${printStyles}
+</style></head><body>
+<div class="receipt">
+  <div class="sidebar"></div>
+  <div class="header">
+    <div>
+      <h1>Silk Mart</h1>
+      <div style="font-size:12px;color:#7f8c8d;margin-top:5px;margin-left:5px">boutique collection</div>
+    </div>
+    <div style="text-align:right">
+      <div class="invoice-label">INVOICE</div>
+      <div class="invoice-id">#${o.orderNumber}</div>
+    </div>
+  </div>
+  <div class="grid">
+     <div>
+       <div class="col-label">Billed To</div>
+       <div class="col-content">${o.address.name}<br>${o.address.phone}</div>
+       <div class="col-label" style="margin-top:20px">Date</div>
+       <div class="col-content">${formatDate(o.createdAt)}</div>
+     </div>
+     <div>
+       <div class="col-label">Shipping Details</div>
+       <div class="col-content">${o.address.address}<br>${o.address.city}, ${o.address.district}</div>
+       <div class="col-text" style="font-size:13px;color:#7f8c8d;margin-top:10px">${o.user?.email || ''}</div>
+     </div>
+  </div>
+  <table>
+    <thead><tr><th>Item Name</th><th>Variant</th><th>Qty</th><th class="t-price">Price</th></tr></thead>
+    <tbody>
+      ${o.items.map(i => `<tr><td>${i.product.name}</td><td style="color:#7f8c8d;font-size:13px">${getVariant(i.variantInfo)}</td><td>${i.quantity}</td><td class="t-price">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
+    </tbody>
+  </table>
+  <div class="grand-box">
+     <div class="grand-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
+     <div class="grand-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
+     ${o.discount > 0 ? `<div class="grand-row"><span>Discount</span><span>-৳${o.discount.toLocaleString()}</span></div>` : ''}
+     <div class="grand-row grand-total"><span>Total</span><span>৳${o.total.toLocaleString()}</span></div>
+  </div>
+  <div class="sign-area">
+    <span class="signature">Silk Mart</span>
+    <div class="sign-line">Authorized Signature</div>
+  </div>
+  <div class="footer">Thank you for choosing Silk Mart. We appreciate your business.</div>
+</div>
+${printBtn('#e74c3c')}
+</body></html>`
+
+// Template 27-35 clones remain...
 const template27 = (o: OrderData, logo?: string) => template1(o, logo).replace(/#1a365d/g,'#10b981').replace(/#fff/g,'#ecfdf5')
 const template28 = (o: OrderData, logo?: string) => template1(o, logo).replace(/#1a365d/g,'#27272a').replace(/#fff/g,'#fafafa')
 const template29 = (o: OrderData, logo?: string) => template3(o, logo).replace(/#b8860b/g,'#b45309').replace(/#fffef5/g,'#fef3c7')
@@ -1347,7 +1682,7 @@ ${printStyles}
   <div class="header">
     <div class="brand">
       ${logo ? `<img src="${logo}" style="height:45px;margin-bottom:8px;border-radius:8px">` : ''}
-      <h1>CTG <span>Collection</span></h1>
+      <h1>SILK <span>MART</span></h1>
       <p>Premium Fashion & Lifestyle</p>
     </div>
     <div class="order-box">
@@ -1405,9 +1740,9 @@ ${printStyles}
   </div>
   
   <div class="footer">
-    <h3>CTG Collection</h3>
+    <h3>Silk Mart</h3>
     <p>Thank you for shopping with us!</p>
-    <div class="email">📧 ctgcollection2@gmail.com</div>
+    <div class="email">📧 support@silkmart.com</div>
     <p class="disclaimer">This is a computer-generated receipt. No signature required.</p>
   </div>
 </div>
