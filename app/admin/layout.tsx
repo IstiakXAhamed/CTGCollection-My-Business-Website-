@@ -233,7 +233,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <span className="text-lg sm:text-xl font-bold text-white">C</span>
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg sm:text-xl font-bold">CTG Collection</h1>
+              <h1 className="text-lg sm:text-xl font-bold">Silk Mart</h1>
               <div className="mt-0.5">
                 <RoleBadge role={isSuperAdmin ? 'superadmin' : user?.role || 'admin'} size="sm" />
               </div>

@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-          <h1 style="margin: 0; font-size: 24px;">CTG Collection</h1>
+          <h1 style="margin: 0; font-size: 24px;">Silk Mart</h1>
         </div>
         <div style="background: #ffffff; padding: 30px; border: 1px solid #eee; border-radius: 0 0 10px 10px;">
           <h2 style="color: #333; margin-bottom: 20px;">${subject}</h2>
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
           </div>
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
           <p style="color: #999; font-size: 12px; text-align: center;">
-            You received this email because you subscribed to CTG Collection newsletter.
+            You received this email because you subscribed to Silk Mart newsletter.
             <br><a href="${process.env.NEXT_PUBLIC_URL}/unsubscribe" style="color: #667eea;">Unsubscribe</a>
           </p>
         </div>
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     for (const email of emailList) {
       try {
         await transporter.sendMail({
-          from: `"CTG Collection" <${process.env.SMTP_USER}>`,
+          from: `"Silk Mart" <${process.env.SMTP_USER}>`,
           to: email,
           subject: subject,
           html: html,

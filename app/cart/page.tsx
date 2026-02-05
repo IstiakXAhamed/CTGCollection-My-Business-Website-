@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Breadcrumb } from '@/components/Breadcrumb'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -195,6 +196,10 @@ export default function CartPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
+          <Breadcrumb 
+            items={[{ label: 'Cart' }]} 
+            className="mb-4"
+          />
           <h1 className="text-4xl font-bold mb-2">Shopping Cart</h1>
           <p className="text-muted-foreground">
             {items.length} {items.length === 1 ? 'item' : 'items'} in your cart

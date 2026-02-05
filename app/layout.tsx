@@ -13,24 +13,25 @@ import { CompareBar } from "@/components/ProductComparison";
 import { ExitIntentPopup } from "@/components/ExitIntentPopup";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import AnnouncementPopup from '@/components/AnnouncementPopup'
+import Analytics from '@/components/Analytics'
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CTG Collection - Premium E-Commerce Store | Bangladesh",
-  description: "Shop the latest fashion and lifestyle products from CTG Collection. Quality products with fast delivery across Bangladesh. SSLCommerz & COD available.",
-  keywords: ["ecommerce", "online shopping", "Bangladesh", "CTG Collection", "fashion", "lifestyle", "Chittagong"],
-  authors: [{ name: "CTG Collection" }],
+  title: "Silk Mart - Premium E-Commerce Store | Bangladesh",
+  description: "Shop the latest fashion and lifestyle products from Silk Mart. Quality products with fast delivery across Bangladesh. SSLCommerz & COD available.",
+  keywords: ["ecommerce", "online shopping", "Bangladesh", "Silk Mart", "fashion", "lifestyle", "Chittagong"],
+  authors: [{ name: "Silk Mart" }],
   openGraph: {
-    title: "CTG Collection - Premium E-Commerce Store",
+    title: "Silk Mart - Premium E-Commerce Store",
     description: "Shop the latest fashion and lifestyle products with free shipping on orders over ৳2000",
     type: "website",
     locale: "en_BD",
-    siteName: "CTG Collection",
+    siteName: "Silk Mart",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CTG Collection",
+    title: "Silk Mart",
     description: "Shop the latest fashion and lifestyle products",
   },
   robots: {
@@ -58,10 +59,11 @@ export default function RootLayout({
           <LiveChat />
           
           {/* Premium Global Features */}
+          <Analytics />
           <WhatsAppChat phoneNumber="8801991523289" position="bottom-right" />
           <FloatingActions />
           <CompareBar />
-          <ExitIntentPopup enabled={false} discountPercent={10} />
+          <ExitIntentPopup enabled={true} discountPercent={10} />
           <PWAInstallPrompt />
           <AnnouncementPopup />
           

@@ -100,7 +100,7 @@ export function Footer() {
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                 <span className="text-xl font-bold">C</span>
               </div>
-              <span className="text-2xl font-bold">{settings?.storeName || 'CTG Collection'}</span>
+              <span className="text-2xl font-bold">{settings?.storeName || 'Silk Mart'}</span>
             </Link>
             <p className="text-gray-400 mb-6 max-w-md">
               {settings?.footerAbout || 'Your premier destination for quality products in Bangladesh. We offer a wide range of fashion, electronics, and lifestyle products with the best prices and fastest delivery.'}
@@ -172,7 +172,7 @@ export function Footer() {
         <div className="container mx-auto px-4 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-gray-400 text-xs sm:text-sm text-center sm:text-left">
-              {settings?.copyrightText || `© ${currentYear} CTG Collection. All rights reserved.`}
+              {settings?.copyrightText || `© ${currentYear} Silk Mart. All rights reserved.`}
             </p>
             
             {/* Social Links - Dynamic */}

@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
               <p style="color: #888; font-size: 14px;">If you didn't request this, please ignore this email.</p>
             </div>
             <div class="footer">
-              <p>CTG Collection - Premium E-Commerce Store</p>
+              <p>Silk Mart - Premium E-Commerce Store</p>
             </div>
           </div>
         </body>

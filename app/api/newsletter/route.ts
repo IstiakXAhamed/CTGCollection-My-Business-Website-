@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       <body>
         <div class="container">
           <div class="header">
-            <h1 style="margin: 0; font-size: 28px;">Welcome to CTG Collection! 🎉</h1>
+            <h1 style="margin: 0; font-size: 28px;">Welcome to Silk Mart! 🎉</h1>
           </div>
           <div class="content">
             <p style="font-size: 18px; color: #333;">Thank you for subscribing to our newsletter!</p>
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
             <a href="${process.env.NEXT_PUBLIC_URL}/shop" class="button">Start Shopping →</a>
           </div>
           <div class="footer">
-            <p>CTG Collection - Premium E-Commerce Store</p>
+            <p>Silk Mart - Premium E-Commerce Store</p>
             <p>You can unsubscribe at any time from your account settings.</p>
           </div>
         </div>
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
         to: email,
         subject: discountCode 
           ? `🎁 Welcome! Here's Your ${discountCode} Discount Code` 
-          : '🎉 Welcome to CTG Collection Newsletter!',
+          : '🎉 Welcome to Silk Mart Newsletter!',
         html: welcomeHtml
       })
       console.log('🔔 Newsletter email send result:', emailSent ? 'SUCCESS' : 'FAILED')

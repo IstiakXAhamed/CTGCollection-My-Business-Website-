@@ -85,12 +85,12 @@ export default function Navbar() {
           <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
             <Image 
               src="/logo.png" 
-              alt="CTG Collection" 
+              alt="Silk Mart" 
               width={48} 
               height={48}
               className="object-contain"
             />
-            <span className="text-lg font-bold hidden sm:block">CTG Collection</span>
+            <span className="text-lg font-bold hidden sm:block">Silk Mart</span>
           </Link>
 
           {/* Desktop Navigation - Fixed width */}

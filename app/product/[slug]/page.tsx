@@ -23,6 +23,7 @@ import { SocialShare } from '@/components/SocialShare'
 import { useCartStore } from '@/store/cart'
 import { StickyMobileCart } from '@/components/product/StickyMobileCart'
 import Link from 'next/link'
+import { Breadcrumb } from '@/components/Breadcrumb'
 
 export default function ProductDetailPage() {
   const params = useParams()
@@ -139,19 +140,16 @@ export default function ProductDetailPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Breadcrumb - hidden on very small screens */}
-        <nav className="mb-4 sm:mb-6 text-xs sm:text-sm hidden sm:block">
-          <ol className="flex items-center gap-1 sm:gap-2 text-muted-foreground flex-wrap">
-            <li><Link href="/" className="hover:text-foreground">Home</Link></li>
-            <li>/</li>
-            <li><Link href="/shop" className="hover:text-foreground">Shop</Link></li>
-            <li>/</li>
-            <li><Link href={`/shop?category=${product.category?.slug}`} className="hover:text-foreground">
-              {product.category?.name}
-            </Link></li>
-            <li>/</li>
-            <li className="text-foreground font-semibold truncate max-w-[150px] sm:max-w-[200px]">{product.name}</li>
-          </ol>
-        </nav>
+        {/* Breadcrumb */}
+        <div className="mb-6 hidden sm:block">
+          <Breadcrumb 
+            items={[
+              { label: 'Shop', href: '/shop' },
+              { label: product.category?.name || 'Category', href: `/shop?category=${product.category?.slug}` },
+              { label: product.name }
+            ]} 
+          />
+        </div>
 
         {/* Main Product Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">

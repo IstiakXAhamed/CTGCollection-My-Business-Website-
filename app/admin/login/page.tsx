@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
             <Lock className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold mb-2">Admin Login</h1>
-          <p className="text-muted-foreground">CTG Collection Admin Panel</p>
+          <p className="text-muted-foreground">Silk Mart Admin Panel</p>
         </CardHeader>
 
         <CardContent>

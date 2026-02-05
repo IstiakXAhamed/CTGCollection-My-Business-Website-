@@ -69,7 +69,7 @@ export default function AboutPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-6xl font-bold mb-6"
           >
-            {settings?.aboutTitle || `About ${settings?.storeName || 'CTG Collection'}`}
+            {settings?.aboutTitle || `About ${settings?.storeName || 'Silk Mart'}`}
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -122,7 +122,7 @@ export default function AboutPage() {
             ) : (
               <>
                 <p className="text-lg text-muted-foreground mb-6">
-                  {settings?.storeName || 'CTG Collection'} started in 2020 with a simple mission: to make quality products 
+                  {settings?.storeName || 'Silk Mart'} started in 2020 with a simple mission: to make quality products 
                   accessible to everyone in Bangladesh. What began as a small online store in 
                   Chittagong has grown into one of the most trusted e-commerce platforms in the country.
                 </p>
@@ -194,7 +194,7 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Shop?</h2>
           <p className="text-white/80 mb-8 max-w-xl mx-auto">
-            Explore our wide range of products and discover why thousands of customers trust {settings?.storeName || 'CTG Collection'}.
+            Explore our wide range of products and discover why thousands of customers trust {settings?.storeName || 'Silk Mart'}.
           </p>
           <div className="flex justify-center gap-4">
             <Button asChild size="lg" variant="secondary">

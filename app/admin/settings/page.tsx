@@ -41,7 +41,7 @@ export default function AdminSettingsPage() {
     promoCode: 'WELCOME10',
     promoMessage: '🎉 FLASH SALE! Use code WELCOME10 for 10% OFF',
     promoEndTime: null,
-    storeName: 'CTG Collection',
+    storeName: 'Silk Mart',
     storeEmail: 'info@ctgcollection.com',
     storePhone: '+880 1234 567890',
     storeAddress: 'Chittagong, Bangladesh',

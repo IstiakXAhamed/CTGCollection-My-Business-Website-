@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       `
 
       await transporter.sendMail({
-        from: `"CTG Collection" <${process.env.SMTP_USER}>`,
+        from: `"Silk Mart" <${process.env.SMTP_USER}>`,
         to: recipientEmail,
         subject: `🎁 ${senderName} sent you a ৳${amount} Gift Card!`,
         html

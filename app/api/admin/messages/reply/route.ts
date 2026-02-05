@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
         siteSettings = await (prisma as any).siteSettings.findUnique({ where: { id: 'main' } })
       } catch (e) {}
 
-      const storeName = siteSettings?.storeName || 'CTG Collection'
+      const storeName = siteSettings?.storeName || 'Silk Mart'
       const storeEmail = siteSettings?.email || process.env.SMTP_USER || 'support@ctgcollection.com'
 
       await transporter.sendMail({

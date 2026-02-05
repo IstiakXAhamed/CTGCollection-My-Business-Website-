@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Breadcrumb } from '@/components/Breadcrumb'
 import { useSearchParams } from 'next/navigation'
 import { formatPrice } from '@/lib/utils'
 import type { Product, Category } from '@/types'
@@ -161,6 +162,19 @@ function ShopContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+             items={[
+               { label: 'Shop', href: '/shop' },
+               ...(isFeatured ? [{ label: 'Featured', href: '/shop?featured=true' }] : []),
+               ...(isSale ? [{ label: 'Sale', href: '/shop?sale=true' }] : []),
+               ...(categoryParam ? [{ label: categoryParam, href: `/shop?category=${categoryParam}` }] : []),
+               ...(searchParam ? [{ label: `Search: ${searchParam}` }] : [])
+             ]}
+          />
+        </div>
+
         {/* Header */}
         <div className="mb-4 sm:mb-8">
           <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">

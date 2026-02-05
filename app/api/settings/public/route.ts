@@ -16,7 +16,7 @@ export async function GET() {
 
     return NextResponse.json({
       multiVendorEnabled: settings?.multiVendorEnabled ?? false,
-      siteName: settings?.storeName || 'CTG Collection',
+      siteName: settings?.storeName || 'Silk Mart',
       spinWheelConfig: settings?.spinWheelConfig || null
     })
   } catch (error) {

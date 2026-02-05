@@ -24,7 +24,7 @@ export async function GET() {
     // If model doesn't exist yet, return defaults
     return NextResponse.json({
       settings: {
-        storeName: 'CTG Collection',
+        storeName: 'Silk Mart',
         storeTagline: 'Premium E-Commerce Store',
         storeEmail: 'support@ctgcollection.com',
         storePhone: '+880 1234 567890',
@@ -33,8 +33,8 @@ export async function GET() {
         workingDays: 'Sat - Thu',
         workingHours: '9AM - 9PM',
         offDays: 'Friday: 3PM - 9PM',
-        aboutTitle: 'About CTG Collection',
-        copyrightText: '© 2024 CTG Collection. All rights reserved.'
+        aboutTitle: 'About Silk Mart',
+        copyrightText: '© 2024 Silk Mart. All rights reserved.'
       }
     })
   }

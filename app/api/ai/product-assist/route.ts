@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
 // ============ Real AI Functions ============
 
 async function generateDescription(name: string, category?: string): Promise<string> {
-  const prompt = `You are a professional e-commerce copywriter for a Bangladeshi fashion and lifestyle store called "CTG Collection".
+  const prompt = `You are a professional e-commerce copywriter for a Bangladeshi fashion and lifestyle store called "Silk Mart".
 
 Write a compelling, detailed product description for: "${name}"
 ${category ? `Category: ${category}` : ''}
@@ -157,9 +157,9 @@ ${category ? `Category: ${category}` : ''}
 Requirements:
 - Max 60 characters
 - Include main keyword
-- Include "CTG Collection" brand
+- Include "Silk Mart" brand
 - Include a benefit or USP
-- Format: Product Name | Benefit | CTG Collection
+- Format: Product Name | Benefit | Silk Mart
 
 SEO Title:`
 
@@ -240,7 +240,7 @@ Return ONLY the JSON, no other text.`
 
 function fallbackDescription(name: string, category?: string): string {
   const categoryText = category ? ` from our ${category} collection` : ''
-  return `Discover the ${name}${categoryText}. Crafted with premium quality materials for exceptional comfort and style. This product features modern design elements perfect for any occasion. Experience the perfect blend of functionality and elegance with CTG Collection.`
+  return `Discover the ${name}${categoryText}. Crafted with premium quality materials for exceptional comfort and style. This product features modern design elements perfect for any occasion. Experience the perfect blend of functionality and elegance with Silk Mart.`
 }
 
 function fallbackTags(name: string, category?: string): string {
@@ -251,7 +251,7 @@ function fallbackTags(name: string, category?: string): string {
 }
 
 function fallbackSEO(name: string, category?: string): string {
-  return `${name} | Premium Quality | CTG Collection Bangladesh`
+  return `${name} | Premium Quality | Silk Mart Bangladesh`
 }
 
 function fallbackAnalyze(name: string): any {
