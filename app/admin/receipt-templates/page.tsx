@@ -21,23 +21,26 @@ const RECEIPT_TEMPLATES = [
   { id: '36', name: 'Classic Purple Gradient', description: 'Your favorite! Purple gradient with emojis', category: 'Brand', grade: 'exceptional' as Grade, preview: { header: '#667eea', body: '#fff', text: '#fff', logoBg: 'transparent' } },
   { id: '1', name: 'Classic Professional', description: 'Clean blue business invoice with premium layout', category: 'Professional', grade: 'exceptional' as Grade, preview: { header: '#1a365d', body: '#fff', text: '#fff', logoBg: '#fff' } },
   { id: '6', name: 'Dark Luxury', description: 'Elegant black with gold accents - Premium feel', category: 'Luxury', grade: 'exceptional' as Grade, preview: { header: '#0a0a0a', body: '#1a1a1a', text: '#d4af37', logoBg: '#1a1a1a' } },
-  { id: '4', name: 'Corporate Bold', description: 'Strong navy header - Executive style', category: 'Professional', grade: 'exceptional' as Grade, preview: { header: '#0f172a', body: '#fff', text: '#fff', logoBg: '#fff' } },
+  { id: '24', name: 'Luxury Serif', description: 'High-end boutique elegance - Dark & Gold', category: 'Luxury', grade: 'exceptional' as Grade, preview: { header: '#111', body: '#1a1a1a', text: '#d4af37', logoBg: '#111' } },
+  { id: '26', name: 'Signature Brand', description: 'Artistic layout with signature style', category: 'Creative', grade: 'exceptional' as Grade, preview: { header: '#fff', body: '#fff', text: '#e74c3c', logoBg: '#fff' } },
   { id: '20', name: 'Signature CTG', description: 'Premium brand signature with gold details', category: 'Brand', grade: 'exceptional' as Grade, preview: { header: '#0f172a', body: '#fff', text: '#d4af37', logoBg: '#fff' } },
   
   // EXCELLENT - Beautiful and professional
+  { id: '22', name: 'Editorial Minimalist', description: 'High-fashion editorial layout', category: 'Elegant', grade: 'excellent' as Grade, preview: { header: '#fff', body: '#f9f9f9', text: '#111', logoBg: '#fff' } },
+  { id: '25', name: 'Warranty Shield', description: 'Trust-focused with verified badge details', category: 'Professional', grade: 'excellent' as Grade, preview: { header: '#0e7490', body: '#f3f6f8', text: '#fff', logoBg: '#0e7490' } },
   { id: '3', name: 'Elegant Cream', description: 'Warm ivory with gold accents - Sophisticated', category: 'Elegant', grade: 'excellent' as Grade, preview: { header: '#92400e', body: '#fffbeb', text: '#fff', logoBg: '#fffbeb' } },
   { id: '13', name: 'Ocean Blue', description: 'Deep blue professional - Trusted feel', category: 'Professional', grade: 'excellent' as Grade, preview: { header: '#0369a1', body: '#f0f9ff', text: '#fff', logoBg: '#f0f9ff' } },
   { id: '16', name: 'Purple Reign', description: 'Royal purple - Premium elegance', category: 'Elegant', grade: 'excellent' as Grade, preview: { header: '#5b21b6', body: '#f5f3ff', text: '#fff', logoBg: '#f5f3ff' } },
   { id: '15', name: 'Emerald Pro', description: 'Rich green - Fresh and professional', category: 'Professional', grade: 'excellent' as Grade, preview: { header: '#047857', body: '#ecfdf5', text: '#fff', logoBg: '#ecfdf5' } },
-  { id: '21', name: 'Midnight Navy', description: 'Deep navy with blue accents - Modern luxury', category: 'Luxury', grade: 'excellent' as Grade, preview: { header: '#0f172a', body: '#1e293b', text: '#60a5fa', logoBg: '#1e293b' } },
+  { id: '21', name: 'Premium Minimal', description: 'Clean, elegant, monochrome with warranty focus', category: 'Professional', grade: 'excellent' as Grade, preview: { header: '#0f172a', body: '#fff', text: '#0f172a', logoBg: '#fff' } },
   
   // GREAT - Very good designs
+  { id: '23', name: 'Architectural Grid', description: 'Technical blueprint aesthetic', category: 'Creative', grade: 'great' as Grade, preview: { header: '#333', body: '#f0f2f5', text: '#fff', logoBg: '#333' } },
   { id: '9', name: 'Split Invoice', description: 'Formal invoice style - Business ready', category: 'Professional', grade: 'great' as Grade, preview: { header: '#1e293b', body: '#f8fafc', text: '#fff', logoBg: '#f8fafc' } },
   { id: '14', name: 'Rose Elegant', description: 'Soft pink elegance - Feminine touch', category: 'Elegant', grade: 'great' as Grade, preview: { header: '#be185d', body: '#fdf2f8', text: '#fff', logoBg: '#fdf2f8' } },
   { id: '12', name: 'Executive Gray', description: 'Sophisticated gray - Corporate feel', category: 'Professional', grade: 'great' as Grade, preview: { header: '#374151', body: '#f9fafb', text: '#fff', logoBg: '#f9fafb' } },
   { id: '11', name: 'Gradient Banner', description: 'Vibrant gradient header - Modern style', category: 'Creative', grade: 'great' as Grade, preview: { header: '#3b82f6', body: '#f8fafc', text: '#fff', logoBg: '#f8fafc' } },
-  { id: '22', name: 'Forest Deep', description: 'Rich forest green - Natural elegance', category: 'Elegant', grade: 'great' as Grade, preview: { header: '#14532d', body: '#f0fdf4', text: '#fff', logoBg: '#f0fdf4' } },
-  { id: '23', name: 'Burgundy Royal', description: 'Royal burgundy wine - Classic premium', category: 'Luxury', grade: 'great' as Grade, preview: { header: '#7f1d1d', body: '#fef2f2', text: '#fff', logoBg: '#fef2f2' } },
+  { id: '4', name: 'Corporate Bold', description: 'Strong navy header - Executive style', category: 'Professional', grade: 'great' as Grade, preview: { header: '#0f172a', body: '#fff', text: '#fff', logoBg: '#fff' } },
   
   // GOOD - Solid designs
   { id: '5', name: 'Soft Luxe', description: 'Pink-purple gradients - Gentle luxury', category: 'Luxury', grade: 'good' as Grade, preview: { header: '#c026d3', body: '#fdf4ff', text: '#fff', logoBg: '#fdf4ff' } },

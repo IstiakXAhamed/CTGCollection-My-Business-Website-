@@ -630,7 +630,7 @@ ${printStyles}
     <div class="info-centered">${o.address.address}<br>${o.address.city}, ${o.address.district}</div>
   </div>
   <div class="items-list">
-    ${o.items.map(i => `<div class="item"><div><div class="item-name">${i.product.name}</div><div class="item-details">${getVariant(i.variantInfo)} × ${i.quantity}</div></div><div>৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}
+    ${o.items.map(i => `<div class="item"><div><div class="item-name">${i.product.name}</div><div class="item-details">${getVariant(i.variantInfo)} × ${i.quantity}${i.product.hasWarranty?' • 🛡️ '+(i.product.warrantyPeriod||'Warranty'):''}</div></div><div>৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}
   </div>
   <div class="totals">
     <div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
@@ -689,7 +689,7 @@ ${printStyles}
     <div class="info-block" style="text-align:right"><h4>SHIP TO:</h4><p>${o.address.city}<br>${o.address.district}</p></div>
   </div>
   <table><thead><tr><th>ITEM</th><th>QTY</th><th style="text-align:right">AMOUNT</th></tr></thead><tbody>
-    ${o.items.map(i => `<tr><td>${i.product.name}<br><span style="color:#8b7355;font-size:11px">${getVariant(i.variantInfo)}</span></td><td>${i.quantity}</td><td style="text-align:right">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
+    ${o.items.map(i => `<tr><td>${i.product.name}${i.product.hasWarranty?' <span style="font-size:10px;color:#8b7355">🛡️ '+(i.product.warrantyPeriod||'Warranty')+'</span>':''}<br><span style="color:#8b7355;font-size:11px">${getVariant(i.variantInfo)}</span></td><td>${i.quantity}</td><td style="text-align:right">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
   </tbody></table>
   <div class="totals">
     <div class="total-row">Subtotal: ৳${o.subtotal.toLocaleString()}</div>
@@ -821,7 +821,7 @@ ${printStyles}
     </div>
     <div class="items">
       <div class="items-header"><span>ITEM</span><span style="text-align:center">QTY</span><span style="text-align:right">AMOUNT</span></div>
-      ${o.items.map(i => `<div class="item-row"><div><strong>${i.product.name}</strong><br><span style="font-size:12px;color:#94a3b8">${getVariant(i.variantInfo)}</span></div><div style="text-align:center">${i.quantity}</div><div style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}
+      ${o.items.map(i => `<div class="item-row"><div><strong>${i.product.name}</strong>${i.product.hasWarranty?' <span style="font-size:10px;color:#94a3b8">🛡️ '+(i.product.warrantyPeriod||'War.')+'</span>':''}<br><span style="font-size:12px;color:#94a3b8">${getVariant(i.variantInfo)}</span></div><div style="text-align:center">${i.quantity}</div><div style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}
     </div>
     <div class="totals">
       <div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
@@ -865,7 +865,7 @@ ${printStyles}</style></head><body>
 <div class="info-box"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
 <div class="info-box"><h4>DELIVERY</h4><p>${o.address.city}<br>${o.address.district}</p></div></div>
 <table><thead><tr><th>Item</th><th>Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>
-${o.items.map(i=>`<tr><td><strong>${i.product.name}</strong><br><span style="color:#94a3b8;font-size:12px">${getVariant(i.variantInfo)}</span></td><td>${i.quantity}</td><td style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
+${o.items.map(i=>`<tr><td><strong>${i.product.name}</strong>${i.product.hasWarranty?' <span style="font-size:10px;color:#fff;background:rgba(255,255,255,0.2);padding:2px 6px;border-radius:4px">🛡️ '+(i.product.warrantyPeriod||'Wty')+'</span>':''}<br><span style="color:#94a3b8;font-size:12px">${getVariant(i.variantInfo)}</span></td><td>${i.quantity}</td><td style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
 </tbody></table>
 <div class="totals">
 <div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
@@ -900,7 +900,7 @@ ${printStyles}</style></head><body><div class="receipt">
 <div class="row"><div class="box"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
 <div class="box"><h4>SHIPPING</h4><p>${o.address.city}, ${o.address.district}</p></div></div>
 <table><thead><tr><th>Description</th><th style="text-align:center">Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>
-${o.items.map(i=>`<tr><td>${i.product.name}<br><span style="color:#9ca3af;font-size:11px">${getVariant(i.variantInfo)}</span></td><td style="text-align:center">${i.quantity}</td><td style="text-align:right">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
+${o.items.map(i=>`<tr><td>${i.product.name}${i.product.hasWarranty?' <span style="font-size:10px">🛡️ '+(i.product.warrantyPeriod||'Wty')+'</span>':''}<br><span style="color:#9ca3af;font-size:11px">${getVariant(i.variantInfo)}</span></td><td style="text-align:center">${i.quantity}</td><td style="text-align:right">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
 </tbody></table><div class="totals">
 <div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
 <div class="total-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
@@ -934,7 +934,7 @@ ${printStyles}</style></head><body><div class="receipt">
 <div class="cards"><div class="card"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
 <div class="card"><h4>DELIVERY</h4><p>${o.address.city}<br>${o.address.district}</p></div></div>
 <div class="items"><div class="items-header"><span>ITEM</span><span style="text-align:center">QTY</span><span style="text-align:right">AMOUNT</span></div>
-${o.items.map(i=>`<div class="item-row"><div><strong>${i.product.name}</strong><br><span style="color:#64748b;font-size:11px">${getVariant(i.variantInfo)}</span></div><div style="text-align:center">${i.quantity}</div><div style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}</div>
+${o.items.map(i=>`<div class="item-row"><div><strong>${i.product.name}</strong>${i.product.hasWarranty?' <span style="color:#0369a1;font-size:10px">🛡️ '+(i.product.warrantyPeriod||'Wty')+'</span>':''}<br><span style="color:#64748b;font-size:11px">${getVariant(i.variantInfo)}</span></div><div style="text-align:center">${i.quantity}</div><div style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}</div>
 <div class="totals"><div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
 <div class="total-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
 ${o.discount>0?`<div class="total-row"><span>Discount</span><span>-৳${o.discount.toLocaleString()}</span></div>`:''}
@@ -966,7 +966,7 @@ ${printStyles}</style></head><body><div class="receipt">
 <div class="num">${o.orderNumber}</div><div style="color:#9ca3af;font-size:12px">${formatDate(o.createdAt)}</div></div>
 <div class="cards"><div class="card"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
 <div class="card"><h4>DELIVERY</h4><p>${o.address.city}<br>${o.address.district}</p></div></div>
-<div class="items">${o.items.map(i=>`<div class="item"><div><div class="item-name">${i.product.name}</div><div class="item-meta">${getVariant(i.variantInfo)} × ${i.quantity}</div></div><div style="font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}</div>
+<div class="items">${o.items.map(i=>`<div class="item"><div><div class="item-name">${i.product.name}${i.product.hasWarranty?' 🛡️':''}</div><div class="item-meta">${getVariant(i.variantInfo)} × ${i.quantity}</div></div><div style="font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}</div>
 <div class="totals"><div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
 <div class="total-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
 ${o.discount>0?`<div class="total-row"><span>Discount</span><span>-৳${o.discount.toLocaleString()}</span></div>`:''}
@@ -998,7 +998,7 @@ ${printStyles}</style></head><body><div class="receipt">
 <div class="info-card"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
 <div class="info-card"><h4>DELIVERY</h4><p>${o.address.city}, ${o.address.district}</p></div></div>
 <table><thead><tr><th>Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>
-${o.items.map(i=>`<tr><td><strong>${i.product.name}</strong><br><span style="color:#9ca3af;font-size:11px">${getVariant(i.variantInfo)}</span></td><td style="text-align:center">${i.quantity}</td><td style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
+${o.items.map(i=>`<tr><td><strong>${i.product.name}</strong>${i.product.hasWarranty?' <span style="color:#059669;font-size:10px">🛡️ '+(i.product.warrantyPeriod||'Wty')+'</span>':''}<br><span style="color:#9ca3af;font-size:11px">${getVariant(i.variantInfo)}</span></td><td style="text-align:center">${i.quantity}</td><td style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
 </tbody></table><div class="totals">
 <div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
 <div class="total-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
@@ -1032,7 +1032,7 @@ ${printStyles}</style></head><body><div class="receipt">
 <div class="info-box"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
 <div class="info-box"><h4>DELIVERY</h4><p>${o.address.city}<br>${o.address.district}</p></div></div>
 <div class="items"><div class="items-header"><span>ITEM</span><span style="text-align:center">QTY</span><span style="text-align:right">AMOUNT</span></div>
-${o.items.map(i=>`<div class="item-row"><div><strong>${i.product.name}</strong><br><span style="color:#9ca3af;font-size:11px">${getVariant(i.variantInfo)}</span></div><div style="text-align:center">${i.quantity}</div><div style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}</div>
+${o.items.map(i=>`<div class="item-row"><div><strong>${i.product.name}</strong>${i.product.hasWarranty?' <span style="font-size:10px">🛡️</span>':''}<br><span style="color:#9ca3af;font-size:11px">${getVariant(i.variantInfo)}</span></div><div style="text-align:center">${i.quantity}</div><div style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}</div>
 <div class="totals"><div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
 <div class="total-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
 ${o.discount>0?`<div class="total-row"><span>Discount</span><span>-৳${o.discount.toLocaleString()}</span></div>`:''}
@@ -1062,7 +1062,7 @@ ${printStyles}</style></head><body><div class="receipt">
 <div class="cards"><div class="card"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
 <div class="card"><h4>DELIVERY</h4><p>${o.address.city}, ${o.address.district}</p></div></div>
 <table><thead><tr><th>Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>
-${o.items.map(i=>`<tr><td><strong>${i.product.name}</strong><br><span style="color:#9ca3af;font-size:11px">${getVariant(i.variantInfo)}</span></td><td style="text-align:center">${i.quantity}</td><td style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
+${o.items.map(i=>`<tr><td><strong>${i.product.name}</strong>${i.product.hasWarranty?' <span style="color:#b45309;font-size:10px">🛡️</span>':''}<br><span style="color:#9ca3af;font-size:11px">${getVariant(i.variantInfo)}</span></div><td style="text-align:center">${i.quantity}</td><td style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
 </tbody></table><div class="totals">
 <div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
 <div class="total-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
@@ -1095,7 +1095,7 @@ ${printStyles}</style></head><body><div class="receipt">
 <div class="info-box"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
 <div class="info-box"><h4>SHIPPING</h4><p>${o.address.city}, ${o.address.district}</p></div></div>
 <table><thead><tr><th>Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>
-${o.items.map(i=>`<tr><td><strong>${i.product.name}</strong><br><span style="color:#94a3b8;font-size:11px">${getVariant(i.variantInfo)}</span></td><td style="text-align:center">${i.quantity}</td><td style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
+${o.items.map(i=>`<tr><td><strong>${i.product.name}</strong>${i.product.hasWarranty?' <span style="font-size:10px">🛡️ '+(i.product.warrantyPeriod||'Wty')+'</span>':''}<br><span style="color:#94a3b8;font-size:11px">${getVariant(i.variantInfo)}</span></td><td style="text-align:center">${i.quantity}</td><td style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
 </tbody></table><div class="totals">
 <div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
 <div class="total-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
@@ -1128,7 +1128,7 @@ ${printStyles}</style></head><body><div class="receipt">
 <div class="card"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
 <div class="card"><h4>DELIVERY</h4><p>${o.address.city}<br>${o.address.district}</p></div></div>
 <div class="items"><div class="items-header"><span>ITEM</span><span style="text-align:center">QTY</span><span style="text-align:right">AMOUNT</span></div>
-${o.items.map(i=>`<div class="item-row"><div><strong>${i.product.name}</strong><br><span style="color:#94a3b8;font-size:11px">${getVariant(i.variantInfo)}</span></div><div style="text-align:center">${i.quantity}</div><div style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}</div>
+${o.items.map(i=>`<div class="item-row"><div><strong>${i.product.name}</strong>${i.product.hasWarranty?' <span style="color:#0d9488;font-size:10px">🛡️ '+(i.product.warrantyPeriod||'Wty')+'</span>':''}<br><span style="color:#94a3b8;font-size:11px">${getVariant(i.variantInfo)}</span></div><div style="text-align:center">${i.quantity}</div><div style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}</div>
 <div class="totals"><div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
 <div class="total-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
 ${o.discount>0?`<div class="total-row"><span>Discount</span><span>-৳${o.discount.toLocaleString()}</span></div>`:''}
@@ -1162,7 +1162,7 @@ ${printStyles}</style></head><body><div class="receipt">
 <div class="info"><div class="info-box"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
 <div class="info-box"><h4>DELIVERY</h4><p>${o.address.city}<br>${o.address.district}</p></div></div>
 <table><thead><tr><th>ITEM</th><th style="text-align:center">QTY</th><th style="text-align:right">AMOUNT</th></tr></thead><tbody>
-${o.items.map(i=>`<tr><td><strong>${i.product.name}</strong><br><span style="color:#94a3b8;font-size:11px">${getVariant(i.variantInfo)}</span></td><td style="text-align:center">${i.quantity}</td><td style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
+${o.items.map(i=>`<tr><td><strong>${i.product.name}</strong>${i.product.hasWarranty?' <span style="color:#d4af37;font-size:10px">🛡️</span>':''}<br><span style="color:#94a3b8;font-size:11px">${getVariant(i.variantInfo)}</span></td><td style="text-align:center">${i.quantity}</td><td style="text-align:right;font-weight:600">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
 </tbody></table><div class="totals">
 <div class="total-row"><span>Subtotal</span><span>৳${o.subtotal.toLocaleString()}</span></div>
 <div class="total-row"><span>Shipping</span><span>৳${o.shippingCost.toLocaleString()}</span></div>
@@ -1468,7 +1468,7 @@ ${printStyles}
     </div>
   </div>
   <div class="items-list">
-    ${o.items.map(i => `<div class="item-row"><div><div class="item-name">${i.product.name}</div><div class="item-meta">${getVariant(i.variantInfo)} / QTY ${i.quantity}</div></div><div style="font-size:16px">৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}
+    ${o.items.map(i => `<div class="item-row"><div><div class="item-name">${i.product.name}</div><div class="item-meta">${getVariant(i.variantInfo)} / QTY ${i.quantity}${i.product.hasWarranty?' • 🛡️ WTY INCL':''}</div></div><div style="font-size:16px">৳${(i.price*i.quantity).toLocaleString()}</div></div>`).join('')}
   </div>
   <div class="totals">
     <div class="total-row"><span>SUBTOTAL</span><span>৳${o.subtotal.toLocaleString()}</span></div>
@@ -1608,7 +1608,7 @@ ${printStyles}
   <table>
     <thead><tr><th>Item Name</th><th>Variant</th><th>Qty</th><th class="t-price">Price</th></tr></thead>
     <tbody>
-      ${o.items.map(i => `<tr><td>${i.product.name}</td><td style="color:#7f8c8d;font-size:13px">${getVariant(i.variantInfo)}</td><td>${i.quantity}</td><td class="t-price">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
+      ${o.items.map(i => `<tr><td>${i.product.name}${i.product.hasWarranty?' <span style="font-size:10px;color:#e74c3c">🛡️</span>':''}</td><td style="color:#7f8c8d;font-size:13px">${getVariant(i.variantInfo)}</td><td>${i.quantity}</td><td class="t-price">৳${(i.price*i.quantity).toLocaleString()}</td></tr>`).join('')}
     </tbody>
   </table>
   <div class="grand-box">
@@ -1721,7 +1721,7 @@ ${printStyles}
       <tbody>
         ${o.items.map(item => `
           <tr>
-            <td class="product-name">${item.product.name}</td>
+            <td class="product-name">${item.product.name}${item.product.hasWarranty ? ' <span style="font-size:10px;color:#667eea">🛡️</span>' : ''}</td>
             <td class="variant">${getVariant(item.variantInfo)}</td>
             <td style="text-align:center">${item.quantity}</td>
             <td style="text-align:right">৳${item.price.toLocaleString()}</td>
