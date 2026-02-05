@@ -9,7 +9,9 @@ import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { 
   Bot, Loader2, Save, CheckCircle2, XCircle, AlertTriangle,
-  Sparkles, MessageSquare, FileText, ShoppingBag, BarChart3, Eye, EyeOff
+  Sparkles, MessageSquare, FileText, ShoppingBag, BarChart3, Eye, EyeOff,
+  Image, Megaphone, Users, TrendingUp, Package, ShieldAlert, Percent,
+  HelpCircle, Ruler, Hash, Mail, Globe, Wand2
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
@@ -19,14 +21,37 @@ interface AIFeature {
   description: string
   icon: any
   enabled: boolean
+  category: 'core' | 'product' | 'marketing' | 'analytics' | 'customer'
 }
 
 const AI_FEATURES: AIFeature[] = [
-  { id: 'product_assist', name: 'Product AI Assistant', description: 'Smart product descriptions, tags, and analysis', icon: ShoppingBag, enabled: true },
-  { id: 'chat_assist', name: 'Customer Support AI', description: 'AI-powered chat response suggestions', icon: MessageSquare, enabled: false },
-  { id: 'review_moderation', name: 'Review Moderation', description: 'Auto-detect spam and inappropriate reviews', icon: FileText, enabled: false },
-  { id: 'seo_generator', name: 'SEO Content Generator', description: 'Generate meta descriptions for categories/pages', icon: Sparkles, enabled: false },
-  { id: 'analytics_insights', name: 'AI Analytics Insights', description: 'Smart insights from sales and traffic data', icon: BarChart3, enabled: false },
+  // Core Features
+  { id: 'product_assist', name: 'Product AI Assistant', description: 'Smart descriptions with tone & language control', icon: ShoppingBag, enabled: true, category: 'core' },
+  { id: 'chat_assist', name: 'Customer Support AI', description: 'AI-powered chat response suggestions', icon: MessageSquare, enabled: true, category: 'core' },
+  { id: 'review_moderation', name: 'Review Moderation', description: 'Spam detection + auto-response generator', icon: FileText, enabled: true, category: 'core' },
+  
+  // Product Features
+  { id: 'image_studio', name: 'AI Image Studio', description: 'Smart image search with Gemini keywords', icon: Image, enabled: true, category: 'product' },
+  { id: 'magic_rewrite', name: 'Magic Rewrite', description: 'Improve/expand/shorten any text', icon: Wand2, enabled: true, category: 'product' },
+  { id: 'faq_generator', name: 'FAQ Generator', description: 'Auto-create product Q&A sections', icon: HelpCircle, enabled: true, category: 'product' },
+  { id: 'size_recommender', name: 'Size Recommender', description: 'Help customers pick the right size', icon: Ruler, enabled: true, category: 'product' },
+  { id: 'bundle_suggester', name: 'Bundle Suggester', description: 'AI-powered cross-sell recommendations', icon: Package, enabled: true, category: 'product' },
+  
+  // Marketing Features
+  { id: 'marketing_ai', name: 'Marketing AI Center', description: 'Facebook posts, emails, ad copy in BN/EN', icon: Megaphone, enabled: true, category: 'marketing' },
+  { id: 'hashtag_generator', name: 'Hashtag Generator', description: 'Trending social media hashtags', icon: Hash, enabled: true, category: 'marketing' },
+  { id: 'seo_generator', name: 'SEO Generator', description: 'Meta titles, descriptions, keywords', icon: Sparkles, enabled: true, category: 'marketing' },
+  { id: 'email_ai', name: 'Order Email AI', description: 'Shipping updates in Bengali/English', icon: Mail, enabled: true, category: 'marketing' },
+  
+  // Analytics Features  
+  { id: 'analytics_insights', name: 'Analytics Insights', description: 'Smart insights from sales data', icon: BarChart3, enabled: true, category: 'analytics' },
+  { id: 'inventory_forecast', name: 'Inventory Forecaster', description: 'Predict stock needs & reorder points', icon: TrendingUp, enabled: true, category: 'analytics' },
+  { id: 'discount_optimizer', name: 'Discount Optimizer', description: 'Calculate optimal sale prices', icon: Percent, enabled: true, category: 'analytics' },
+  { id: 'fraud_detector', name: 'Fraud Detector', description: 'Flag suspicious orders with risk scores', icon: ShieldAlert, enabled: true, category: 'analytics' },
+  
+  // Customer Features
+  { id: 'customer_persona', name: 'Customer Persona AI', description: 'Segment customers by behavior', icon: Users, enabled: true, category: 'customer' },
+  { id: 'multi_language', name: 'Multi-Language AI', description: 'Bengali/English with tone control', icon: Globe, enabled: true, category: 'customer' },
 ]
 
 export function AISettings() {
@@ -220,42 +245,133 @@ export function AISettings() {
           </p>
         </div>
 
-        {/* AI Features Toggle */}
-        <div className="space-y-3">
-          <h4 className="font-semibold text-gray-900">⚡ AI Features</h4>
+        {/* AI Features Toggle - Grouped by Category */}
+        <div className="space-y-6">
+          <h4 className="font-semibold text-gray-900 text-lg">⚡ AI Features ({AI_FEATURES.length} Available)</h4>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {AI_FEATURES.map(feature => {
-              const Icon = feature.icon
-              const isEnabled = settings.features[feature.id] ?? feature.enabled
-              
-              return (
-                <div 
-                  key={feature.id}
-                  className={`p-4 rounded-lg border transition-all ${
-                    isEnabled 
-                      ? 'bg-indigo-50 border-indigo-200' 
-                      : 'bg-gray-50 border-gray-200'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-lg ${isEnabled ? 'bg-indigo-100' : 'bg-gray-100'}`}>
-                        <Icon className={`w-5 h-5 ${isEnabled ? 'text-indigo-600' : 'text-gray-400'}`} />
+          {/* Category: Core */}
+          <div className="space-y-2">
+            <h5 className="text-sm font-bold text-blue-700 flex items-center gap-2">🔷 Core Features</h5>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {AI_FEATURES.filter(f => f.category === 'core').map(feature => {
+                const Icon = feature.icon
+                const isEnabled = settings.features[feature.id] ?? feature.enabled
+                return (
+                  <div key={feature.id} className={`p-3 rounded-lg border transition-all ${isEnabled ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <Icon className={`w-4 h-4 ${isEnabled ? 'text-blue-600' : 'text-gray-400'}`} />
+                        <div>
+                          <p className="font-medium text-xs">{feature.name}</p>
+                          <p className="text-[10px] text-gray-500 line-clamp-1">{feature.description}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-sm">{feature.name}</p>
-                        <p className="text-xs text-gray-500">{feature.description}</p>
-                      </div>
+                      <Switch checked={isEnabled} onCheckedChange={(checked) => toggleFeature(feature.id, checked)} />
                     </div>
-                    <Switch
-                      checked={isEnabled}
-                      onCheckedChange={(checked) => toggleFeature(feature.id, checked)}
-                    />
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Category: Product */}
+          <div className="space-y-2">
+            <h5 className="text-sm font-bold text-purple-700 flex items-center gap-2">📦 Product AI</h5>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {AI_FEATURES.filter(f => f.category === 'product').map(feature => {
+                const Icon = feature.icon
+                const isEnabled = settings.features[feature.id] ?? feature.enabled
+                return (
+                  <div key={feature.id} className={`p-3 rounded-lg border transition-all ${isEnabled ? 'bg-purple-50 border-purple-200' : 'bg-gray-50 border-gray-200'}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <Icon className={`w-4 h-4 ${isEnabled ? 'text-purple-600' : 'text-gray-400'}`} />
+                        <div>
+                          <p className="font-medium text-xs">{feature.name}</p>
+                          <p className="text-[10px] text-gray-500 line-clamp-1">{feature.description}</p>
+                        </div>
+                      </div>
+                      <Switch checked={isEnabled} onCheckedChange={(checked) => toggleFeature(feature.id, checked)} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Category: Marketing */}
+          <div className="space-y-2">
+            <h5 className="text-sm font-bold text-orange-700 flex items-center gap-2">📣 Marketing AI</h5>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {AI_FEATURES.filter(f => f.category === 'marketing').map(feature => {
+                const Icon = feature.icon
+                const isEnabled = settings.features[feature.id] ?? feature.enabled
+                return (
+                  <div key={feature.id} className={`p-3 rounded-lg border transition-all ${isEnabled ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200'}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <Icon className={`w-4 h-4 ${isEnabled ? 'text-orange-600' : 'text-gray-400'}`} />
+                        <div>
+                          <p className="font-medium text-xs">{feature.name}</p>
+                          <p className="text-[10px] text-gray-500 line-clamp-1">{feature.description}</p>
+                        </div>
+                      </div>
+                      <Switch checked={isEnabled} onCheckedChange={(checked) => toggleFeature(feature.id, checked)} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Category: Analytics */}
+          <div className="space-y-2">
+            <h5 className="text-sm font-bold text-green-700 flex items-center gap-2">📊 Analytics AI</h5>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {AI_FEATURES.filter(f => f.category === 'analytics').map(feature => {
+                const Icon = feature.icon
+                const isEnabled = settings.features[feature.id] ?? feature.enabled
+                return (
+                  <div key={feature.id} className={`p-3 rounded-lg border transition-all ${isEnabled ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <Icon className={`w-4 h-4 ${isEnabled ? 'text-green-600' : 'text-gray-400'}`} />
+                        <div>
+                          <p className="font-medium text-xs">{feature.name}</p>
+                          <p className="text-[10px] text-gray-500 line-clamp-1">{feature.description}</p>
+                        </div>
+                      </div>
+                      <Switch checked={isEnabled} onCheckedChange={(checked) => toggleFeature(feature.id, checked)} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Category: Customer */}
+          <div className="space-y-2">
+            <h5 className="text-sm font-bold text-rose-700 flex items-center gap-2">👥 Customer AI</h5>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {AI_FEATURES.filter(f => f.category === 'customer').map(feature => {
+                const Icon = feature.icon
+                const isEnabled = settings.features[feature.id] ?? feature.enabled
+                return (
+                  <div key={feature.id} className={`p-3 rounded-lg border transition-all ${isEnabled ? 'bg-rose-50 border-rose-200' : 'bg-gray-50 border-gray-200'}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <Icon className={`w-4 h-4 ${isEnabled ? 'text-rose-600' : 'text-gray-400'}`} />
+                        <div>
+                          <p className="font-medium text-xs">{feature.name}</p>
+                          <p className="text-[10px] text-gray-500 line-clamp-1">{feature.description}</p>
+                        </div>
+                      </div>
+                      <Switch checked={isEnabled} onCheckedChange={(checked) => toggleFeature(feature.id, checked)} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
 

@@ -312,3 +312,450 @@ export async function getSmartSuggestions(context: string, type: 'product_name' 
     return { success: false, error: e.message }
   }
 }
+
+// ============ ADVANCED AI FEATURES ============
+
+// Types for advanced features
+export type AITone = 'professional' | 'luxury' | 'friendly' | 'urgent' | 'casual'
+export type AILanguage = 'en' | 'bn'
+
+// 1. Advanced Product Description with Tone & Language
+export async function generateAdvancedDescription(
+  productName: string, 
+  options?: { category?: string, tone?: AITone, language?: AILanguage }
+): Promise<AIResponse> {
+  try {
+    const tone = options?.tone || 'professional'
+    const lang = options?.language || 'en'
+    const langName = lang === 'bn' ? 'Bengali (বাংলা)' : 'English'
+    
+    const toneGuides: Record<AITone, string> = {
+      professional: 'Use professional, business-like language. Focus on features and quality.',
+      luxury: 'Use premium, sophisticated language. Emphasize exclusivity and elegance.',
+      friendly: 'Use warm, conversational tone. Make it feel personal and approachable.',
+      urgent: 'Create urgency. Use phrases like "Limited stock", "Don\'t miss out".',
+      casual: 'Use relaxed, everyday language. Keep it simple and relatable.'
+    }
+    
+    const prompt = `Write a compelling 3-4 sentence product description for "${productName}"${options?.category ? ` in ${options.category}` : ''}.
+
+TONE: ${toneGuides[tone]}
+LANGUAGE: Write in ${langName}
+STORE: CTG Collection (Bangladesh e-commerce)
+
+Requirements:
+- Be specific and engaging
+- Highlight benefits
+- Do NOT use placeholders like [color] or [size]
+- Match the specified tone perfectly`
+
+    const result = await callGeminiAI(prompt)
+    return { success: true, result: result.trim() }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+// 2. Magic Rewrite - Improve existing content
+export async function rewriteContent(
+  text: string, 
+  options?: { tone?: AITone, language?: AILanguage, action?: 'improve' | 'shorten' | 'expand' | 'fix_grammar' }
+): Promise<AIResponse> {
+  try {
+    const action = options?.action || 'improve'
+    const lang = options?.language || 'en'
+    const langName = lang === 'bn' ? 'Bengali' : 'English'
+    
+    const actionPrompts: Record<string, string> = {
+      improve: 'Improve this text to sound more professional and engaging',
+      shorten: 'Make this text more concise while keeping key points',
+      expand: 'Expand this text with more details and benefits',
+      fix_grammar: 'Fix any grammar, spelling, or punctuation errors'
+    }
+    
+    const prompt = `${actionPrompts[action]}:
+
+Original text: "${text}"
+${options?.tone ? `Apply ${options.tone} tone.` : ''}
+Output in ${langName}.
+
+Return ONLY the rewritten text, nothing else.`
+
+    const result = await callGeminiAI(prompt, { temperature: 0.4 })
+    return { success: true, result: result.trim() }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+// 3. Smart Image Keywords - Generate perfect search terms for Unsplash
+export async function generateImageKeywords(productName: string, category?: string): Promise<AIResponse> {
+  try {
+    const prompt = `Generate 5 perfect search queries for finding product images on Unsplash/Pexels.
+
+Product: "${productName}"
+${category ? `Category: ${category}` : ''}
+
+Return JSON: {
+  "primary": "best single search term",
+  "queries": ["query1", "query2", "query3", "query4", "query5"],
+  "style": "product photography style suggestion",
+  "colors": ["suggested", "color", "scheme"]
+}
+
+Make queries specific enough to find relevant images. Return ONLY valid JSON.`
+
+    const result = await callGeminiAI(prompt, { temperature: 0.5 })
+    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    return { success: true, result: json }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+// 4. Marketing Content Generator - Facebook, Email, Ads
+export async function generateMarketingContent(
+  type: 'facebook_post' | 'instagram_caption' | 'email_campaign' | 'ad_copy' | 'sms',
+  productOrCampaign: string,
+  options?: { language?: AILanguage, tone?: AITone, includeEmoji?: boolean }
+): Promise<AIResponse> {
+  try {
+    const lang = options?.language || 'en'
+    const langName = lang === 'bn' ? 'Bengali (বাংলা)' : 'English'
+    const emoji = options?.includeEmoji !== false ? 'Include relevant emojis.' : 'No emojis.'
+    
+    const typeConfigs: Record<string, { format: string, length: string }> = {
+      facebook_post: { format: 'Facebook post with hook, body, CTA', length: '100-150 words' },
+      instagram_caption: { format: 'Instagram caption with hook and hashtags', length: '50-100 words + 10 hashtags' },
+      email_campaign: { format: 'Email with subject, preheader, body, CTA', length: '200-250 words' },
+      ad_copy: { format: 'Ad headline + description', length: 'Headline 10 words max, description 30 words max' },
+      sms: { format: 'SMS promotional text', length: 'Max 160 characters' }
+    }
+    
+    const config = typeConfigs[type]
+    
+    const prompt = `Create ${type.replace(/_/g, ' ')} for CTG Collection:
+
+Topic/Product: ${productOrCampaign}
+Format: ${config.format}
+Length: ${config.length}
+Language: ${langName}
+${emoji}
+
+Return JSON with appropriate fields for ${type}. Return ONLY valid JSON.`
+
+    const result = await callGeminiAI(prompt)
+    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    return { success: true, result: json }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+// 5. Customer Persona Generator
+export async function generateCustomerPersona(orderData: {
+  totalOrders: number,
+  avgOrderValue: number,
+  topCategories: string[],
+  lastOrderDate: string
+}): Promise<AIResponse> {
+  try {
+    const prompt = `Analyze this customer data and create a persona:
+
+Orders: ${orderData.totalOrders}
+Avg Order Value: ৳${orderData.avgOrderValue}
+Top Categories: ${orderData.topCategories.join(', ')}
+Last Order: ${orderData.lastOrderDate}
+
+Return JSON: {
+  "segment": "VIP/Regular/New/At-Risk",
+  "persona": "Brief description",
+  "preferences": ["preference1", "preference2"],
+  "recommendations": ["product recommendation 1", "product recommendation 2"],
+  "retentionStrategy": "How to keep this customer"
+}
+Return ONLY valid JSON.`
+
+    const result = await callGeminiAI(prompt, { temperature: 0.4 })
+    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    return { success: true, result: json }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+// 6. Inventory Demand Forecaster
+export async function predictInventoryNeeds(productData: {
+  name: string,
+  category: string,
+  currentStock: number,
+  salesLast30Days: number,
+  salesLast7Days: number
+}): Promise<AIResponse> {
+  try {
+    const prompt = `Predict inventory needs for this product:
+
+Product: ${productData.name}
+Category: ${productData.category}
+Current Stock: ${productData.currentStock}
+Sales (30 days): ${productData.salesLast30Days}
+Sales (7 days): ${productData.salesLast7Days}
+
+Return JSON: {
+  "dailyRate": estimated daily sales,
+  "daysUntilStockout": number,
+  "restockRecommendation": number to restock,
+  "urgency": "critical/high/medium/low",
+  "reason": "Brief explanation"
+}
+Return ONLY valid JSON.`
+
+    const result = await callGeminiAI(prompt, { temperature: 0.2 })
+    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    return { success: true, result: json }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+// 7. Product Bundle Suggester
+export async function suggestProductBundles(
+  productName: string,
+  category: string,
+  price: number
+): Promise<AIResponse> {
+  try {
+    const prompt = `Suggest product bundles for cross-selling:
+
+Main Product: ${productName}
+Category: ${category}
+Price: ৳${price}
+
+Return JSON: {
+  "bundles": [
+    {
+      "name": "Bundle name",
+      "products": ["product1", "product2"],
+      "discount": suggested bundle discount %,
+      "reason": "Why these go together"
+    }
+  ],
+  "frequentlyBoughtTogether": ["product1", "product2", "product3"],
+  "upsellSuggestion": "Premium version or upgrade suggestion"
+}
+Return ONLY valid JSON.`
+
+    const result = await callGeminiAI(prompt, { temperature: 0.5 })
+    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    return { success: true, result: json }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+// 8. Order Fraud Detector
+export async function detectOrderFraud(orderDetails: {
+  orderValue: number,
+  paymentMethod: string,
+  shippingAddress: string,
+  customerOrderCount: number,
+  itemCount: number
+}): Promise<AIResponse> {
+  try {
+    const prompt = `Analyze this order for potential fraud indicators:
+
+Order Value: ৳${orderDetails.orderValue}
+Payment: ${orderDetails.paymentMethod}
+Shipping: ${orderDetails.shippingAddress}
+Customer's Previous Orders: ${orderDetails.customerOrderCount}
+Items in Order: ${orderDetails.itemCount}
+
+Return JSON: {
+  "riskScore": 1-100,
+  "riskLevel": "low/medium/high/critical",
+  "flags": ["flag1", "flag2"],
+  "recommendation": "approve/review/reject",
+  "reason": "Brief explanation"
+}
+Return ONLY valid JSON.`
+
+    const result = await callGeminiAI(prompt, { temperature: 0.2 })
+    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    return { success: true, result: json }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+// 9. Discount Optimizer
+export async function optimizeDiscount(productData: {
+  name: string,
+  originalPrice: number,
+  currentDiscount: number,
+  salesVelocity: 'slow' | 'moderate' | 'fast',
+  stockLevel: number,
+  competitorPrice?: number
+}): Promise<AIResponse> {
+  try {
+    const prompt = `Suggest optimal discount strategy:
+
+Product: ${productData.name}
+Price: ৳${productData.originalPrice}
+Current Discount: ${productData.currentDiscount}%
+Sales Speed: ${productData.salesVelocity}
+Stock: ${productData.stockLevel} units
+${productData.competitorPrice ? `Competitor Price: ৳${productData.competitorPrice}` : ''}
+
+Return JSON: {
+  "suggestedDiscount": optimal discount %,
+  "suggestedPrice": final price after discount,
+  "expectedImpact": "Predicted sales increase",
+  "strategy": "flash_sale/clearance/competitive/premium",
+  "reason": "Explanation"
+}
+Return ONLY valid JSON.`
+
+    const result = await callGeminiAI(prompt, { temperature: 0.3 })
+    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    return { success: true, result: json }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+// 10. Product FAQ Generator
+export async function generateProductFAQ(
+  productName: string,
+  description: string,
+  category: string,
+  options?: { language?: AILanguage, count?: number }
+): Promise<AIResponse> {
+  try {
+    const lang = options?.language || 'en'
+    const count = options?.count || 5
+    const langName = lang === 'bn' ? 'Bengali (বাংলা)' : 'English'
+    
+    const prompt = `Generate ${count} frequently asked questions and answers for this product:
+
+Product: ${productName}
+Category: ${category}
+Description: ${description}
+
+Language: ${langName}
+
+Return JSON: {
+  "faqs": [
+    { "question": "...", "answer": "..." }
+  ]
+}
+Make questions realistic (shipping, size, material, care, warranty).
+Return ONLY valid JSON.`
+
+    const result = await callGeminiAI(prompt)
+    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    return { success: true, result: json }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+// 11. Size Recommender
+export async function recommendSize(
+  productType: string,
+  measurements: { bust?: number, waist?: number, hip?: number, height?: number }
+): Promise<AIResponse> {
+  try {
+    const prompt = `Recommend the best size based on measurements:
+
+Product Type: ${productType}
+${measurements.bust ? `Bust: ${measurements.bust} cm` : ''}
+${measurements.waist ? `Waist: ${measurements.waist} cm` : ''}
+${measurements.hip ? `Hip: ${measurements.hip} cm` : ''}
+${measurements.height ? `Height: ${measurements.height} cm` : ''}
+
+Return JSON: {
+  "recommendedSize": "S/M/L/XL/XXL",
+  "confidence": "high/medium/low",
+  "alternativeSize": "second best option",
+  "fitNotes": "How it will likely fit",
+  "tip": "Sizing advice"
+}
+Return ONLY valid JSON.`
+
+    const result = await callGeminiAI(prompt, { temperature: 0.2 })
+    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    return { success: true, result: json }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+// 12. Social Media Hashtag Generator
+export async function generateHashtags(
+  productName: string,
+  category: string,
+  options?: { platform?: 'instagram' | 'facebook' | 'tiktok', count?: number }
+): Promise<AIResponse> {
+  try {
+    const platform = options?.platform || 'instagram'
+    const count = options?.count || 15
+    
+    const prompt = `Generate ${count} trending hashtags for ${platform}:
+
+Product: ${productName}
+Category: ${category}
+Store: CTG Collection (Bangladesh)
+
+Return JSON: {
+  "primary": ["#topHashtag1", "#topHashtag2", "#topHashtag3"],
+  "secondary": ["other", "relevant", "hashtags"],
+  "trending": ["currently", "trending", "ones"],
+  "branded": ["#CTGCollection", "#ShopBangladesh"]
+}
+Mix English and Bengali hashtags. Return ONLY valid JSON.`
+
+    const result = await callGeminiAI(prompt, { temperature: 0.6 })
+    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    return { success: true, result: json }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+
+// 13. Order Communication Generator (Bengali/English)
+export async function generateOrderCommunication(
+  type: 'confirmation' | 'shipped' | 'out_for_delivery' | 'delivered' | 'delayed',
+  orderDetails: { orderId: string, customerName: string, items: string[], estimatedDelivery?: string },
+  language: AILanguage = 'en'
+): Promise<AIResponse> {
+  try {
+    const langName = language === 'bn' ? 'Bengali (বাংলা)' : 'English'
+    
+    const prompt = `Write an order ${type.replace(/_/g, ' ')} message:
+
+Order ID: ${orderDetails.orderId}
+Customer: ${orderDetails.customerName}
+Items: ${orderDetails.items.join(', ')}
+${orderDetails.estimatedDelivery ? `Expected Delivery: ${orderDetails.estimatedDelivery}` : ''}
+
+Language: ${langName}
+Store: CTG Collection
+
+Return JSON: {
+  "sms": "Short SMS version (max 160 chars)",
+  "email": {
+    "subject": "Email subject",
+    "body": "Full email content"
+  },
+  "whatsapp": "WhatsApp friendly message with emojis"
+}
+Return ONLY valid JSON.`
+
+    const result = await callGeminiAI(prompt)
+    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    return { success: true, result: json }
+  } catch (e: any) {
+    return { success: false, error: e.message }
+  }
+}
+

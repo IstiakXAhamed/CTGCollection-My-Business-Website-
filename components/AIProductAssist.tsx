@@ -1,14 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, Loader2, Wand2, Tag, FileText, CheckCircle, Zap, Brain, TrendingUp, Palette, Ruler } from 'lucide-react'
+import { Sparkles, Loader2, Wand2, Tag, FileText, CheckCircle, Zap, Brain, TrendingUp, Palette, Ruler, Globe, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { motion, AnimatePresence } from 'framer-motion'
 
+// Types for advanced AI features
+type AITone = 'professional' | 'luxury' | 'friendly' | 'urgent' | 'casual'
+type AILanguage = 'en' | 'bn'
+
 interface AIProductAssistProps {
   productName: string
   category?: string
+  currentDescription?: string // For magic rewrite
   onSuggestionAccept: (field: string, value: any) => void
   onAnalysisResult?: (analysis: any) => void
 }
@@ -22,14 +27,26 @@ interface AnalysisResult {
   confidence?: string
 }
 
-export default function AIProductAssist({ productName, category, onSuggestionAccept, onAnalysisResult }: AIProductAssistProps) {
+const TONE_OPTIONS: { value: AITone; label: string; emoji: string }[] = [
+  { value: 'professional', label: 'Professional', emoji: '💼' },
+  { value: 'luxury', label: 'Luxury', emoji: '✨' },
+  { value: 'friendly', label: 'Friendly', emoji: '😊' },
+  { value: 'urgent', label: 'Urgent', emoji: '🔥' },
+  { value: 'casual', label: 'Casual', emoji: '👋' },
+]
+
+export default function AIProductAssist({ productName, category, currentDescription, onSuggestionAccept, onAnalysisResult }: AIProductAssistProps) {
   const [loading, setLoading] = useState<string | null>(null)
   const [suggestions, setSuggestions] = useState<Record<string, any>>({})
   const [showSuggestion, setShowSuggestion] = useState<string | null>(null)
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
   const [isFallback, setIsFallback] = useState(false)
+  
+  // NEW: Tone and Language state
+  const [selectedTone, setSelectedTone] = useState<AITone>('professional')
+  const [selectedLanguage, setSelectedLanguage] = useState<AILanguage>('en')
 
-  const callAI = async (action: string) => {
+  const callAI = async (action: string, extraParams?: Record<string, any>) => {
     if (!productName) {
       alert('Enter product name first')
       return null
@@ -41,7 +58,14 @@ export default function AIProductAssist({ productName, category, onSuggestionAcc
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ action, productName, category })
+        body: JSON.stringify({ 
+          action, 
+          productName, 
+          category,
+          tone: selectedTone,
+          language: selectedLanguage,
+          ...extraParams
+        })
       })
       
       if (res.ok) {
@@ -136,11 +160,68 @@ export default function AIProductAssist({ productName, category, onSuggestionAcc
           <Sparkles className="w-5 h-5 text-purple-600" />
           <h3 className="font-bold text-purple-800">AI Product Assistant</h3>
         </div>
-        {isFallback && (
-          <Badge variant="outline" className="text-amber-600 border-amber-300">
-            Fallback Mode
-          </Badge>
-        )}
+        <div className="flex items-center gap-2">
+          {isFallback && (
+            <Badge variant="outline" className="text-amber-600 border-amber-300">
+              Fallback
+            </Badge>
+          )}
+        </div>
+      </div>
+
+      {/* Language & Tone Selector */}
+      <div className="flex flex-wrap items-center gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+        {/* Language Toggle */}
+        <div className="flex items-center gap-2">
+          <Globe className="w-4 h-4 text-gray-500" />
+          <div className="flex rounded-lg overflow-hidden border">
+            <button
+              type="button"
+              onClick={() => setSelectedLanguage('en')}
+              className={`px-3 py-1 text-xs font-medium transition-all ${
+                selectedLanguage === 'en' 
+                  ? 'bg-purple-600 text-white' 
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              🇺🇸 English
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedLanguage('bn')}
+              className={`px-3 py-1 text-xs font-medium transition-all ${
+                selectedLanguage === 'bn' 
+                  ? 'bg-purple-600 text-white' 
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              🇧🇩 বাংলা
+            </button>
+          </div>
+        </div>
+
+        {/* Tone Selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">Tone:</span>
+          <div className="flex gap-1">
+            {TONE_OPTIONS.map(tone => (
+              <button
+                key={tone.value}
+                type="button"
+                onClick={() => setSelectedTone(tone.value)}
+                className={`px-2 py-1 text-xs rounded-md transition-all ${
+                  selectedTone === tone.value
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-white text-gray-600 border hover:bg-gray-50'
+                }`}
+                title={tone.label}
+              >
+                {tone.emoji}
+              </button>
+            ))}
+          </div>
+          <span className="text-xs text-purple-600 font-medium">{TONE_OPTIONS.find(t => t.value === selectedTone)?.label}</span>
+        </div>
       </div>
 
       {/* Quick Actions */}

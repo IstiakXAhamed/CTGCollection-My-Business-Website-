@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 401 })
     }
 
-    const { action, productName, category, description } = await request.json()
+    const { action, productName, category, description, tone, language } = await request.json()
 
     if (!productName) {
       return NextResponse.json({ error: 'Product name is required' }, { status: 400 })
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     try {
       switch (action) {
         case 'description':
-          result.suggestion = await generateDescription(productName, category)
+          result.suggestion = await generateDescription(productName, category, tone, language)
           break
         case 'tags':
           result.suggestion = await generateTags(productName, category)
@@ -76,6 +76,9 @@ export async function POST(request: NextRequest) {
           break
         case 'complete':
           result = await completeProduct(productName)
+          break
+        case 'rewrite':
+          result.suggestion = await rewriteContent(description, tone, language)
           break
         default:
           return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
@@ -99,6 +102,9 @@ export async function POST(request: NextRequest) {
         case 'complete':
           result = fallbackComplete(productName)
           break
+        case 'rewrite':
+          result.suggestion = description // Just return original if rewrite fails
+          break
       }
       result.fallback = true
     }
@@ -111,11 +117,28 @@ export async function POST(request: NextRequest) {
 
 // ============ Real AI Functions ============
 
-async function generateDescription(name: string, category?: string): Promise<string> {
-  const prompt = `You are a professional e-commerce copywriter for a Bangladeshi fashion and lifestyle store called "Silk Mart".
+// Tone guides for different writing styles
+const TONE_GUIDES: Record<string, string> = {
+  professional: 'Use professional, business-like language. Focus on features and quality.',
+  luxury: 'Use premium, sophisticated language. Emphasize exclusivity and elegance.',
+  friendly: 'Use warm, conversational tone. Make it feel personal and approachable.',
+  urgent: 'Create urgency. Use phrases like "Limited stock", "Don\'t miss out".',
+  casual: 'Use relaxed, everyday language. Keep it simple and relatable.'
+}
+
+async function generateDescription(name: string, category?: string, tone?: string, language?: string): Promise<string> {
+  const selectedTone = tone || 'professional'
+  const selectedLang = language || 'en'
+  const langName = selectedLang === 'bn' ? 'Bengali (বাংলা)' : 'English'
+  const toneGuide = TONE_GUIDES[selectedTone] || TONE_GUIDES.professional
+
+  const prompt = `You are a professional e-commerce copywriter for a Bangladeshi fashion and lifestyle store called "CTG Collection".
 
 Write a compelling, detailed product description for: "${name}"
 ${category ? `Category: ${category}` : ''}
+
+TONE: ${toneGuide}
+LANGUAGE: Write in ${langName}
 
 Requirements:
 - 3-4 sentences, engaging and persuasive
@@ -124,10 +147,30 @@ Requirements:
 - Mention quality, comfort, or style as appropriate
 - Do NOT include prices or availability
 - Do NOT use placeholder brackets like [color] or [size]
-- Write in English
 - Make it specific to the actual product, not generic
+- Match the specified tone perfectly
 
 Product Description:`
+
+  const response = await callGemini(prompt)
+  return response.trim()
+}
+
+// Magic Rewrite function
+async function rewriteContent(text: string, tone?: string, language?: string): Promise<string> {
+  const selectedTone = tone || 'professional'
+  const selectedLang = language || 'en'
+  const langName = selectedLang === 'bn' ? 'Bengali' : 'English'
+  const toneGuide = TONE_GUIDES[selectedTone] || TONE_GUIDES.professional
+
+  const prompt = `Improve and rewrite this text to make it more engaging and professional:
+
+Original text: "${text}"
+
+TONE: ${toneGuide}
+LANGUAGE: Output in ${langName}
+
+Return ONLY the rewritten text, nothing else.`
 
   const response = await callGemini(prompt)
   return response.trim()
