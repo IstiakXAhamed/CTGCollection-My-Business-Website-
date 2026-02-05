@@ -30,7 +30,8 @@ import {
   Menu,
   X,
   ShieldAlert,
-  Wallet
+  Wallet,
+  Sparkles
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AdminNotificationBell from '@/components/AdminNotificationBell'
@@ -62,6 +63,7 @@ const getMenuItems = (role: string, permissions: string[] = []) => {
     ...(hasPerm('manage_products') ? [
       { icon: FolderTree, label: 'Categories', href: '/admin/categories' },
       { icon: Package, label: 'Inventory History', href: '/admin/inventory' },
+      { icon: TrendingUp, label: 'Stock Forecast', href: '/admin/inventory/forecast' },
     ] : []),
     
     // Orders - Admin or Seller order permissions
@@ -90,6 +92,7 @@ const getMenuItems = (role: string, permissions: string[] = []) => {
     
     ...(hasPerm('manage_marketing') ? [
       { icon: Crown, label: 'Loyalty & Referrals', href: '/admin/loyalty' },
+      { icon: Sparkles, label: 'Marketing AI', href: '/admin/marketing/ai' },
     ] : []),
     
     // Content

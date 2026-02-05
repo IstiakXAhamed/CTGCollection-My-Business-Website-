@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Package, User, MapPin, CreditCard, Loader2, RefreshCw, FileDown, CheckCircle, Shield } from 'lucide-react'
+import { ArrowLeft, Package, User, MapPin, CreditCard, Loader2, RefreshCw, FileDown, CheckCircle, Shield, ShieldAlert, Sparkles } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 
 const statusColors: Record<string, string> = {
@@ -346,6 +346,12 @@ export default function AdminOrderDetailPage() {
             </CardContent>
           </Card>
 
+          {/* AI Fraud Analysis Card */}
+          <AIFraudAnalysis order={order} />
+
+          {/* AI Fraud Analysis Card */}
+          <AIFraudAnalysis order={order} />
+
           {/* Customer Info */}
           <Card>
             <CardHeader>
@@ -388,6 +394,105 @@ export default function AdminOrderDetailPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function AIFraudAnalysis({ order }: { order: any }) {
+  const [analysis, setAnalysis] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+
+  const analyzeFraud = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/ai/order-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderValue: order.total,
+          paymentMethod: order.paymentMethod,
+          shippingAddress: order.address ? `${order.address.city}, ${order.address.district}` : 'Unknown',
+          customerOrderCount: order.user?.orderCount || 1, // Fallback
+          itemCount: order.items?.length || 0
+        })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setAnalysis(data.analysis)
+      }
+    } catch (err) {
+      console.error('Fraud analysis failed', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Card className="border-l-4 border-l-purple-500 shadow-sm mt-6">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-purple-700 text-lg">
+          <ShieldAlert className="w-5 h-5" />
+          AI Fraud Analysis
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {!analysis ? (
+          <div className="text-center py-4">
+             <p className="text-sm text-gray-500 mb-3">Analyze this order for potential risks using AI.</p>
+             <Button 
+              variant="outline" 
+              className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
+              onClick={analyzeFraud}
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+              Check for Fraud
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4 animate-in fade-in duration-500">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-600">Risk Score</span>
+              <span className={`text-xl font-bold ${
+                analysis.result.riskScore > 70 ? 'text-red-600' : 
+                analysis.result.riskScore > 30 ? 'text-amber-600' : 'text-green-600'
+              }`}>
+                {analysis.result.riskScore}/100
+              </span>
+            </div>
+            
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div 
+                className={`h-full transition-all duration-1000 ${
+                  analysis.result.riskScore > 70 ? 'bg-red-500' : 
+                  analysis.result.riskScore > 30 ? 'bg-amber-500' : 'bg-green-500'
+                }`}
+                style={{ width: `${analysis.result.riskScore}%` }}
+              />
+            </div>
+
+            <div className={`p-3 rounded-lg text-sm border ${
+               analysis.result.riskScore > 70 ? 'bg-red-50 border-red-100 text-red-800' : 
+               analysis.result.riskScore > 30 ? 'bg-amber-50 border-amber-100 text-amber-800' : 'bg-green-50 border-green-100 text-green-800'
+            }`}>
+              <span className="font-semibold">Risk Level: </span>
+              {analysis.result.riskLevel?.toUpperCase()}
+            </div>
+
+            <div className="bg-gray-50 p-3 rounded-lg text-sm space-y-2 border">
+              <p className="font-semibold text-gray-700 flex items-center gap-1">
+                <Shield className="w-3 h-3" /> Analysis Report:
+              </p>
+              <ul className="list-disc pl-4 text-gray-600 space-y-1">
+                {analysis.result.flags?.map((flag: string, i: number) => (
+                  <li key={i}>{flag}</li>
+                ))}
+              </ul>
+              <p className="mt-3 text-xs italic text-gray-500 border-t pt-2">Recommendation: {analysis.result.recommendation}</p>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 

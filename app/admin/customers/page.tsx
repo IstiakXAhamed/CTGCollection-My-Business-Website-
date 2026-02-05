@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Users as UsersIcon, ChevronLeft, ChevronRight, Loader2, Crown, X, Check } from 'lucide-react'
+import { Search, Users as UsersIcon, ChevronLeft, ChevronRight, Loader2, Crown, X, Check, BrainCircuit, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 
@@ -38,6 +38,9 @@ export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [showTierModal, setShowTierModal] = useState(false)
+  const [showPersonaModal, setShowPersonaModal] = useState(false)
+  const [personaAnalysis, setPersonaAnalysis] = useState<any>(null)
+  const [analyzing, setAnalyzing] = useState(false)
   const [updating, setUpdating] = useState(false)
   const [currentUserRole, setCurrentUserRole] = useState<string>('')
   const [pagination, setPagination] = useState({
@@ -127,6 +130,35 @@ export default function CustomersPage() {
       console.error('Failed to assign tier:', error)
     } finally {
       setUpdating(false)
+    }
+  }
+
+  const analyzePersona = async (user: User) => {
+    setSelectedUser(user)
+    setShowPersonaModal(true)
+    setPersonaAnalysis(null)
+    setAnalyzing(true)
+
+    try {
+      const res = await fetch('/api/ai/customer-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      })
+      
+      if (res.ok) {
+        const data = await res.json()
+        setPersonaAnalysis(data.analysis)
+      } else {
+        const err = await res.json()
+        // If 400/404/etc, we can show error in modal
+        setPersonaAnalysis({ error: err.message || 'Analysis failed' })
+      }
+    } catch (error) {
+      console.error('Failed to analyze persona:', error)
+      setPersonaAnalysis({ error: 'Network error occurred' })
+    } finally {
+      setAnalyzing(false)
     }
   }
 
@@ -277,6 +309,15 @@ export default function CustomersPage() {
                         </td>
                         {currentUserRole === 'superadmin' && (
                           <td className="py-4 px-4">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1 mr-2"
+                              onClick={() => analyzePersona(user)}
+                            >
+                              <BrainCircuit className="w-4 h-4 text-indigo-600" />
+                              Analyze
+                            </Button>
                             <Button
                               size="sm"
                               variant="outline"
@@ -432,6 +473,104 @@ export default function CustomersPage() {
                     <span>Updating...</span>
                   </div>
                 )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* AI Persona Modal */}
+      <AnimatePresence>
+        {showPersonaModal && selectedUser && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-40"
+              onClick={() => setShowPersonaModal(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed left-1/2 -translate-x-1/2 w-[90vw] max-w-lg bg-white rounded-xl shadow-2xl z-50"
+              style={{ top: '60px', maxHeight: 'calc(100vh - 80px)' }}
+            >
+              <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-xl">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <BrainCircuit className="w-5 h-5" />
+                  AI Customer Persona
+                </h3>
+                <button onClick={() => setShowPersonaModal(false)} className="p-1 hover:bg-white/20 rounded">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+                {analyzing ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                    <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-3" />
+                    <p className="font-medium">Thinking...</p>
+                    <p className="text-xs">Analyzing purchase history and patterns</p>
+                  </div>
+                ) : personaAnalysis ? (
+                  personaAnalysis.error ? (
+                    <div className="text-center py-8 text-red-500">
+                      <p>Analysis failed: {personaAnalysis.error}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {/* Segment Badge */}
+                      <div className="flex justify-center">
+                        <span className={`px-4 py-1.5 rounded-full text-sm font-bold shadow-sm ${
+                          personaAnalysis.result.segment === 'VIP' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                          personaAnalysis.result.segment === 'At-Risk' ? 'bg-red-100 text-red-700 border border-red-200' :
+                          'bg-blue-100 text-blue-700 border border-blue-200'
+                        }`}>
+                          {personaAnalysis.result.segment} Customer
+                        </span>
+                      </div>
+
+                      {/* Brief Persona */}
+                      <div className="bg-gray-50 p-4 rounded-lg border">
+                        <p className="text-gray-700 italic text-center">"{personaAnalysis.result.persona}"</p>
+                      </div>
+
+                      {/* Details Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <h4 className="font-semibold text-sm flex items-center gap-2">
+                            ❤️ Preferences
+                          </h4>
+                          <ul className="text-sm text-gray-600 list-disc pl-4 space-y-1">
+                            {personaAnalysis.result.preferences?.map((p: string, i: number) => (
+                              <li key={i}>{p}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="font-semibold text-sm flex items-center gap-2">
+                            🛍️ Recommendations
+                          </h4>
+                          <ul className="text-sm text-gray-600 list-disc pl-4 space-y-1">
+                            {personaAnalysis.result.recommendations?.map((r: string, i: number) => (
+                              <li key={i}>{r}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      {/* Retention Strategy */}
+                      <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                        <h4 className="font-semibold text-sm text-green-800 mb-1 flex items-center gap-2">
+                          <Sparkles className="w-4 h-4" /> Recommended Strategy
+                        </h4>
+                        <p className="text-sm text-green-700">{personaAnalysis.result.retentionStrategy}</p>
+                      </div>
+                    </div>
+                  )
+                ) : null}
               </div>
             </motion.div>
           </>
