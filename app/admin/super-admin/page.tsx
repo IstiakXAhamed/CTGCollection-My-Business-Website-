@@ -28,6 +28,7 @@ import { FeatureToggles } from "@/components/admin/FeatureToggles"
 import { PermissionCenter } from "@/components/admin/PermissionCenter"
 import { MultiVendorSettings } from "@/components/admin/MultiVendorSettings"
 import { AISettings } from "@/components/admin/AISettings"
+import { RoleSwitchTester } from "@/components/admin/RoleSwitchTester"
 
 interface User {
   id: string
@@ -260,6 +261,11 @@ export default function SuperAdminPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Role Switch Testing */}
+      <div className="mt-8">
+        <RoleSwitchTester />
+      </div>
 
       {/* Multi-Vendor Marketplace Settings */}
       <div className="mt-8">

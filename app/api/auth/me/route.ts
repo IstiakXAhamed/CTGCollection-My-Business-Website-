@@ -15,6 +15,15 @@ export async function GET(request: Request) {
     // Check for role switching cookies
     const tempRole = cookieHeader?.split(';').find(c => c.trim().startsWith('tempRole='))?.split('=')[1]
     const originalRole = cookieHeader?.split(';').find(c => c.trim().startsWith('originalRole='))?.split('=')[1]
+    const testPermsCookie = cookieHeader?.split(';').find(c => c.trim().startsWith('testPermissions='))?.split('=')[1]
+    let testPermissions: string[] | undefined
+    if (testPermsCookie) {
+      try {
+        testPermissions = JSON.parse(decodeURIComponent(testPermsCookie))
+      } catch (e) {
+        testPermissions = undefined
+      }
+    }
 
     // Verify token
     const { verifyToken } = await import('@/lib/auth')
@@ -59,6 +68,7 @@ export async function GET(request: Request) {
         originalRole: originalRole || freshUser.role,  // For role switcher component
         isRoleSwitched,  // Flag to indicate if role is switched
         permissions: freshUser.permissions || [],  // Return permissions for menu generation
+        testPermissions,  // Custom test permissions for role switching (undefined if not set)
         tier: freshUser.loyaltyPoints?.tier?.name || null  // null = No Tier assigned
       }
     })

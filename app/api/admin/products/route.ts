@@ -47,8 +47,22 @@ export async function GET(request: NextRequest) {
       prisma.product.count({ where: whereClause })
     ])
 
+    // Parse images JSON for each product
+    const productsWithParsedImages = products.map((p: any) => {
+      let images: string[] = []
+      try {
+        const imageStr = p.images as string || '[]'
+        const cleanStr = imageStr.replace(/\\"/g, '"')
+        images = JSON.parse(cleanStr)
+      } catch (error) {
+        console.error('Image parse error:', error)
+        images = []
+      }
+      return { ...p, images }
+    })
+
     return NextResponse.json({
-      products,
+      products: productsWithParsedImages,
       pagination: {
         page,
         limit,

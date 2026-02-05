@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       }, { status: 403 })
     }
 
-    const { targetRole } = await request.json()
+    const { targetRole, testPermissions } = await request.json()
 
     // Validate target role
     const validRoles = ['superadmin', 'admin', 'seller', 'customer']
@@ -69,6 +69,15 @@ export async function POST(request: NextRequest) {
         maxAge: 60 * 60 * 4,
         sameSite: 'lax'
       })
+      // Store custom test permissions if provided
+      if (testPermissions && Array.isArray(testPermissions)) {
+        response.cookies.set('testPermissions', JSON.stringify(testPermissions), {
+          httpOnly: true,
+          path: '/',
+          maxAge: 60 * 60 * 4,
+          sameSite: 'lax'
+        })
+      }
     }
 
     return response

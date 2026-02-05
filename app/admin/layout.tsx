@@ -45,17 +45,28 @@ const getMenuItems = (role: string, permissions: string[] = []) => {
   const isAdminOrSuper = isSuperAdmin || isAdmin
   
   const hasPerm = (perm: string) => isSuperAdmin || permissions.includes(perm)
+  
+  // Check for seller-specific permissions
+  const hasSellerProductPerms = hasPerm('seller_add_products') || hasPerm('seller_edit_products') || hasPerm('seller_delete_products')
+  const hasSellerOrderPerms = hasPerm('seller_view_orders') || hasPerm('seller_update_orders')
 
   return [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
-    // E-commerce Core
-    ...(hasPerm('manage_products') ? [
+    
+    // E-commerce Core - Admin permissions OR Seller product permissions
+    ...((hasPerm('manage_products') || hasSellerProductPerms) ? [
       { icon: Package, label: 'Products', href: '/admin/products' },
+    ] : []),
+    
+    ...(hasPerm('manage_products') ? [
       { icon: FolderTree, label: 'Categories', href: '/admin/categories' },
       { icon: Package, label: 'Inventory History', href: '/admin/inventory' },
     ] : []),
     
-    ...(hasPerm('manage_orders') ? [{ icon: ShoppingCart, label: 'Orders', href: '/admin/orders' }] : []),
+    // Orders - Admin or Seller order permissions
+    ...((hasPerm('manage_orders') || hasSellerOrderPerms) ? [
+      { icon: ShoppingCart, label: 'Orders', href: '/admin/orders' }
+    ] : []),
     
     ...(hasPerm('manage_users') ? [
       { icon: Users, label: 'Customers', href: '/admin/customers' },
@@ -71,9 +82,12 @@ const getMenuItems = (role: string, permissions: string[] = []) => {
     // Shops: Super Admin OR 'manage_shops' permission
     ...(hasPerm('manage_shops') ? [{ icon: Store, label: 'Shops', href: '/admin/shops' }] : []),
     
-    // Marketing
-    ...(hasPerm('manage_marketing') ? [
+    // Marketing - Admin or seller coupons
+    ...((hasPerm('manage_marketing') || hasPerm('seller_create_coupons')) ? [
       { icon: Tag, label: 'Coupons', href: '/admin/coupons' },
+    ] : []),
+    
+    ...(hasPerm('manage_marketing') ? [
       { icon: Crown, label: 'Loyalty & Referrals', href: '/admin/loyalty' },
     ] : []),
     
@@ -83,10 +97,13 @@ const getMenuItems = (role: string, permissions: string[] = []) => {
       { icon: Palette, label: 'Banners', href: '/admin/banners' },
     ] : []),
     
-    // Comms
+    // Comms - Admin or seller reply permissions
+    ...((hasPerm('manage_communications') || hasPerm('seller_reply_reviews') || hasPerm('seller_answer_questions')) ? [
+      { icon: MessageCircle, label: 'Live Chat', href: '/admin/chat' },
+    ] : []),
+    
     ...(hasPerm('manage_communications') ? [
       { icon: Mail, label: 'Messages', href: '/admin/messages' },
-      { icon: MessageCircle, label: 'Live Chat', href: '/admin/chat' },
     ] : []),
     
     // Site Settings: Super Admin OR 'manage_settings'
@@ -182,11 +199,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const isRoleSwitched = user?.isRoleSwitched || false
   const originalRole = user?.originalRole || user?.role
   
-  // When superadmin switches roles, use default permissions for that role
-  // This allows them to see what that role would see with standard permissions
+  // When superadmin switches roles, determine effective permissions:
+  // 1. If testPermissions are provided (from Super Console tester), use those
+  // 2. Otherwise, use default permissions for that role
   let effectivePermissions = user?.permissions || []
   if (isRoleSwitched && originalRole === 'superadmin' && (user?.role === 'admin' || user?.role === 'seller')) {
-    effectivePermissions = getDefaultPermissionsForRole(user.role as 'admin' | 'seller')
+    // Check for custom test permissions first
+    if (user?.testPermissions && Array.isArray(user.testPermissions) && user.testPermissions.length > 0) {
+      effectivePermissions = user.testPermissions
+    } else {
+      effectivePermissions = getDefaultPermissionsForRole(user.role as 'admin' | 'seller')
+    }
   }
   
   const menuItems = getMenuItems(user?.role || 'admin', effectivePermissions)
