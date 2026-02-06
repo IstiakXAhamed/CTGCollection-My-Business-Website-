@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth } from '@/lib/auth'
+import { callGeminiAI } from '@/lib/gemini-ai'
 
 export const dynamic = 'force-dynamic'
 
-// Free image search using multiple sources
+// Smart image search using AI keywords + multiple sources
 export async function POST(request: NextRequest) {
   try {
     const user = await verifyAuth(request)
@@ -16,56 +17,51 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Query required' }, { status: 400 })
     }
 
-    const images: string[] = []
+    let searchTerms = [query]
 
-    // Try Unsplash first (no API key needed for basic search)
+    // 1. SMART ENHANCEMENT: Ask AI for better visual keywords
+    // Only do this if we have an API key (implied by callGeminiAI success)
     try {
-      const unsplashRes = await fetch(
-        `https://source.unsplash.com/random/800x800/?${encodeURIComponent(query)}`,
-        { method: 'HEAD' }
-      )
-      if (unsplashRes.ok) {
-        // Generate multiple unique Unsplash images
-        for (let i = 0; i < 4; i++) {
-          images.push(`https://source.unsplash.com/random/800x800/?${encodeURIComponent(query)}&sig=${Date.now()}-${i}`)
+      if (process.env.GOOGLE_AI_API_KEY) {
+        const aiPrompt = `For the product "${query}", suggest 3 highly visual, specific stock photo search queries. 
+        Example: for "Rose Perfume", suggest "luxury perfume bottle rose", "pink floral aesthetic".
+        Return ONLY comma-separated phrases.`
+        
+        const aiResult = await callGeminiAI(aiPrompt, { temperature: 0.4 })
+        const aiKeywords = aiResult.split(',').map(s => s.trim()).filter(s => s.length > 0)
+        if (aiKeywords.length > 0) {
+          searchTerms = [...aiKeywords, query] // Prioritize AI terms
         }
       }
     } catch (e) {
-      console.error('Unsplash error:', e)
+      console.log('AI Keyword generation failed, falling back to raw query', e)
     }
 
-    // Try Lorem Picsum as fallback
-    if (images.length < 8) {
+    const images: string[] = []
+
+    // 2. Fetch images using smart keywords
+    for (const term of searchTerms.slice(0, 3)) { // Use top 3 terms
+      try {
+        // Try Unsplash (using generic source endpoint which mimics search)
+        const encodedTerm = encodeURIComponent(term)
+        images.push(`https://source.unsplash.com/random/800x800/?${encodedTerm}&sig=${Date.now()}-${Math.random()}`)
+        images.push(`https://source.unsplash.com/random/800x800/?${encodedTerm}&sig=${Date.now()}-${Math.random()}`)
+      } catch (e) {
+        console.error('Unsplash error:', e)
+      }
+    }
+
+    // 3. Fallback: Lorem Picsum (if AI search yields little)
+    if (images.length < 4) {
       for (let i = 0; i < 4; i++) {
         images.push(`https://picsum.photos/seed/${query.replace(/\s/g, '')}-${i}/800/800`)
       }
     }
 
-    // Try placeholder images based on product type
-    const productKeywords = query.toLowerCase()
-    let placeholderCategory = 'product'
-    
-    if (productKeywords.includes('shirt') || productKeywords.includes('cloth') || productKeywords.includes('dress')) {
-      placeholderCategory = 'fashion'
-    } else if (productKeywords.includes('phone') || productKeywords.includes('laptop') || productKeywords.includes('electronic')) {
-      placeholderCategory = 'tech'
-    } else if (productKeywords.includes('shoe') || productKeywords.includes('sneaker')) {
-      placeholderCategory = 'shoes'
-    } else if (productKeywords.includes('watch') || productKeywords.includes('jewelry')) {
-      placeholderCategory = 'accessories'
-    } else if (productKeywords.includes('bag') || productKeywords.includes('purse')) {
-      placeholderCategory = 'bags'
-    }
-
-    // Add category-specific Unsplash images
-    for (let i = 0; i < 4; i++) {
-      images.push(`https://source.unsplash.com/random/800x800/?${placeholderCategory}&sig=${Date.now()}-cat-${i}`)
-    }
-
     return NextResponse.json({
       success: true,
       images: images.slice(0, 12), // Return max 12 images
-      source: 'unsplash,picsum'
+      source: 'smart-ai-studio'
     })
   } catch (error: any) {
     console.error('Image search error:', error)

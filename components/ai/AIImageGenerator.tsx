@@ -81,10 +81,10 @@ export function AIImageGenerator({ productName, onImageSelect }: AIImageGenerato
     <div className="p-4 bg-gradient-to-br from-rose-50 to-orange-50 rounded-lg border border-rose-200 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Bot className="w-5 h-5 text-rose-600" />
-          <span className="font-semibold text-rose-800">AI Image Finder</span>
+          <Sparkles className="w-5 h-5 text-indigo-600" />
+          <span className="font-semibold text-indigo-900">Advanced AI Image Studio</span>
         </div>
-        <Badge variant="outline" className="text-xs">Free Stock Images</Badge>
+        <Badge variant="secondary" className="text-xs bg-indigo-100 text-indigo-700">AI Smart Search</Badge>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2">
