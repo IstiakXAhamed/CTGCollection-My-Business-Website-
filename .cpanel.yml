@@ -1,6 +1,6 @@
 ---
 deployment:
   tasks:
-    - export DEPLOY_PATH=/home/silkmart/public_html/ctg-collection
+    - export DEPLOY_PATH=/home/silkmart/silkmart
     - /bin/cp -rf deploy/* $DEPLOY_PATH
     - /usr/bin/touch $DEPLOY_PATH/tmp/restart.txt
