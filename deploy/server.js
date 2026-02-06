@@ -1,3 +1,4 @@
+require('dotenv').config({ path: __dirname + '/.env' });
 const path = require('path')
 
 const dir = path.join(__dirname)

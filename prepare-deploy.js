@@ -82,4 +82,20 @@ if (fs.existsSync(prismaSource)) {
     console.warn('   Run "npx prisma generate" before "npm run build".');
 }
 
-console.log('👉 Next Step: Run "git push cpanel master" to deploy!');
+
+// 7. INJECT DOTENV into server.js (Use .env file on server)
+console.log('💉 Injecting .env support into server.js...');
+const serverJsPath = path.join(deployDir, 'server.js');
+if (fs.existsSync(serverJsPath)) {
+    let serverContent = fs.readFileSync(serverJsPath, 'utf8');
+    // Prepend dotenv config
+    if (!serverContent.includes('dotenv')) {
+        serverContent = "require('dotenv').config({ path: __dirname + '/.env' });\n" + serverContent;
+        fs.writeFileSync(serverJsPath, serverContent);
+        console.log('✅ server.js patched! It will now read .env file on cPanel.');
+    }
+} else {
+    console.warn('⚠️  server.js not found in deploy folder. This might look like a failed build copy.');
+}
+
+console.log('👉 Next Step: Run "git push cpanel main" to deploy!');
