@@ -90,7 +90,7 @@ if (fs.existsSync(serverJsPath)) {
     let serverContent = fs.readFileSync(serverJsPath, 'utf8');
     // Prepend dotenv config
     if (!serverContent.includes('dotenv')) {
-        serverContent = "require('dotenv').config({ path: __dirname + '/.env' });\n" + serverContent;
+        serverContent = "try { require('dotenv').config({ path: __dirname + '/.env' }); } catch (e) { console.log('Env load failed:', e.message); }\n" + serverContent;
         fs.writeFileSync(serverJsPath, serverContent);
         console.log('✅ server.js patched! It will now read .env file on cPanel.');
     }

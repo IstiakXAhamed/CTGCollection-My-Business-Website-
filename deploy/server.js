@@ -1,4 +1,4 @@
-require('dotenv').config({ path: __dirname + '/.env' });
+try { require('dotenv').config({ path: __dirname + '/.env' }); } catch (e) { console.log('Env load failed:', e.message); }
 const path = require('path')
 
 const dir = path.join(__dirname)
