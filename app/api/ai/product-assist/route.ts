@@ -31,7 +31,7 @@ async function callGemini(prompt: string): Promise<string> {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.7,
-        maxOutputTokens: 1024,
+        maxOutputTokens: 2048,
       }
     })
   })
@@ -142,14 +142,14 @@ TONE: ${toneGuide}
 LANGUAGE: Write in ${langName}
 
 Requirements:
-- 3-4 sentences, engaging and persuasive
-- Highlight key features and benefits
-- Use sensory words and emotional appeal
-- Mention quality, comfort, or style as appropriate
+- 5-7 sentences, highly engaging, professional, and persuasive
+- Highlight specific notes, materials, features, and target audience
+- Use rich, sensory language and emotional appeal
+- Mention craftsmanship, heritage, or modern appeal as appropriate
 - Do NOT include prices or availability
 - Do NOT use placeholder brackets like [color] or [size]
-- Make it specific to the actual product, not generic
-- Match the specified tone perfectly
+- Make it extremely specific to the actual product's known characteristics
+- Match the luxury tone of "CTG Collection" (Premium Bangladeshi Store)
 
 Product Description:`
 
@@ -217,18 +217,19 @@ async function analyzeProduct(name: string): Promise<any> {
 You are helping a Bangladeshi e-commerce store manager. Respond in this exact JSON format:
 
 {
-  "productType": "detected product type (e.g., Shoes, T-Shirt, Electronics)",
-  "suggestedCategory": "best category from: Fashion, Electronics, Home & Living, Beauty, Sports, Accessories",
+  "productType": "detected product type (e.g., Fragrance, Shoes, Watches, Electronics)",
+  "suggestedCategory": "best category from: Fashion, Electronics, Home & Living, Beauty, Sports, Accessories, Fragrance",
   "priceRange": {
     "min": minimum suggested price in BDT (number only),
     "max": maximum suggested price in BDT (number only)
   },
   "suggestedVariants": {
-    "sizes": ["array of suggested sizes if applicable"],
-    "colors": ["array of common colors for this product type"]
+    "sizes": ["array of suggested sizes (e.g., 50ml, 100ml, 42, XL)"],
+    "colors": ["array of common colors or variations"]
   },
-  "keywords": ["5 SEO keywords"],
-  "confidence": "high/medium/low"
+  "keywords": ["5-7 SEO keywords, include brand and specific model"],
+  "confidence": "high/medium/low",
+  "reasoning": "Brief explanation of why this was categorized this way"
 }
 
 Return ONLY the JSON, no other text.`

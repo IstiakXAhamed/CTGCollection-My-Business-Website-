@@ -33,7 +33,7 @@ export async function callGeminiAI(prompt: string, options?: {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: options?.temperature ?? 0.7,
-        maxOutputTokens: options?.maxTokens ?? 1024,
+        maxOutputTokens: options?.maxTokens ?? 2048,
       }
     })
   })
@@ -95,7 +95,8 @@ export function parseAIJSON<T>(text: string, defaultValue: T): T {
 
 export async function generateProductDescription(productName: string, category?: string): Promise<AIResponse> {
   try {
-    const prompt = `Write a compelling 3-4 sentence product description for "${productName}"${category ? ` in ${category}` : ''} for a Bangladeshi e-commerce store. Be specific, engaging, and highlight benefits. Do NOT use placeholders.`
+    const prompt = `Write a compelling, detailed 5-7 sentence product description for "${productName}"${category ? ` in ${category}` : ''} for a premium Bangladeshi e-commerce store "CTG Collection". 
+    Highlight specific features, luxury appeal, and sensory details. Make it extremely professional and engaging. Return ONLY the description, no placeholders.`
     const result = await callGeminiAI(prompt)
     return { success: true, result: result.trim() }
   } catch (e: any) {
@@ -382,17 +383,19 @@ export async function generateAdvancedDescription(
       casual: 'Use relaxed, everyday language. Keep it simple and relatable.'
     }
     
-    const prompt = `Write a compelling 3-4 sentence product description for "${productName}"${options?.category ? ` in ${options.category}` : ''}.
+    const prompt = `Write a compelling, highly detailed 6-8 sentence product description for "${productName}"${options?.category ? ` in ${options.category}` : ''}.
 
 TONE: ${toneGuides[tone]}
 LANGUAGE: Write in ${langName}
-STORE: CTG Collection (Bangladesh e-commerce)
+STORE: CTG Collection (Premium Bangladesh Fashion & Lifestyle)
 
 Requirements:
-- Be specific and engaging
-- Highlight benefits
+- Be highly specific, professional, and engaging
+- Highlight premium features, materials, and benefits
+- Use sensory language appropriate for the product type
 - Do NOT use placeholders like [color] or [size]
-- Match the specified tone perfectly`
+- Make it flow naturally and persuasively
+- Match the ${tone} tone perfectly`
 
     const result = await callGeminiAI(prompt)
     return { success: true, result: result.trim() }
