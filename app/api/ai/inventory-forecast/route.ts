@@ -26,13 +26,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Product data is required' }, { status: 400 })
     }
 
-    const forecast = await predictInventoryNeeds({
+    const aiResponse = await predictInventoryNeeds({
       ...productData,
       salesLast30Days: salesHistory?.last30Days || 0,
       salesLast7Days: salesHistory?.last7Days || 0
     })
 
-    return NextResponse.json({ success: true, forecast })
+    if (!aiResponse.success) {
+        return NextResponse.json({ error: aiResponse.error }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true, forecast: aiResponse.result })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

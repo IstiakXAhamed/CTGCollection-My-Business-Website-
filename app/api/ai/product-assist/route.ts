@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth } from '@/lib/auth'
+import { parseAIJSON } from '@/lib/gemini-ai'
 
 export const dynamic = 'force-dynamic'
 
@@ -235,12 +236,7 @@ Return ONLY the JSON, no other text.`
   const response = await callGemini(prompt)
   
   try {
-    // Extract JSON from response
-    const jsonMatch = response.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0])
-    }
-    throw new Error('Invalid JSON response')
+    return parseAIJSON(response, fallbackAnalyze(name))
   } catch (e) {
     return fallbackAnalyze(name)
   }
@@ -269,11 +265,7 @@ Return ONLY the JSON, no other text.`
   const response = await callGemini(prompt)
   
   try {
-    const jsonMatch = response.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0])
-    }
-    throw new Error('Invalid JSON response')
+    return parseAIJSON(response, fallbackComplete(name))
   } catch (e) {
     return fallbackComplete(name)
   }

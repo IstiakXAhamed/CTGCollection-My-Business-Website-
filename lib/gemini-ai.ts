@@ -46,6 +46,51 @@ export async function callGeminiAI(prompt: string, options?: {
   return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
 }
 
+// ============ Helper for JSON Parsing ============
+
+/**
+ * Robustly parses JSON from AI response, handling Markdown code blocks.
+ */
+export function parseAIJSON<T>(text: string, defaultValue: T): T {
+  try {
+    // 1. Try parsing directly
+    try {
+      return JSON.parse(text)
+    } catch (e) {
+      // Continue if direct parsing fails
+    }
+
+    // 2. Strip Markdown code blocks (```json ... ```)
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+    if (jsonMatch && jsonMatch[1]) {
+      try {
+        return JSON.parse(jsonMatch[1])
+      } catch (e) {
+        // Continue
+      }
+    }
+
+    // 3. Find first { or [ and last } or ]
+    const firstOpen = text.search(/[{[]/)
+    const lastClose = text.search(/[}\]][^}\]]*$/)
+
+    if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
+      const jsonString = text.substring(firstOpen, lastClose + 1)
+      try {
+        return JSON.parse(jsonString)
+      } catch (e) {
+        // Continue
+      }
+    }
+
+    console.warn('Failed to parse AI JSON:', text)
+    return defaultValue
+  } catch (error) {
+    console.error('Error in parseAIJSON:', error)
+    return defaultValue
+  }
+}
+
 // ============ Product AI ============
 
 export async function generateProductDescription(productName: string, category?: string): Promise<AIResponse> {
@@ -62,7 +107,7 @@ export async function analyzeProductForSuggestions(productName: string): Promise
   try {
     const prompt = `Analyze this product: "${productName}". Return JSON with: { "category": "...", "priceRange": { "min": number, "max": number } (in BDT), "sizes": [...], "colors": [...], "tags": [...] }. Return ONLY valid JSON.`
     const result = await callGeminiAI(prompt, { temperature: 0.3 })
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -91,7 +136,7 @@ export async function suggestChatReplies(customerMessage: string): Promise<AIRes
     const prompt = `Customer message: "${customerMessage}"
 Generate 3 quick reply options for support agent. Return as JSON array: ["reply1", "reply2", "reply3"]. Keep each under 50 words.`
     const result = await callGeminiAI(prompt, { temperature: 0.5 })
-    const replies = JSON.parse(result.match(/\[[\s\S]*\]/)?.[0] || '[]')
+    const replies = parseAIJSON(result, [])
     return { success: true, result: replies }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -116,7 +161,7 @@ Return JSON: {
 }
 Return ONLY valid JSON.`
     const result = await callGeminiAI(prompt, { temperature: 0.2 })
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -151,7 +196,7 @@ ${options.discountType ? `Type: ${options.discountType}` : ''}
 Return JSON array: [{ "code": "EXAMPLE20", "name": "...", "description": "...", "discountPercent": 20, "validDays": 7 }, ...]
 Use creative, memorable codes. Return ONLY valid JSON array.`
     const result = await callGeminiAI(prompt)
-    const coupons = JSON.parse(result.match(/\[[\s\S]*\]/)?.[0] || '[]')
+    const coupons = parseAIJSON(result, [])
     return { success: true, result: coupons }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -174,7 +219,7 @@ Return JSON: {
 }
 Make it exciting and action-oriented. Return ONLY valid JSON.`
     const result = await callGeminiAI(prompt)
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -199,7 +244,7 @@ Provide 3-4 actionable business insights in JSON: {
 }
 Return ONLY valid JSON.`
     const result = await callGeminiAI(prompt)
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -221,7 +266,7 @@ Return JSON: {
 }
 Return ONLY valid JSON.`
     const result = await callGeminiAI(prompt)
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -263,7 +308,7 @@ Return JSON: {
 }
 Be warm, professional. Include relevant info for ${type} emails. Return ONLY valid JSON.`
     const result = await callGeminiAI(prompt)
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -285,7 +330,7 @@ Return JSON: {
 }
 Make it compelling and action-oriented. Return ONLY valid JSON.`
     const result = await callGeminiAI(prompt)
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -305,8 +350,8 @@ export async function getSmartSuggestions(context: string, type: 'product_name' 
     
     const result = await callGeminiAI(prompts[type], { temperature: 0.4 })
     const parsed = type === 'price' 
-      ? JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
-      : JSON.parse(result.match(/\[[\s\S]*\]/)?.[0] || '[]')
+      ? parseAIJSON(result, {})
+      : parseAIJSON(result, [])
     return { success: true, result: parsed }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -406,7 +451,7 @@ Return JSON: {
 Make queries specific enough to find relevant images. Return ONLY valid JSON.`
 
     const result = await callGeminiAI(prompt, { temperature: 0.5 })
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -445,7 +490,7 @@ ${emoji}
 Return JSON with appropriate fields for ${type}. Return ONLY valid JSON.`
 
     const result = await callGeminiAI(prompt)
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -477,7 +522,7 @@ Return JSON: {
 Return ONLY valid JSON.`
 
     const result = await callGeminiAI(prompt, { temperature: 0.4 })
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -502,7 +547,7 @@ Sales (30 days): ${productData.salesLast30Days}
 Sales (7 days): ${productData.salesLast7Days}
 
 Return JSON: {
-  "dailyRate": estimated daily sales,
+  "dailyRate": estimated daily sales (number),
   "daysUntilStockout": number,
   "restockRecommendation": number to restock,
   "urgency": "critical/high/medium/low",
@@ -511,7 +556,7 @@ Return JSON: {
 Return ONLY valid JSON.`
 
     const result = await callGeminiAI(prompt, { temperature: 0.2 })
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -546,7 +591,7 @@ Return JSON: {
 Return ONLY valid JSON.`
 
     const result = await callGeminiAI(prompt, { temperature: 0.5 })
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -580,7 +625,7 @@ Return JSON: {
 Return ONLY valid JSON.`
 
     const result = await callGeminiAI(prompt, { temperature: 0.2 })
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -616,7 +661,7 @@ Return JSON: {
 Return ONLY valid JSON.`
 
     const result = await callGeminiAI(prompt, { temperature: 0.3 })
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -652,7 +697,7 @@ Make questions realistic (shipping, size, material, care, warranty).
 Return ONLY valid JSON.`
 
     const result = await callGeminiAI(prompt)
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -683,7 +728,7 @@ Return JSON: {
 Return ONLY valid JSON.`
 
     const result = await callGeminiAI(prompt, { temperature: 0.2 })
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -715,7 +760,7 @@ Return JSON: {
 Mix English and Bengali hashtags. Return ONLY valid JSON.`
 
     const result = await callGeminiAI(prompt, { temperature: 0.6 })
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }
@@ -752,7 +797,7 @@ Return JSON: {
 Return ONLY valid JSON.`
 
     const result = await callGeminiAI(prompt)
-    const json = JSON.parse(result.match(/\{[\s\S]*\}/)?.[0] || '{}')
+    const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
     return { success: false, error: e.message }

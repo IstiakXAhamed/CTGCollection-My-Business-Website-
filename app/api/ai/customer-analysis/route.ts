@@ -65,14 +65,18 @@ export async function POST(request: NextRequest) {
     const lastOrderDate = orders[0].createdAt.toISOString().split('T')[0]
 
     // AI Analysis
-    const analysis = await generateCustomerPersona({
+    const aiResponse = await generateCustomerPersona({
       totalOrders,
       avgOrderValue,
       topCategories,
       lastOrderDate
     })
 
-    return NextResponse.json({ success: true, analysis })
+    if (!aiResponse.success) {
+      return NextResponse.json({ error: aiResponse.error }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true, analysis: aiResponse.result })
   } catch (error: any) {
     console.error('Customer analysis error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
