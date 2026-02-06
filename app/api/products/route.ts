@@ -75,7 +75,8 @@ export async function GET(request: NextRequest) {
       db.product.findMany({
         where,
         include: {
-          category: { select: { name: true, slug: true } },
+          category: { select: { id: true, name: true, slug: true } },
+          shop: { select: { id: true, name: true, slug: true, logo: true } },
           variants: { select: { id: true, size: true, color: true, stock: true, sku: true } },
           reviews: {
             where: { isApproved: true },

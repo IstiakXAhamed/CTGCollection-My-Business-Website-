@@ -56,4 +56,30 @@ if (fs.existsSync(publicSource)) {
 }
 
 console.log('✅ Deployment Folder Ready: ./deploy');
-console.log('👉 Next Step: Zip the "deploy" folder and upload to cPanel!');
+
+// 5.5 Copy .env (Crucial for DB connection)
+const envSource = path.join(__dirname, '.env');
+const envDest = path.join(deployDir, '.env');
+
+if (fs.existsSync(envSource)) {
+    console.log('🔑 Copying .env file to deploy folder...');
+    fs.copyFileSync(envSource, envDest);
+} else {
+    console.warn('⚠️  WARNING: .env file not found! Please manually upload it to cPanel.');
+}
+
+// 6. Manual Copy for Prisma Engines (Critical for Linux)
+// Standalone build often misses the specific binaries needed for the target OS
+const prismaSource = path.join(__dirname, 'node_modules', '.prisma', 'client');
+const prismaDest = path.join(deployDir, 'node_modules', '.prisma', 'client');
+
+if (fs.existsSync(prismaSource)) {
+    console.log('🐘 Copying Prisma Binaries (Linux support)...');
+    copyDir(prismaSource, prismaDest);
+    console.log('   - Prisma files copied successfully.');
+} else {
+    console.warn('⚠️  WARNING: node_modules/.prisma/client not found. Database might fail!');
+    console.warn('   Run "npx prisma generate" before "npm run build".');
+}
+
+console.log('👉 Next Step: Run "git push cpanel master" to deploy!');

@@ -1,9 +1,6 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/silkmart/ctg-collection
-    - /bin/cp -R * $DEPLOYPATH
-    - cd $DEPLOYPATH
-    - /usr/bin/npm install
-    - /usr/bin/npm run build
-    - /usr/bin/touch tmp/restart.txt
+    - export DEPLOY_PATH=/home/silkmart/public_html
+    - /bin/cp -rf deploy/* $DEPLOY_PATH
+    - /usr/bin/touch $DEPLOY_PATH/tmp/restart.txt
