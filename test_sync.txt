@@ -1,3 +1,0 @@
-This is a test file to verify that cPanel's 'Update from Remote' button is working correctly.
-If you see this file on your server, the sync was successful!
-You can delete this file afterwards.
