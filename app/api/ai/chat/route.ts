@@ -37,14 +37,14 @@ export async function POST(request: NextRequest) {
                  { description: { contains: query } },
                  { category: { name: { contains: query } } }
                ],
-               isArchived: false
-             },
-             take: 4,
-             select: { name: true, price: true, slug: true, stock: true }
+                isActive: true
+              },
+              take: 4,
+              select: { name: true, basePrice: true, salePrice: true, slug: true }
            })
            
            if (products.length > 0) {
-             const productList = products.map((p: any) => `- ${p.name} (৳${p.price}) [${p.stock > 0 ? 'In Stock' : 'Out of Stock'}]`).join('\n')
+             const productList = products.map((p: any) => `- ${p.name} (৳${p.salePrice || p.basePrice})`).join('\n')
              context += `\n\nFound Products matching "${query}":\n${productList}\n(Use these to recommend specific items to the user)`
            } else {
              context += `\n\nSystem: No products found for "${query}". Suggest browsing categories.`
@@ -69,13 +69,16 @@ export async function POST(request: NextRequest) {
          // Prisam schema check needed. For now assume ID.
          const order = await prisma.order.findFirst({
            where: {
-             id: orderId // Precise match first
+             OR: [
+                { id: orderId },
+                { orderNumber: orderId }
+             ]
            },
-           include: { orderItems: true }
+           include: { items: true }
          })
          
          if (order) {
-           context += `\n\nOrder Found: #${order.id}\nStatus: ${order.status}\nTotal: ৳${order.total}\nItems: ${order.orderItems.length}\nDate: ${order.createdAt.toLocaleDateString()}`
+           context += `\n\nOrder Found: #${order.orderNumber}\nStatus: ${order.status}\nTotal: ৳${order.total}\nItems: ${order.items.length}\nDate: ${order.createdAt.toLocaleDateString()}`
          } else {
            // Provide context that order was not found so AI can apologize
            context += `\n\nSystem: Customer asked for Order #${orderId} but it was not found in database.`
