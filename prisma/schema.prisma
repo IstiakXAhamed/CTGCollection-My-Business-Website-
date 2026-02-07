@@ -132,6 +132,13 @@ model Product {
   sizeGuide     String?   // JSON with size chart data
   hasWarranty   Boolean   @default(false)
   warrantyPeriod String?  // e.g., "1 Year", "6 Months", "Lifetime"
+  
+  // Smart Product Fields
+  productType   String    @default("clothing") // clothing, footwear, fragrance, beauty, electronics, general
+  metaTitle     String?
+  metaDescription String? @db.Text
+  metaKeywords  String?   // Comma separated
+  
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
@@ -746,6 +753,12 @@ model SiteSettings {
   // Chat Settings
   chatStatus        String   @default("online") // online, away, offline
   
+  // AI Bot & FAQ Contact Info
+  aiContactEmail    String?  @default("support@ctgcollection.com")
+  aiContactPhone    String?  @default("+8801991523289")
+  supportEmail      String?  @default("support@ctgcollection.com")
+  supportPhone      String?  @default("+8801991523289")
+  
   // Promo Banner Settings  
   promoEnabled      Boolean  @default(true)
   promoCode         String   @default("WELCOME10")
@@ -780,8 +793,11 @@ model SiteSettings {
   defaultCommission  Float   @default(5.0)   // Platform commission %
   couponCostPolicy   String  @default("platform") // platform, shop, shared
   
+  // Admin Interface Settings
+  adminProductMode   String  @default("simple") // simple, advanced
+
   // Gamification (Spin Wheel)
-  spinWheelConfig   Json?    // { enabled, prizes: [], cooldownMinutes, delaySeconds }
+  spinWheelConfig   Json?    // { enabled: boolean, prizes: [], cooldownMinutes: number }
 
   updatedAt         DateTime @updatedAt
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { ChevronDown, HelpCircle, ShoppingCart, Truck, CreditCard, RefreshCw, Shield } from 'lucide-react'
@@ -100,6 +100,14 @@ const faqCategories = [
 
 export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<string | null>(null)
+  const [settings, setSettings] = useState<any>(null)
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => setSettings(data.settings))
+      .catch(err => console.error(err))
+  }, [])
 
   const toggleQuestion = (id: string) => {
     setOpenIndex(openIndex === id ? null : id)
@@ -198,6 +206,7 @@ export default function FAQPage() {
         </div>
       </section>
 
+
       {/* Still Need Help */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4 text-center">
@@ -207,13 +216,13 @@ export default function FAQPage() {
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
             <a
-              href="mailto:support@ctgcollection.com"
+              href={`mailto:${settings?.supportEmail || settings?.storeEmail || 'support@ctgcollection.com'}`}
               className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
               Email Support
             </a>
             <a
-              href="tel:+8801234567890"
+              href={`tel:${settings?.supportPhone || settings?.storePhone || '+8801234567890'}`}
               className="inline-flex items-center gap-2 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
             >
               Call Us

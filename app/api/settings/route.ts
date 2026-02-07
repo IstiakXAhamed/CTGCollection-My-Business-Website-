@@ -34,7 +34,12 @@ export async function GET() {
         workingHours: '9AM - 9PM',
         offDays: 'Friday: 3PM - 9PM',
         aboutTitle: 'About Silk Mart',
-        copyrightText: '© 2024 Silk Mart. All rights reserved.'
+        copyrightText: '© 2024 Silk Mart. All rights reserved.',
+        supportEmail: 'support@ctgcollection.com',
+        supportPhone: '+880 1234 567890',
+        aiContactEmail: 'support@ctgcollection.com',
+        aiContactPhone: '+880 1234 567890',
+        adminProductMode: 'simple'
       }
     })
   }

@@ -96,7 +96,12 @@ export async function POST(request: NextRequest) {
       isFeatured,
       isBestseller,
       isActive,
-      variants
+      variants,
+      // New Fields
+      productType,
+      metaTitle,
+      metaDescription,
+      metaKeywords
     } = body
 
     const product = await prisma.product.create({
@@ -112,6 +117,11 @@ export async function POST(request: NextRequest) {
         isFeatured: isFeatured || false,
         isBestseller: isBestseller || false,
         isActive: isActive !== false,
+        // Smart Fields
+        productType: productType || 'clothing',
+        metaTitle,
+        metaDescription,
+        metaKeywords,
         variants: {
           create: variants?.map((v: any) => ({
             size: v.size,

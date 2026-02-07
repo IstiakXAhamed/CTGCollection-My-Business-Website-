@@ -23,51 +23,35 @@ export function InstantFAQ({ productName, description, category }: InstantFAQPro
 
   useEffect(() => {
     const fetchFAQs = async () => {
-      // In a real app, you might want to cache this or fetch from DB first
-      // Calling our Next.js API route that wraps generateProductFAQ
-      // For now, mocking the call to avoid hitting rate limits or complex setup in this demo
-      
-      const timer = setTimeout(() => {
-        // Mock Response based on category
-        const mockFAQs: FAQItem[] = [
-           { 
-             question: "What is the material quality?", 
-             answer: `This ${productName} is crafted from premium materials suitable for ${category}, ensuring durability and comfort.` 
-           },
-           { 
-             question: "How do I care for this item?", 
-             answer: "We recommend following the care label instructions. Generally, gentle wash or dry clean is best for longevity." 
-           },
-           { 
-             question: "Is there a warranty?", 
-             answer: "Yes, we offer a standard quality guarantee on all our products. Please check our return policy for details." 
-           },
-           {
-             question: "What is the estimated delivery time?",
-             answer: "Delivery typically takes 2-5 business days within Dhaka and 3-7 days nationwide."
-           }
-        ]
-        setFaqs(mockFAQs)
-        setLoading(false)
-      }, 2000)
-
-      return () => clearTimeout(timer)
-      
-      /* 
-      // Real API Call Implementation:
       try {
         const res = await fetch('/api/ai/faq', {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ productName, description, category })
         })
-        const data = await res.json()
-        if (data.faqs) setFaqs(data.faqs)
-      } catch (e) { console.error(e) }
-      */
+        
+        if (res.ok) {
+          const data = await res.json()
+          if (data.faqs) setFaqs(data.faqs)
+        } else {
+          console.error('Failed to fetch FAQs')
+          // Fallback to mock if API fails
+          setFaqs([
+            { question: "What material is this?", answer: "Please check the product description for detailed material information." },
+            { question: "How do I wash this?", answer: "We recommend checking the care label. Generally, gentle wash is best." }
+          ])
+        }
+      } catch (e) {
+        console.error('Error fetching FAQs:', e)
+      } finally {
+        setLoading(false)
+      }
     }
 
-    fetchFAQs()
-  }, [productName, category])
+    if (productName && category) {
+      fetchFAQs()
+    }
+  }, [productName, description, category])
 
   if (loading) {
      return (

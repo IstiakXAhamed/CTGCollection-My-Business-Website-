@@ -44,7 +44,7 @@ export function FloatingActions({ onSpinClick }: FloatingActionsProps) {
   return (
     <>
       {/* Mini Floating Action Button - positioned above chat */}
-      <div className="fixed bottom-24 right-6 z-40 flex flex-col items-end gap-2">
+      <div className="fixed bottom-[15rem] right-6 z-40 flex flex-col items-end gap-2">
         <AnimatePresence>
           {isExpanded && (
             <>

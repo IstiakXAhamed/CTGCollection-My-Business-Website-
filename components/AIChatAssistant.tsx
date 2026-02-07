@@ -12,6 +12,7 @@ interface Message {
   role: 'user' | 'assistant'
   content: string
   timestamp: number
+  isAction?: boolean
 }
 
 export function AIChatAssistant() {
@@ -94,11 +95,31 @@ export function AIChatAssistant() {
        }, 1000)
     } finally {
       setIsTyping(false)
+      
+      // Check if user asked for human/admin
+      const lowerInput = input.toLowerCase()
+      if (lowerInput.includes('human') || lowerInput.includes('admin') || lowerInput.includes('support') || lowerInput.includes('chat with person')) {
+        setTimeout(() => {
+          setMessages(prev => [...prev, {
+            id: 'system_' + Date.now(),
+            role: 'assistant',
+            content: 'Would you like to speak with a human support agent?',
+            timestamp: Date.now(),
+            isAction: true
+          }])
+        }, 1500)
+      }
     }
   }
 
+  const openLiveChat = () => {
+    // Trigger custom event for LiveChat component
+    window.dispatchEvent(new Event('open-live-chat'))
+    setIsOpen(false) // Close AI chat
+  }
+
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end pointer-events-none">
+    <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end pointer-events-none">
       <AnimatePresence>
         {isOpen && !isMinimized && (
           <motion.div
@@ -143,8 +164,8 @@ export function AIChatAssistant() {
                 <div
                   key={msg.id}
                   className={cn(
-                    "flex w-full mb-2",
-                    msg.role === 'user' ? "justify-end" : "justify-start"
+                    "flex flex-col w-full mb-2",
+                    msg.role === 'user' ? "items-end" : "items-start"
                   )}
                 >
                   <div
@@ -160,6 +181,20 @@ export function AIChatAssistant() {
                       {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
+                  
+                  {/* Action Button for System Messages */}
+                  {(msg as any).isAction && (
+                    <div className="mt-2 ml-2">
+                      <Button 
+                        size="sm" 
+                        onClick={openLiveChat}
+                        className="bg-green-600 hover:bg-green-700 text-white text-xs"
+                      >
+                        <MessageSquare className="w-3 h-3 mr-1" />
+                        Connect to Live Chat
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))}
               {isTyping && (

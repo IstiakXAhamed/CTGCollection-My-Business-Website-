@@ -119,14 +119,23 @@ export async function analyzeProductForSuggestions(productName: string): Promise
 
 // ============ Customer Support AI ============
 
-export async function generateChatResponse(customerMessage: string, context?: { orderStatus?: string, previousMessages?: string[] }): Promise<AIResponse> {
+
+export async function generateChatResponse(customerMessage: string, context?: { orderStatus?: string, previousMessages?: string[] }, settings?: any): Promise<AIResponse> {
   try {
     const contextInfo = context?.orderStatus ? `Order Status: ${context.orderStatus}` : ''
-    const prompt = `You are a helpful customer support agent for CTG Collection (Bangladesh e-commerce).
-Customer message: "${customerMessage}"
-${contextInfo}
+    const contactInfo = settings ? `
+    Store Contact Info:
+    - Phone: ${settings.aiContactPhone || settings.storePhone}
+    - Email: ${settings.aiContactEmail || settings.storeEmail}
+    If the user asks to speak to a human/admin, suggest they click the "Live Chat" button or call the phone number above.
+    ` : ''
 
-Write a professional, helpful response in 2-3 sentences. Be polite and solution-oriented. If about order, provide tracking info or next steps.`
+    const prompt = `You are a helpful customer support agent for CTG Collection (Bangladesh e-commerce).
+    ${contactInfo}
+    Customer message: "${customerMessage}"
+    ${contextInfo}
+    
+    Write a professional, helpful response in 2-3 sentences. Be polite and solution-oriented. If about order, provide tracking info or next steps.`
     const result = await callGeminiAI(prompt)
     return { success: true, result: result.trim() }
   } catch (e: any) {
@@ -137,7 +146,7 @@ Write a professional, helpful response in 2-3 sentences. Be polite and solution-
 export async function suggestChatReplies(customerMessage: string): Promise<AIResponse> {
   try {
     const prompt = `Customer message: "${customerMessage}"
-Generate 3 quick reply options for support agent. Return as JSON array: ["reply1", "reply2", "reply3"]. Keep each under 50 words.`
+    Generate 3 quick reply options for support agent. Return as JSON array: ["reply1", "reply2", "reply3"]. Keep each under 50 words.`
     const result = await callGeminiAI(prompt, { temperature: 0.5 })
     const replies = parseAIJSON(result, [])
     return { success: true, result: replies }
@@ -348,7 +357,10 @@ export async function getSmartSuggestions(context: string, type: 'product_name' 
       product_name: `Suggest 5 similar product names based on: "${context}". Return JSON array: ["name1", "name2", ...]`,
       category: `Suggest appropriate categories for product: "${context}". Return JSON array of 3 best matching categories.`,
       tags: `Suggest 10 SEO-optimized tags for: "${context}". Return JSON array.`,
-      price: `Suggest appropriate price range in BDT for: "${context}". Return JSON: {"min": number, "max": number, "recommended": number}`
+      price: `Suggest appropriate price range in BDT for: "${context}". 
+      CRITICAL: The price must be realistic for the Bangladesh market. 
+      The range width must NOT exceed 3000 BDT (e.g., 2000-5000 is ok, 1000-10000 is NOT).
+      Return JSON: {"min": number, "max": number, "recommended": number}`
     }
     
     const result = await callGeminiAI(prompts[type], { temperature: 0.4 })
@@ -475,7 +487,7 @@ export async function generateMarketingContent(
     const emoji = options?.includeEmoji !== false ? 'Include relevant emojis.' : 'No emojis.'
     
     const typeConfigs: Record<string, { format: string, length: string }> = {
-      facebook_post: { format: 'Facebook post with hook, body, CTA', length: '100-150 words' },
+      facebook_post: { format: 'Facebook post with hook, body, CTA', length: '150-200 words' },
       instagram_caption: { format: 'Instagram caption with hook and hashtags', length: '50-100 words + 10 hashtags' },
       email_campaign: { format: 'Email with subject, preheader, body, CTA', length: '200-250 words' },
       ad_copy: { format: 'Ad headline + description', length: 'Headline 10 words max, description 30 words max' },
@@ -488,8 +500,12 @@ export async function generateMarketingContent(
 
 Topic/Product: ${productOrCampaign}
 Format: ${config.format}
-Length: ${config.length}
+Length: ${lang === 'bn' ? 'Detailed and engaging (150-200 words)' : config.length}
 Language: ${langName}
+
+CRITICAL INSTRUCTION: Read the language requirement carefully. 
+If Language is Bengali, the ENTIRE output MUST be in Bengali script (Bangla). Do NOT use English alphabet.
+
 ${emoji}
 
 Return JSON with appropriate fields for ${type}. Return ONLY valid JSON.`

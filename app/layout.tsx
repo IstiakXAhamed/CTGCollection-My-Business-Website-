@@ -65,7 +65,7 @@ export default function RootLayout({
           </main>
           <Footer />
           <Footer />
-          {/* <LiveChat /> */} 
+          <LiveChat />
           <AIChatAssistant />
           
           {/* Premium Global Features */}

@@ -11,6 +11,7 @@ import {
   CheckCircle2, Wifi, WifiOff, Clock, Loader2,
   Store, Truck, CreditCard, RotateCcw
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
 
 interface SiteSettings {
   chatStatus: string
@@ -32,6 +33,12 @@ interface SiteSettings {
   nagadNumber: string
   rocketEnabled: boolean
   rocketNumber: string
+  aiContactEmail?: string
+  aiContactPhone?: string
+  supportEmail?: string
+  supportPhone?: string
+  spinWheelConfig?: any
+  adminProductMode: 'simple' | 'advanced'
 }
 
 export default function AdminSettingsPage() {
@@ -54,7 +61,8 @@ export default function AdminSettingsPage() {
     nagadEnabled: true,
     nagadNumber: '01991523289',
     rocketEnabled: true,
-    rocketNumber: '01991523289'
+    rocketNumber: '01991523289',
+    adminProductMode: 'simple'
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -143,6 +151,42 @@ export default function AdminSettingsPage() {
       )}
 
       <div className="grid gap-6">
+        {/* General Configuration */}
+        <Card className="border-2 border-slate-200">
+          <CardHeader className="bg-slate-50">
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-slate-700" />
+              General Configuration
+            </CardTitle>
+            <CardDescription>System-wide operational settings</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6 pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-base">Advanced Product Form</Label>
+                <p className="text-sm text-muted-foreground">
+                  Enable segment-specific fields (Electronics, Beauty) and AI SEO tools.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                 <span className={`text-sm ${settings.adminProductMode === 'simple' ? 'font-bold' : 'text-muted-foreground'}`}>Simple</span>
+                 <Switch
+                  checked={settings.adminProductMode === 'advanced'}
+                  onCheckedChange={(checked) => handlePromoChange('adminProductMode', checked ? 'advanced' : 'simple')}
+                />
+                <span className={`text-sm ${settings.adminProductMode === 'advanced' ? 'font-bold text-blue-600' : 'text-muted-foreground'}`}>Advanced</span>
+              </div>
+            </div>
+            
+            <div className="flex justify-end pt-4 border-t">
+              <Button onClick={() => saveSettings({ adminProductMode: settings.adminProductMode })} disabled={saving}>
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                Save General Settings
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Live Chat Settings */}
         <Card className="border-2 border-blue-100">
           <CardHeader className="bg-blue-50">
@@ -234,7 +278,80 @@ export default function AdminSettingsPage() {
           </CardContent>
         </Card>
 
+        {/* AI & Interaction Settings */}
+        <Card className="border-2 border-purple-100">
+          <CardHeader className="bg-purple-50">
+            <CardTitle className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-purple-600" />
+              AI & Interaction Settings
+            </CardTitle>
+            <CardDescription>Configure AI Bot contact info and Gamification</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6 pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>AI Bot Contact Email</Label>
+                <Input
+                  value={settings.aiContactEmail || ''}
+                  onChange={(e) => handlePromoChange('aiContactEmail', e.target.value)}
+                  placeholder="support@ctgcollection.com"
+                />
+                <p className="text-xs text-muted-foreground">Email AI shares with customers</p>
+              </div>
+              <div className="space-y-2">
+                <Label>AI Bot Contact Phone</Label>
+                <Input
+                  value={settings.aiContactPhone || ''}
+                  onChange={(e) => handlePromoChange('aiContactPhone', e.target.value)}
+                  placeholder="+8801..."
+                />
+                <p className="text-xs text-muted-foreground">Phone AI shares with customers</p>
+              </div>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+              <div className="space-y-2">
+                <Label>FAQ Support Email</Label>
+                <Input
+                  value={settings.supportEmail || ''}
+                  onChange={(e) => handlePromoChange('supportEmail', e.target.value)}
+                  placeholder="support@ctgcollection.com"
+                />
+                <p className="text-xs text-muted-foreground">Displayed in FAQ section</p>
+              </div>
+              <div className="space-y-2">
+                <Label>FAQ Support Phone</Label>
+                <Input
+                  value={settings.supportPhone || ''}
+                  onChange={(e) => handlePromoChange('supportPhone', e.target.value)}
+                  placeholder="+8801..."
+                />
+                <p className="text-xs text-muted-foreground">Displayed in FAQ section</p>
+              </div>
+            </div>
+            
+            <div className="border-t pt-4 flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Spin Wheel Game</Label>
+                <p className="text-sm text-muted-foreground">Enable/Disable the "Spin & Win" popup globally</p>
+              </div>
+              <Switch
+                checked={settings.spinWheelConfig?.enabled !== false}
+                onCheckedChange={(checked) => {
+                   const currentConfig = settings.spinWheelConfig || {}
+                   handlePromoChange('spinWheelConfig', { ...currentConfig, enabled: checked })
+                }}
+              />
+            </div>
+
+            <div className="flex justify-end pt-4 border-t">
+              <Button onClick={() => saveSettings(settings)} disabled={saving}>
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                Save Interaction Settings
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Store Information */}
         <Card className="border-2 border-green-100">

@@ -9,19 +9,17 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useToast } from "@/components/ui/use-toast"
+import { toast } from 'sonner'
 
 interface SizeRecommenderProps {
   productType: string
   category?: string
-  onSizeSelect?: (size: string) => void
 }
 
-export function AISizeRecommender({ productType, category, onSizeSelect }: SizeRecommenderProps) {
+export default function SizeRecommender({ productType, category }: SizeRecommenderProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
-  const { toast } = useToast()
   const [formData, setFormData] = useState({
     height: '',
     weight: '',
@@ -29,7 +27,7 @@ export function AISizeRecommender({ productType, category, onSizeSelect }: SizeR
   })
 
   // Determine needed fields based on category/type
-  const isClothing = ['Saree', 'Panjabi', 'Shirt', 'T-Shirt', 'Dress', 'Kameez', 'Kurti'].some(t => 
+  const isClothing = ['Saree', 'Panjabi', 'Shirt', 'T-Shirt', 'Dress', 'Kameez'].some(t => 
     productType.includes(t) || category?.includes(t)
   )
 
@@ -59,11 +57,7 @@ export function AISizeRecommender({ productType, category, onSizeSelect }: SizeR
       const data = await res.json()
       setResult(data.recommendation)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Could not generate size recommendation",
-        variant: "destructive"
-      })
+      toast.error('Could not generate size recommendation')
     } finally {
       setLoading(false)
     }
@@ -72,7 +66,7 @@ export function AISizeRecommender({ productType, category, onSizeSelect }: SizeR
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 p-0 h-auto font-medium">
+        <Button variant="outline" size="sm" className="gap-2 text-indigo-600 border-indigo-200 hover:bg-indigo-50">
           <Ruler className="w-4 h-4" />
           Find My Size (AI)
         </Button>
@@ -176,19 +170,9 @@ export function AISizeRecommender({ productType, category, onSizeSelect }: SizeR
               "{result.tip}"
             </p>
 
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => setResult(null)}>
-                Recalculate
-              </Button>
-              {onSizeSelect && (
-                 <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
-                   onSizeSelect(result.recommendedSize)
-                   setIsOpen(false)
-                 }}>
-                   Select {result.recommendedSize}
-                 </Button>
-              )}
-            </div>
+            <Button variant="outline" className="w-full" onClick={() => setResult(null)}>
+              Check Another Size
+            </Button>
           </motion.div>
         )}
       </DialogContent>

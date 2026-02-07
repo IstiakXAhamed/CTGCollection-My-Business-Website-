@@ -199,6 +199,15 @@ export function LiveChat() {
     }
     
     init()
+
+    // Listen for custom event to open chat (e.g. from AI assistant)
+    const handleOpenChat = () => {
+      setIsOpen(true)
+      setIsMinimized(false)
+    }
+    
+    window.addEventListener('open-live-chat', handleOpenChat)
+    return () => window.removeEventListener('open-live-chat', handleOpenChat)
   }, [])
 
   // Poll for admin replies ONLY for this session
@@ -437,7 +446,7 @@ export function LiveChat() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleOpen}
-            className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full shadow-lg flex items-center justify-center text-white hover:shadow-xl transition-shadow"
+            className="fixed bottom-[10.5rem] right-6 z-50 w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full shadow-lg flex items-center justify-center text-white hover:shadow-xl transition-shadow"
           >
             <MessageCircle className="w-7 h-7" />
             {unreadCount > 0 && (
