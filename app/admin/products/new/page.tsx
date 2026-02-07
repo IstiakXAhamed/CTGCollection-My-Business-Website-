@@ -183,10 +183,10 @@ export default function NewProductPage() {
              className={!useAdvancedMode ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-900'}
            >Simple</Button>
            <Button 
-             variant={useAdvancedMode ? 'white' : 'ghost'} 
+             variant={useAdvancedMode ? 'ghost' : 'ghost'} 
              size="sm" 
              onClick={() => setUseAdvancedMode(true)}
-             className={useAdvancedMode ? 'bg-white shadow-sm text-blue-600' : ''}
+             className={useAdvancedMode ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-900'}
            >Advanced</Button>
         </div>
       </div>
