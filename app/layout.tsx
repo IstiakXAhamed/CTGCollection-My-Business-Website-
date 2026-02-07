@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LiveChat from "@/components/LiveChat";
+import { AIChatAssistant } from "@/components/AIChatAssistant";
 import UnifiedPromoBanner from "@/components/UnifiedPromoBanner";
 import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "@/components/Providers";
@@ -63,7 +64,9 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
-          <LiveChat />
+          <Footer />
+          {/* <LiveChat /> */} 
+          <AIChatAssistant />
           
           {/* Premium Global Features */}
           <Analytics />

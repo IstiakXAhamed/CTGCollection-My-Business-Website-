@@ -93,7 +93,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           {/* Scrollable nav */}
           <div className="overflow-x-auto -mx-3 px-3">
             <div className="flex gap-2 pb-2 min-w-max">
-              {menuItems.map((item) => {
+              {menuItems.filter(item => {
+                // Hide Wallet for Customers (Seller/Admin only)
+                if (item.label === 'Wallet' && (user.role === 'customer' || user.role === 'Customer')) return false
+                // Hide Payout for same
+                if (item.label === 'Payout' && (user.role === 'customer' || user.role === 'Customer')) return false
+                return true
+              }).map((item) => {
                 const Icon = item.icon
                 const isActive = pathname === item.href
                 return (
@@ -158,7 +164,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               </div>
 
               <nav className="space-y-2">
-                {menuItems.map((item) => {
+                {menuItems.filter(item => {
+                  // Hide Wallet for Customers (Seller/Admin only)
+                  if (item.label === 'Wallet' && (user.role === 'customer' || user.role === 'Customer')) return false
+                  if (item.label === 'Payout' && (user.role === 'customer' || user.role === 'Customer')) return false
+                  return true
+                }).map((item) => {
                   const Icon = item.icon
                   const isActive = pathname === item.href
                   

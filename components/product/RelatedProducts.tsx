@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Sparkles, Heart, Eye } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/types'
 
@@ -73,7 +73,7 @@ export function RelatedProducts({ currentProductId, categoryId }: RelatedProduct
 
       <div
         id="related-products-scroll"
-        className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+        className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {products.map((product) => {
@@ -89,32 +89,65 @@ export function RelatedProducts({ currentProductId, categoryId }: RelatedProduct
             <Link
               key={product.id}
               href={`/product/${product.slug}`}
-              className="flex-shrink-0 w-64"
+              className="flex-shrink-0 w-48 sm:w-64"
             >
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-4">
-                  <div className="relative aspect-square mb-3 bg-gray-100 rounded-lg overflow-hidden">
-                    <Image
-                      src={imageUrl}
-                      alt={product.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform"
-                    />
-                    {discount > 0 && (
-                      <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+              <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer h-full border-0 shadow-sm bg-white group">
+                <div className="relative aspect-square overflow-hidden bg-gray-100 rounded-t-xl">
+                  <Image
+                    src={imageUrl}
+                    alt={product.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    unoptimized={imageUrl.startsWith('/') && !imageUrl.startsWith('//')}
+                  />
+                  
+                  {/* Quick actions - hidden on mobile */}
+                  <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 hidden sm:flex z-20">
+                     <button className="w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-red-50 transition">
+                       <Heart className="w-4 h-4 text-gray-600" />
+                     </button>
+                     <button className="w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition">
+                       <Eye className="w-4 h-4 text-gray-600" />
+                     </button>
+                  </div>
+
+                  {/* UNIFIED SMART LAYOUT - Clean & Consistent */}
+                  
+                  {/* Discount Badge: Top Left (Red Tag) */}
+                  {discount > 0 && (
+                    <div className="absolute top-2 left-2 z-10">
+                      <span className="bg-red-500 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-md shadow-md">
                         -{discount}%
                       </span>
-                    )}
-                  </div>
-                  <h3 className="font-semibold text-sm mb-2 line-clamp-2">
+                    </div>
+                  )}
+
+                  {/* Featured Icon: Top Right (Gold Star) */}
+                  {product.isFeatured && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <div className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-md">
+                        <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-500 fill-yellow-500" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <CardContent className="p-3">
+                  {/* Category */}
+                  <p className="text-[10px] sm:text-xs text-gray-500 mb-1 truncate">{product.category?.name || 'Product'}</p>
+                  
+                  {/* Name */}
+                  <h3 className="font-medium text-xs sm:text-sm text-gray-900 line-clamp-2 h-8 sm:h-auto mb-2 sm:mb-1 leading-tight group-hover:text-blue-600 transition-colors">
                     {product.name}
                   </h3>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-blue-600">
+                  
+                  {/* Price Stack */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 flex-wrap">
+                    <span className="text-sm sm:text-base font-bold text-blue-600 truncate">
                       {formatPrice(product.salePrice || product.basePrice)}
                     </span>
-                    {product.salePrice && (
-                      <span className="text-sm text-gray-500 line-through">
+                    {product.salePrice && product.basePrice > product.salePrice && (
+                      <span className="text-[10px] sm:text-xs text-gray-400 line-through truncate">
                         {formatPrice(product.basePrice)}
                       </span>
                     )}

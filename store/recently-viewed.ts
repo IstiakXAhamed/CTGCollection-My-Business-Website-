@@ -9,9 +9,11 @@ interface RecentlyViewedProduct {
   name: string
   slug: string
   price: number
+  basePrice?: number // Added for compatibility
   salePrice?: number
   image: string
   viewedAt: number
+  isFeatured?: boolean
 }
 
 interface RecentlyViewedStore {
@@ -66,14 +68,17 @@ export function useTrackProductView() {
     price: number
     salePrice?: number
     images?: string[]
+    isFeatured?: boolean
   }) => {
     addProduct({
       id: product.id,
       name: product.name,
       slug: product.slug,
       price: product.price,
+      basePrice: product.price, // Map price to basePrice for consistency
       salePrice: product.salePrice,
-      image: product.images?.[0] || '/placeholder-product.jpg'
+      image: product.images?.[0] || '/placeholder-product.jpg',
+      isFeatured: product.isFeatured
     })
   }
   

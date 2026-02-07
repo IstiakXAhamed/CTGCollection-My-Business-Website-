@@ -3,13 +3,15 @@
 import { Star } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { calculateAverageRating, getRatingDistribution } from '@/lib/reviews'
+import { AIReviewSummary } from '@/components/product/AIReviewSummary'
 
 interface ReviewDisplayProps {
   reviews: any[]
   productId: string
+  productName: string
 }
 
-export function ReviewDisplay({ reviews, productId }: ReviewDisplayProps) {
+export function ReviewDisplay({ reviews, productId, productName }: ReviewDisplayProps) {
   if (!reviews || reviews.length === 0) {
     return (
       <Card className="p-8 text-center" id="reviews-section">
@@ -30,6 +32,9 @@ export function ReviewDisplay({ reviews, productId }: ReviewDisplayProps) {
     <Card className="p-6" id="reviews-section">
       <div className="mb-6">
         <h2 className="text-2xl font-bold mb-4">Customer Reviews</h2>
+        
+        {/* AI Review Summary */}
+        <AIReviewSummary reviews={reviews} productName={productName} />
         
         {/* Rating Summary */}
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-6 p-4 bg-gray-50 rounded-lg">

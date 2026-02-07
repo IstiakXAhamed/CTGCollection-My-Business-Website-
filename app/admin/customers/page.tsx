@@ -148,10 +148,19 @@ export default function CustomersPage() {
       
       if (res.ok) {
         const data = await res.json()
-        setPersonaAnalysis(data.analysis)
+        // Ensure analysis is an object
+        let analysis = data.analysis
+        if (typeof analysis === 'string') {
+          try {
+            analysis = JSON.parse(analysis)
+          } catch (e) {
+            console.error('Failed to parse analysis JSON', e)
+            analysis = { error: 'Failed to parse AI response' }
+          }
+        }
+        setPersonaAnalysis(analysis)
       } else {
         const err = await res.json()
-        // If 400/404/etc, we can show error in modal
         setPersonaAnalysis({ error: err.message || 'Analysis failed' })
       }
     } catch (error) {
@@ -524,17 +533,17 @@ export default function CustomersPage() {
                       {/* Segment Badge */}
                       <div className="flex justify-center">
                         <span className={`px-4 py-1.5 rounded-full text-sm font-bold shadow-sm ${
-                          personaAnalysis.result.segment === 'VIP' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
-                          personaAnalysis.result.segment === 'At-Risk' ? 'bg-red-100 text-red-700 border border-red-200' :
+                          personaAnalysis.segment === 'VIP' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                          personaAnalysis.segment === 'At-Risk' ? 'bg-red-100 text-red-700 border border-red-200' :
                           'bg-blue-100 text-blue-700 border border-blue-200'
                         }`}>
-                          {personaAnalysis.result.segment} Customer
+                          {personaAnalysis.segment || 'Customer'} Customer
                         </span>
                       </div>
 
                       {/* Brief Persona */}
                       <div className="bg-gray-50 p-4 rounded-lg border">
-                        <p className="text-gray-700 italic text-center">"{personaAnalysis.result.persona}"</p>
+                        <p className="text-gray-700 italic text-center">"{personaAnalysis.persona || 'No persona details available'}"</p>
                       </div>
 
                       {/* Details Grid */}
@@ -544,9 +553,13 @@ export default function CustomersPage() {
                             ❤️ Preferences
                           </h4>
                           <ul className="text-sm text-gray-600 list-disc pl-4 space-y-1">
-                            {personaAnalysis.result.preferences?.map((p: string, i: number) => (
-                              <li key={i}>{p}</li>
-                            ))}
+                            {personaAnalysis.preferences?.length > 0 ? (
+                              personaAnalysis.preferences.map((p: string, i: number) => (
+                                <li key={i}>{p}</li>
+                              ))
+                            ) : (
+                              <li>No specific preferences found</li>
+                            )}
                           </ul>
                         </div>
                         <div className="space-y-2">
@@ -554,9 +567,13 @@ export default function CustomersPage() {
                             🛍️ Recommendations
                           </h4>
                           <ul className="text-sm text-gray-600 list-disc pl-4 space-y-1">
-                            {personaAnalysis.result.recommendations?.map((r: string, i: number) => (
-                              <li key={i}>{r}</li>
-                            ))}
+                            {personaAnalysis.recommendations?.length > 0 ? (
+                              personaAnalysis.recommendations.map((r: string, i: number) => (
+                                <li key={i}>{r}</li>
+                              ))
+                            ) : (
+                              <li>No recommendations generated</li>
+                            )}
                           </ul>
                         </div>
                       </div>
@@ -566,7 +583,7 @@ export default function CustomersPage() {
                         <h4 className="font-semibold text-sm text-green-800 mb-1 flex items-center gap-2">
                           <Sparkles className="w-4 h-4" /> Recommended Strategy
                         </h4>
-                        <p className="text-sm text-green-700">{personaAnalysis.result.retentionStrategy}</p>
+                        <p className="text-sm text-green-700">{personaAnalysis.retentionStrategy || 'Standard engagement'}</p>
                       </div>
                     </div>
                   )

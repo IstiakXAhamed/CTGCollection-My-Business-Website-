@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Clock, ChevronRight, Zap } from 'lucide-react'
+import { Clock, ChevronRight, Zap, Heart, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatPrice } from '@/lib/utils'
@@ -169,24 +169,45 @@ export function FlashSaleBanner() {
                   className="flex-shrink-0"
                 >
                   <Link href={`/product/${product.slug}`}>
-                    <div className="bg-white rounded-xl p-3 shadow-lg hover:shadow-xl transition w-40">
-                      <div className="relative aspect-square rounded-lg overflow-hidden mb-3">
+                    <div className="bg-white rounded-xl p-3 shadow-lg hover:shadow-xl transition group w-48 h-full flex flex-col relative overflow-hidden">
+                      <div className="relative aspect-square rounded-lg overflow-hidden mb-2 bg-gray-100">
                         <Image
                           src={images[0] || '/placeholder.jpg'}
                           alt={product.name}
                           fill
-                          className="object-cover"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        <Badge className="absolute top-2 left-2 bg-red-500 text-white">
-                          -{flashSale.discountPercent}%
-                        </Badge>
+                        
+                        {/* Quick actions - hidden on mobile */}
+                        <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 hidden sm:flex z-20">
+                           <button className="w-7 h-7 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-red-50 transition">
+                             <Heart className="w-3.5 h-3.5 text-gray-600" />
+                           </button>
+                           <button className="w-7 h-7 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition">
+                             <Eye className="w-3.5 h-3.5 text-gray-600" />
+                           </button>
+                        </div>
+
+                        {/* Minimalist Badge: Top Left */}
+                        <div className="absolute top-2 left-2 z-10">
+                          <span className="bg-red-500 text-white text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded shadow-sm">
+                            -{flashSale.discountPercent}%
+                          </span>
+                        </div>
                       </div>
-                      <h4 className="font-medium text-sm line-clamp-1">{product.name}</h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-red-600 font-bold">{formatPrice(salePrice)}</span>
-                        <span className="text-gray-400 text-xs line-through">
-                          {formatPrice(product.basePrice)}
-                        </span>
+                      
+                      <div className="flex-1 flex flex-col">
+                        <h4 className="font-medium text-xs sm:text-sm line-clamp-2 mb-1 leading-tight text-gray-900 group-hover:text-red-600 transition-colors">
+                          {product.name}
+                        </h4>
+                        <div className="mt-auto flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 flex-wrap">
+                          <span className="text-red-600 font-bold text-sm sm:text-base truncate">
+                            {formatPrice(salePrice)}
+                          </span>
+                          <span className="text-gray-400 text-[10px] sm:text-xs line-through truncate">
+                            {formatPrice(product.basePrice)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </Link>

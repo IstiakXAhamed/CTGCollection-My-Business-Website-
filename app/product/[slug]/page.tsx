@@ -13,7 +13,7 @@ import { ProductFeatures } from '@/components/product/ProductFeatures'
 import { RelatedProducts } from '@/components/product/RelatedProducts'
 import { ReviewDisplay } from '@/components/product/ReviewDisplay'
 import { generateSpecifications } from '@/lib/specifications'
-import { AISizeRecommendation } from '@/components/AISizeRecommendation'
+import { AISizeRecommender } from '@/components/product/AISizeRecommender'
 import { RecentlyViewedProducts } from '@/components/RecentlyViewed'
 import { useTrackProductView } from '@/store/recently-viewed'
 import { LimitedStockAlert } from '@/components/LimitedStockAlert'
@@ -23,6 +23,8 @@ import { SocialShare } from '@/components/SocialShare'
 import { useCartStore } from '@/store/cart'
 import { StickyMobileCart } from '@/components/product/StickyMobileCart'
 import Link from 'next/link'
+import { AISmartBundles } from '@/components/product/AISmartBundles'
+import { InstantFAQ } from '@/components/product/InstantFAQ'
 import { Breadcrumb } from '@/components/Breadcrumb'
 
 export default function ProductDetailPage() {
@@ -266,9 +268,9 @@ export default function ProductDetailPage() {
                     )}
                     
                     {/* AI Size Recommendation */}
-                    <AISizeRecommendation 
-                      productCategory={product.category?.name || 'clothing'} 
-                      availableSizes={product.variants?.map((v: any) => v.size).filter(Boolean) || []}
+                    <AISizeRecommender 
+                      productType="clothing"
+                      category={product.category?.name || 'clothing'} 
                       onSizeSelect={(size) => {
                         const variant = product.variants?.find((v: any) => v.size === size)
                         if (variant) setSelectedVariant(variant)
@@ -348,6 +350,21 @@ export default function ProductDetailPage() {
           </motion.div>
         </div>
 
+        {/* AI Smart Bundles */}
+        <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.15 }}
+           className="mb-8"
+        >
+          <AISmartBundles currentProduct={{
+            id: product.id,
+            name: product.name,
+            price: product.salePrice || product.basePrice,
+            image: images[0] || '/placeholder.png'
+          }} category={product.category?.name || 'General'} />
+        </motion.div>
+
         {/* Product Features */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -375,7 +392,21 @@ export default function ProductDetailPage() {
           transition={{ delay: 0.4 }}
           className="mb-12"
         >
-          <ReviewDisplay reviews={product.reviews || []} productId={product.id} />
+          <ReviewDisplay reviews={product.reviews || []} productId={product.id} productName={product.name} />
+        </motion.div>
+
+        {/* AI Instant FAQ */}
+        <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.45 }}
+           className="mb-12"
+        >
+          <InstantFAQ 
+            productName={product.name} 
+            description={product.description} 
+            category={product.category?.name || 'General'} 
+          />
         </motion.div>
 
         {/* Related Products */}

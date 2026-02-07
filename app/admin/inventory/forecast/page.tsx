@@ -10,11 +10,19 @@ import {
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 
+interface Forecast {
+  dailyRate: number
+  daysUntilStockout: number
+  restockRecommendation: number
+  urgency: 'critical' | 'high' | 'medium' | 'low'
+  reason: string
+}
+
 export default function InventoryForecastPage() {
   const [products, setProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [analyzingIds, setAnalyzingIds] = useState<string[]>([])
-  const [forecasts, setForecasts] = useState<Record<string, any>>({})
+  const [forecasts, setForecasts] = useState<Record<string, Forecast>>({})
 
   useEffect(() => {
     fetchProducts()
@@ -26,7 +34,6 @@ export default function InventoryForecastPage() {
       const res = await fetch('/api/admin/products?limit=100', { credentials: 'include' })
       if (res.ok) {
         const data = await res.json()
-        // Filter for products that might need restocking (e.g. stock < 50 or just all)
         setProducts(data.products || [])
       }
     } catch (error) {
@@ -41,10 +48,8 @@ export default function InventoryForecastPage() {
 
     setAnalyzingIds(prev => [...prev, product.id])
     try {
-      // Mock sales history for now as we don't have a direct API for per-product sales history yet
-      // In production, this should come from real analytics
       const salesHistory = {
-        last30Days: Math.floor(Math.random() * 50) + 5, // Simulated data
+        last30Days: Math.floor(Math.random() * 50) + 5,
         last7Days: Math.floor(Math.random() * 10) + 1
       }
 
@@ -64,10 +69,12 @@ export default function InventoryForecastPage() {
 
       if (res.ok) {
         const data = await res.json()
-        setForecasts(prev => ({
-          ...prev,
-          [product.id]: data.forecast
-        }))
+        if (data.forecast && typeof data.forecast === 'object') {
+             setForecasts(prev => ({
+              ...prev,
+              [product.id]: data.forecast
+            }))
+        }
       }
     } catch (error) {
       console.error('Forecast failed', error)
@@ -76,9 +83,7 @@ export default function InventoryForecastPage() {
     }
   }
 
-  // Helper to bulk analyze low stock items
   const analyzeLowStock = async () => {
-    // Calculate stock for each product to filter
     const lowStockProducts = products.filter(p => {
       const stock = p.variants?.reduce((sum: number, v: any) => sum + (v.stock || 0), 0) || 0
       return stock < 20
@@ -121,7 +126,6 @@ export default function InventoryForecastPage() {
             const forecast = forecasts[product.id]
             const isAnalyzing = analyzingIds.includes(product.id)
             
-            // Calculate total stock from variants
             const totalStock = product.variants?.reduce((sum: number, v: any) => sum + (v.stock || 0), 0) || 0
             const isLowStock = totalStock < 10
 
@@ -152,19 +156,23 @@ export default function InventoryForecastPage() {
                       <div className="flex items-center justify-between p-3 bg-white rounded-lg border shadow-sm">
                         <div className="text-center">
                           <p className="text-xs text-gray-500 uppercase font-bold">Daily Sales</p>
-                          <p className="text-lg font-bold text-gray-900">~{forecast.dailyRate}</p>
+                          <p className="text-lg font-bold text-gray-900">
+                            ~{typeof forecast.dailyRate === 'number' ? forecast.dailyRate : 'N/A'}
+                          </p>
                         </div>
                         <div className="h-8 w-px bg-gray-200" />
                         <div className="text-center">
                           <p className="text-xs text-gray-500 uppercase font-bold">Stockout In</p>
-                          <p className={`text-lg font-bold ${forecast.daysUntilStockout < 7 ? 'text-red-600' : 'text-gray-900'}`}>
-                            {forecast.daysUntilStockout} Days
+                          <p className={`text-lg font-bold ${Number(forecast.daysUntilStockout) < 7 ? 'text-red-600' : 'text-gray-900'}`}>
+                            {typeof forecast.daysUntilStockout === 'number' ? forecast.daysUntilStockout : '?'} Days
                           </p>
                         </div>
                         <div className="h-8 w-px bg-gray-200" />
                         <div className="text-center">
                           <p className="text-xs text-green-600 uppercase font-bold">Restock</p>
-                          <p className="text-lg font-bold text-green-600">+{forecast.restockRecommendation}</p>
+                          <p className="text-lg font-bold text-green-600">
+                             +{typeof forecast.restockRecommendation === 'number' ? forecast.restockRecommendation : '0'}
+                          </p>
                         </div>
                       </div>
 
@@ -176,8 +184,10 @@ export default function InventoryForecastPage() {
                         <div className="flex items-start gap-2">
                           <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
                           <div>
-                            <span className="font-bold uppercase text-xs">{forecast.urgency} Priority</span>
-                            <p className="mt-1 leading-snug">{forecast.reason}</p>
+                            <span className="font-bold uppercase text-xs">{forecast.urgency || 'MEDIUM'} Priority</span>
+                            <p className="mt-1 leading-snug">
+                                {typeof forecast.reason === 'string' ? forecast.reason : 'Analysis available'}
+                            </p>
                           </div>
                         </div>
                       </div>

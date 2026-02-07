@@ -300,46 +300,56 @@ function ShopContent() {
                     transition={{ delay: idx * 0.05 }}
                   >
                     <Link href={`/product/${product.slug}`}>
-                      <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer h-full">
-                        <CardContent className="p-4">
-                          {/* Image */}
-                          <div className="relative aspect-square mb-4 bg-gray-100 rounded-lg overflow-hidden">
-                            <Image
-                              src={imageUrl}
-                              alt={product.name}
-                              fill
-                              className="object-cover group-hover:scale-110 transition-transform duration-300"
-                            />
-                            {product.isFeatured && (
-                              <span className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                                <Sparkles className="w-3 h-3" /> Featured
+                      <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer h-full border-0 shadow-sm bg-white">
+                        <div className="relative aspect-square overflow-hidden bg-gray-100">
+                          <Image
+                            src={imageUrl}
+                            alt={product.name}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            unoptimized={imageUrl.startsWith('/') && !imageUrl.startsWith('//')}
+                          />
+                          
+                          {/* UNIFIED SMART LAYOUT - Clean & Consistent */}
+                          
+                          {/* Discount Badge: Top Left (Red Tag) */}
+                          {discount > 0 && (
+                            <div className="absolute top-2 left-2 z-10">
+                              <span className="bg-red-500 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-md shadow-md">
+                                -{discount}%
                               </span>
-                            )}
-                            {discount > 0 && (
-                              <span className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
-                                {discount}% OFF
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Product Info */}
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">
-                              {product.category?.name || 'Product'}
-                            </p>
-                            <h3 className="font-semibold mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                              {product.name}
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              <span className="text-lg font-bold text-blue-600">
-                                {formatPrice(product.salePrice || product.basePrice)}
-                              </span>
-                              {product.salePrice && product.basePrice > product.salePrice && (
-                                <span className="text-sm text-muted-foreground line-through">
-                                  {formatPrice(product.basePrice)}
-                                </span>
-                              )}
                             </div>
+                          )}
+
+                          {/* Featured Icon: Top Right (Gold Star) */}
+                          {product.isFeatured && (
+                            <div className="absolute top-2 right-2 z-10">
+                              <div className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-md">
+                                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-500 fill-yellow-500" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <CardContent className="p-2 sm:p-3">
+                          {/* Category */}
+                          <p className="text-[10px] sm:text-xs text-gray-500 mb-1 truncate">{product.category?.name || 'Product'}</p>
+                          
+                          {/* Name */}
+                          <h3 className="font-medium text-xs sm:text-sm text-gray-900 line-clamp-2 sm:line-clamp-1 h-8 sm:h-auto mb-2 sm:mb-1 leading-tight group-hover:text-blue-600 transition-colors">
+                            {product.name}
+                          </h3>
+                          
+                          {/* Price Stack - Flex Column on Mobile, Row on Desktop */}
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 flex-wrap">
+                            <span className="text-sm sm:text-base font-bold text-blue-600 truncate">
+                              {formatPrice(product.salePrice || product.basePrice)}
+                            </span>
+                            {product.salePrice && product.basePrice > product.salePrice && (
+                              <span className="text-[10px] sm:text-xs text-gray-400 line-through truncate">
+                                {formatPrice(product.basePrice)}
+                              </span>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
