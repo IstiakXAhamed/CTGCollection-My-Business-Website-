@@ -9,11 +9,13 @@ const publicSource = path.join(__dirname, 'public');
 const publicDest = path.join(deployDir, 'public');
 
 // Helper to copy directory recursive
-function copyDir(src, dest) {
+function copyDir(src, dest, exclude = []) {
     if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
     const entries = fs.readdirSync(src, { withFileTypes: true });
 
     for (const entry of entries) {
+        if (exclude.includes(entry.name)) continue;
+
         const srcPath = path.join(src, entry.name);
         const destPath = path.join(dest, entry.name);
 
@@ -41,9 +43,9 @@ if (!fs.existsSync(standaloneDir)) {
     process.exit(1);
 }
 
-// 3. Copy Standalone
-console.log('📦 Copying Standalone Build...');
-copyDir(standaloneDir, deployDir);
+// 3. Copy Standalone (EXCLUDING node_modules to avoid Windows/Linux binary mismatch)
+console.log('📦 Copying Standalone Build (skipping node_modules)...');
+copyDir(standaloneDir, deployDir, ['node_modules']);
 
 // 4. Copy Static Assets
 console.log('🎨 Copying Static Assets...');
@@ -68,28 +70,21 @@ if (fs.existsSync(envSource)) {
     console.warn('⚠️  WARNING: .env file not found! Please manually upload it to cPanel.');
 }
 
-// 6. Manual Copy for Prisma Engines (Critical for Linux)
-// Standalone build often misses the specific binaries needed for the target OS
-const prismaSource = path.join(__dirname, 'node_modules', '.prisma', 'client');
-const prismaDest = path.join(deployDir, 'node_modules', '.prisma', 'client');
+// 6. Manual Copy Steps REMOVED
+// We now rely on `npm install` on the server to get the correct Linux binaries for Prisma and dotenv.
+// This prevents the "500 Internal Server Error" caused by uploading Windows binaries.
 
-if (fs.existsSync(prismaSource)) {
-    console.log('🐘 Copying Prisma Binaries (Linux support)...');
-    copyDir(prismaSource, prismaDest);
-    console.log('   - Prisma files copied successfully.');
+// 6.6 Copy Prisma Schema (REQUIRED for postinstall generate)
+
+// 6.6 Copy Prisma Schema (REQUIRED for postinstall generate)
+const prismaDirSource = path.join(__dirname, 'prisma');
+const prismaDirDest = path.join(deployDir, 'prisma');
+
+if (fs.existsSync(prismaDirSource)) {
+    console.log('🐘 Copying Prisma Schema folder...');
+    copyDir(prismaDirSource, prismaDirDest);
 } else {
-    console.warn('   Run "npx prisma generate" before "npm run build".');
-}
-
-// 6.5 Manual Copy for dotenv (Required for server.js patch)
-const dotenvSource = path.join(__dirname, 'node_modules', 'dotenv');
-const dotenvDest = path.join(deployDir, 'node_modules', 'dotenv');
-
-if (fs.existsSync(dotenvSource)) {
-    console.log('🔌 Copying dotenv package...');
-    copyDir(dotenvSource, dotenvDest);
-} else {
-    console.warn('⚠️  dotenv package not found in node_modules!');
+    console.warn('⚠️  Prisma folder not found!');
 }
 
 
