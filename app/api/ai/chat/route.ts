@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
                OR: [
                  { name: { contains: query } }, // Case insensitive usually supported by DB collation or use mode: 'insensitive' if postgres
                  { description: { contains: query } },
-                 { category: { contains: query } }
+                 { category: { name: { contains: query } } }
                ],
                isArchived: false
              },
