@@ -310,16 +310,16 @@ export default function HomePage() {
                           )}
                         </div>
                         <CardContent className="p-2 sm:p-3">
-                          <p className="text-[10px] sm:text-xs text-gray-400 mb-0.5">{product.category?.name || 'Product'}</p>
-                          <h3 className="font-medium text-xs sm:text-sm text-gray-800 line-clamp-1 mb-1 group-hover:text-blue-600 transition-colors">
+                          <p className="text-[9px] sm:text-xs text-gray-400 mb-0.5">{product.category?.name || 'Product'}</p>
+                          <h3 className="font-medium text-[11px] sm:text-sm text-gray-800 line-clamp-1 mb-1 group-hover:text-blue-600 transition-colors">
                             {product.name}
                           </h3>
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 flex-wrap">
-                            <span className="text-sm sm:text-base font-bold text-blue-600">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-sm font-bold text-blue-600 truncate">
                               {formatPrice(product.salePrice || product.basePrice)}
                             </span>
                             {product.salePrice && product.basePrice > product.salePrice && (
-                              <span className="text-[10px] sm:text-xs text-gray-400 line-through">
+                              <span className="text-[10px] text-gray-400 line-through">
                                 {formatPrice(product.basePrice)}
                               </span>
                             )}

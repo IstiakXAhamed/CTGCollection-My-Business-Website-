@@ -305,14 +305,26 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <nav className="p-3 sm:p-4 space-y-1">
             {menuItems.map((item) => {
               const Icon = item.icon
-              const isActive = pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(item.href))
               
+              // Smart Active Logic:
+              // 1. Exact match always wins
+              // 2. Prefix match wins ONLY if no other menu item has a longer prefix match
+              // This prevents "Inventory History" (/admin/inventory) from lighting up when we are on "Forecast" (/admin/inventory/forecast)
+              const isExactMatch = pathname === item.href
+              const isPrefixMatch = item.href !== '/admin' && pathname?.startsWith(item.href)
+              
+              const isBestMatch = isExactMatch || (isPrefixMatch && !menuItems.some(other => 
+                other !== item && 
+                other.href.length > item.href.length && 
+                pathname?.startsWith(other.href)
+              ))
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition text-sm sm:text-base ${
-                    isActive
+                    isBestMatch
                       ? 'bg-blue-600 text-white'
                       : 'hover:bg-gray-100'
                   }`}

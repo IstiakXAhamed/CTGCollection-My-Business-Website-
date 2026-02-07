@@ -6,7 +6,7 @@ import { ShoppingCart, User, Search, Menu, Heart, LogOut, Settings, Package, Che
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/Logo'
 import { useState, useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import NotificationBell from '@/components/NotificationBell'
 import { useCartStore } from '@/store/cart'
 import RoleBadge from '@/components/RoleBadge'
@@ -27,6 +27,7 @@ export default function Navbar() {
   const [isHydrated, setIsHydrated] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   
   // Use cart store for reactive cart count
   const storeCartCount = useCartStore((state) => state.getTotalItems())
@@ -78,6 +79,11 @@ export default function Navbar() {
     }
   }
 
+  // Active state helpers
+  const isShopActive = pathname === '/shop' && !searchParams.has('featured') && !searchParams.has('sale')
+  const isFeaturedActive = pathname === '/shop' && searchParams.get('featured') === 'true'
+  const isSaleActive = pathname === '/shop' && searchParams.get('sale') === 'true'
+
   return (
     <nav className="sticky top-0 z-50 w-full max-w-[100vw] border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Fixed width container - same on all pages */}
@@ -101,7 +107,7 @@ export default function Navbar() {
             <Link 
               href="/shop" 
               className={`text-sm font-medium transition-colors whitespace-nowrap ${
-                pathname === '/shop' && !pathname.includes('?') 
+                isShopActive 
                   ? 'text-blue-600 font-semibold' 
                   : 'hover:text-blue-600'
               }`}
@@ -111,7 +117,7 @@ export default function Navbar() {
             <Link 
               href="/shop?featured=true" 
               className={`text-sm font-medium transition-colors whitespace-nowrap ${
-                pathname.includes('featured=true') 
+                isFeaturedActive 
                   ? 'text-blue-600 font-semibold' 
                   : 'hover:text-blue-600'
               }`}
@@ -121,7 +127,7 @@ export default function Navbar() {
             <Link 
               href="/shop?sale=true" 
               className={`text-sm font-medium transition-colors whitespace-nowrap ${
-                pathname.includes('sale=true') 
+                isSaleActive 
                   ? 'text-blue-600 font-semibold' 
                   : 'hover:text-blue-600'
               }`}
