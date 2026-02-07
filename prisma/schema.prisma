@@ -677,6 +677,24 @@ model SiteSettings {
   stat4Label        String   @default("Average Rating")
 
   // Values/Features
+  returnsEnabled    Boolean  @default(true) // Global Return Kill Switch
+  
+  // Feature Visibility
+  showFreeShipping  Boolean  @default(true)
+  showEasyReturns   Boolean  @default(true)
+  showCOD           Boolean  @default(true)
+  showAuthentic     Boolean  @default(true)
+
+  // Feature Text Values
+  featureShippingTitle  String   @default("Free Shipping")
+  featureShippingDesc   String   @default("Orders over BDT 2,000")
+  featureReturnTitle    String   @default("Easy Returns")
+  featureReturnDesc     String   @default("7-day return policy")
+  featureCODTitle       String   @default("COD Available")
+  featureCODDesc        String   @default("Cash on Delivery")
+  featureAuthenticTitle String   @default("100% Authentic")
+  featureAuthenticDesc  String   @default("Genuine products")
+
   value1Title       String   @default("Quality First")
   value1Desc        String   @default("We carefully select every product to ensure the highest quality standards.")
   value2Title       String   @default("Fast Delivery")

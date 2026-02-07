@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { 
   MessageCircle, Gift, Settings, Save, 
   CheckCircle2, Wifi, WifiOff, Clock, Loader2,
-  Store, Truck, CreditCard
+  Store, Truck, CreditCard, Package, RotateCcw
 } from 'lucide-react'
 
 interface SiteSettings {
@@ -32,6 +32,23 @@ interface SiteSettings {
   nagadNumber: string
   rocketEnabled: boolean
   rocketNumber: string
+  // Feature Visibility
+  showFreeShipping: boolean
+  showEasyReturns: boolean
+  showCOD: boolean
+  showAuthentic: boolean
+  
+  // Feature Text
+  featureShippingTitle: string
+  featureShippingDesc: string
+  featureReturnTitle: string
+  featureReturnDesc: string
+  featureCODTitle: string
+  featureCODDesc: string
+  featureAuthenticTitle: string
+  featureAuthenticDesc: string
+
+  returnsEnabled: boolean
 }
 
 export default function AdminSettingsPage() {
@@ -54,7 +71,20 @@ export default function AdminSettingsPage() {
     nagadEnabled: true,
     nagadNumber: '01991523289',
     rocketEnabled: true,
-    rocketNumber: '01991523289'
+    rocketNumber: '01991523289',
+    showFreeShipping: true,
+    showEasyReturns: true,
+    showCOD: true,
+    showAuthentic: true,
+    featureShippingTitle: 'Free Shipping',
+    featureShippingDesc: 'Orders over BDT 2,000',
+    featureReturnTitle: 'Easy Returns',
+    featureReturnDesc: '7-day return policy',
+    featureCODTitle: 'COD Available',
+    featureCODDesc: 'Cash on Delivery',
+    featureAuthenticTitle: '100% Authentic',
+    featureAuthenticDesc: 'Genuine products',
+    returnsEnabled: true
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -448,6 +478,226 @@ export default function AdminSettingsPage() {
               })} disabled={saving}>
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                 Save Payment Settings
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Product Page Features Visibility */}
+        <Card className="border-2 border-blue-100">
+          <CardHeader className="bg-blue-50">
+            <CardTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-blue-600" />
+              Product Page Features
+            </CardTitle>
+            <CardDescription>Control which badges appear on product pages</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6 pt-6">
+            
+            {/* Free Shipping */}
+            <div className="p-4 border rounded-lg bg-white space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Truck className="w-5 h-5 text-blue-600" />
+                  <span className="font-medium">Free Shipping Badge</span>
+                </div>
+                <input 
+                  type="checkbox"
+                  checked={settings.showFreeShipping}
+                  onChange={(e) => handlePromoChange('showFreeShipping', e.target.checked)}
+                  className="w-5 h-5 text-blue-600 rounded"
+                />
+              </div>
+              {settings.showFreeShipping && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Title</Label>
+                    <Input 
+                      value={settings.featureShippingTitle} 
+                      onChange={(e) => handlePromoChange('featureShippingTitle', e.target.value)}
+                      placeholder="Free Shipping"
+                      className="h-8"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Description</Label>
+                    <Input 
+                      value={settings.featureShippingDesc} 
+                      onChange={(e) => handlePromoChange('featureShippingDesc', e.target.value)}
+                      placeholder="Orders over BDT 2,000"
+                      className="h-8"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Easy Returns */}
+            <div className="p-4 border rounded-lg bg-white space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <RotateCcw className="w-5 h-5 text-green-600" />
+                  <span className="font-medium">Easy Returns Badge</span>
+                </div>
+                <input 
+                  type="checkbox"
+                  checked={settings.showEasyReturns}
+                  onChange={(e) => handlePromoChange('showEasyReturns', e.target.checked)}
+                  className="w-5 h-5 text-green-600 rounded"
+                />
+              </div>
+              {settings.showEasyReturns && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Title</Label>
+                    <Input 
+                      value={settings.featureReturnTitle} 
+                      onChange={(e) => handlePromoChange('featureReturnTitle', e.target.value)}
+                      placeholder="Easy Returns"
+                      className="h-8"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Description</Label>
+                    <Input 
+                      value={settings.featureReturnDesc} 
+                      onChange={(e) => handlePromoChange('featureReturnDesc', e.target.value)}
+                      placeholder="7-day return policy"
+                      className="h-8"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* COD Available */}
+            <div className="p-4 border rounded-lg bg-white space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-purple-600" />
+                  <span className="font-medium">COD Available Badge</span>
+                </div>
+                <input 
+                  type="checkbox"
+                  checked={settings.showCOD}
+                  onChange={(e) => handlePromoChange('showCOD', e.target.checked)}
+                  className="w-5 h-5 text-purple-600 rounded"
+                />
+              </div>
+              {settings.showCOD && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Title</Label>
+                    <Input 
+                      value={settings.featureCODTitle} 
+                      onChange={(e) => handlePromoChange('featureCODTitle', e.target.value)}
+                      placeholder="COD Available"
+                      className="h-8"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Description</Label>
+                    <Input 
+                      value={settings.featureCODDesc} 
+                      onChange={(e) => handlePromoChange('featureCODDesc', e.target.value)}
+                      placeholder="Cash on Delivery"
+                      className="h-8"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 100% Authentic */}
+            <div className="p-4 border rounded-lg bg-white space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-yellow-600" />
+                  <span className="font-medium">Authenticity Badge</span>
+                </div>
+                <input 
+                  type="checkbox"
+                  checked={settings.showAuthentic}
+                  onChange={(e) => handlePromoChange('showAuthentic', e.target.checked)}
+                  className="w-5 h-5 text-yellow-600 rounded"
+                />
+              </div>
+              {settings.showAuthentic && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Title</Label>
+                    <Input 
+                      value={settings.featureAuthenticTitle} 
+                      onChange={(e) => handlePromoChange('featureAuthenticTitle', e.target.value)}
+                      placeholder="100% Authentic"
+                      className="h-8"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Description</Label>
+                    <Input 
+                      value={settings.featureAuthenticDesc} 
+                      onChange={(e) => handlePromoChange('featureAuthenticDesc', e.target.value)}
+                      placeholder="Genuine products"
+                      className="h-8"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-4 border-t flex justify-end">
+              <Button onClick={() => saveSettings({ 
+                showFreeShipping: settings.showFreeShipping,
+                showEasyReturns: settings.showEasyReturns,
+                showCOD: settings.showCOD,
+                showAuthentic: settings.showAuthentic,
+                featureShippingTitle: settings.featureShippingTitle,
+                featureShippingDesc: settings.featureShippingDesc,
+                featureReturnTitle: settings.featureReturnTitle,
+                featureReturnDesc: settings.featureReturnDesc,
+                featureCODTitle: settings.featureCODTitle,
+                featureCODDesc: settings.featureCODDesc,
+                featureAuthenticTitle: settings.featureAuthenticTitle,
+                featureAuthenticDesc: settings.featureAuthenticDesc
+              })} disabled={saving}>
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                Save Feature Settings
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Returns & Refunds Settings (Global Kill Switch) */}
+        <Card className="border-2 border-red-100">
+          <CardHeader className="bg-red-50">
+            <CardTitle className="flex items-center gap-2">
+              <Gift className="w-5 h-5 text-red-600" />
+              Global Returns & Refunds
+            </CardTitle>
+            <CardDescription>Master switch to hide ALL return options from customers</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-6">
+            <div className="flex items-center justify-between p-4 border rounded-lg bg-white">
+              <div>
+                <p className="font-semibold text-red-700">Enable Returns System</p>
+                <p className="text-sm text-red-600/80">If OFF: Hides "Request Refund" button AND "Easy Returns" badge everywhere.</p>
+              </div>
+              <input 
+                type="checkbox"
+                checked={settings.returnsEnabled}
+                onChange={(e) => handlePromoChange('returnsEnabled', e.target.checked)}
+                className="w-6 h-6 text-red-600 rounded border-red-300 focus:ring-red-500"
+              />
+            </div>
+            <div className="pt-4 border-t">
+              <Button 
+                onClick={() => saveSettings({ returnsEnabled: settings.returnsEnabled })} 
+                disabled={saving}
+                variant="destructive"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                Save Global Return Settings
               </Button>
             </div>
           </CardContent>

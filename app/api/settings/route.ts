@@ -65,9 +65,9 @@ export async function POST(req: NextRequest) {
         updateData.spinWheelConfig = validSpinConfig
       }
       
-      // Add other settings (filter out empty values)
+      // Add other settings (allow empty strings)
       Object.entries(otherSettings).forEach(([key, value]) => {
-        if (value !== undefined && value !== '') {
+        if (value !== undefined) {
           updateData[key] = value
         }
       })

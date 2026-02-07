@@ -136,6 +136,7 @@ export function AIImageGenerator({ productName, onImageSelect }: AIImageGenerato
               )}
               <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1">
                 <button 
+                  type="button"
                   className="w-full text-xs text-white flex items-center justify-center gap-1 hover:text-rose-300"
                   onClick={(e) => { e.stopPropagation(); selectImage(i) }}
                 >
