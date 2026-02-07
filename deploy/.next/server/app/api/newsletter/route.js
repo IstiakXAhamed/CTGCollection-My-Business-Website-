@@ -28,7 +28,7 @@
                 <p style="margin: 10px 0 0 0; color: #888; font-size: 14px;">Use at checkout for your discount!</p>
               </div>
             `:""}
-            <a href="http://localhost:3000/shop" class="button">Start Shopping →</a>
+            <a href="https://silkmartbd.com/shop" class="button">Start Shopping →</a>
           </div>
           <div class="footer">
             <p>Silk Mart - Premium E-Commerce Store</p>

@@ -22,7 +22,7 @@
               <p>Valid until: ${p.toLocaleDateString()}</p>
             </div>
             <p style="text-align: center; margin-top: 20px;">
-              <a href="http://localhost:3000/shop" style="background: #667eea; color: white; padding: 12px 30px; border-radius: 30px; text-decoration: none;">
+              <a href="https://silkmartbd.com/shop" style="background: #667eea; color: white; padding: 12px 30px; border-radius: 30px; text-decoration: none;">
                 Shop Now
               </a>
             </p>

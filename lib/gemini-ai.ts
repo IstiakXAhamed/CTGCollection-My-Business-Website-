@@ -23,8 +23,10 @@ export async function callGeminiAI(prompt: string, options?: {
   const apiKey = process.env.GOOGLE_AI_API_KEY?.trim()
   
   if (!apiKey) {
+    console.error('❌ GOOGLE_AI_API_KEY is missing in environment variables!')
     throw new Error('GOOGLE_AI_API_KEY not configured')
   }
+  console.log('✅ API Key found (length):', apiKey.length)
 
   const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
     method: 'POST',

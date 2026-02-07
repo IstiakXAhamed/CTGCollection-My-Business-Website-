@@ -84,7 +84,7 @@
           <p><span style="display:inline-block; width:10px; height:10px; background-color:${"cod"===e.paymentMethod?"#f59e0b":"#10b981"}; border-radius:50%; margin-right:5px; vertical-align:middle;"></span>${"cod"===e.paymentMethod?"Cash on Delivery":"Paid Online"}</p>
           
           <center>
-            <a href="http://localhost:3000/dashboard/orders" class="button">
+            <a href="https://silkmartbd.com/dashboard/orders" class="button">
               View Your Orders
             </a>
           </center>
@@ -156,7 +156,7 @@
           </div>
           
           <center>
-            <a href="http://localhost:3000/dashboard/orders" class="button">
+            <a href="https://silkmartbd.com/dashboard/orders" class="button">
               View Order Details
             </a>
           </center>
@@ -260,7 +260,7 @@
           <p><span style="display:inline-block; width:10px; height:10px; background-color:${"cod"===e.paymentMethod?"#f59e0b":"#10b981"}; border-radius:50%; margin-right:5px; vertical-align:middle;"></span>${"cod"===e.paymentMethod?"Cash on Delivery":"Paid Online"}</p>
           
           <center>
-            <a href="http://localhost:3000/dashboard/orders" class="button">
+            <a href="https://silkmartbd.com/dashboard/orders" class="button">
               View Your Orders
             </a>
           </center>
@@ -308,7 +308,7 @@
           ${n}
           
           <div style="text-align: center;">
-            <a href="http://localhost:3000/dashboard/orders" class="button">View Order</a>
+            <a href="https://silkmartbd.com/dashboard/orders" class="button">View Order</a>
           </div>
         </div>
         <div class="footer">
@@ -359,7 +359,7 @@
           `:""}
           
           <div style="text-align: center;">
-            <a href="http://localhost:3000/dashboard" class="button">View My Benefits</a>
+            <a href="https://silkmartbd.com/dashboard" class="button">View My Benefits</a>
           </div>
         </div>
         <div class="footer">
@@ -398,7 +398,7 @@
           <p>Use your points to get discounts on your next purchase!</p>
           
           <div style="text-align: center;">
-            <a href="http://localhost:3000/dashboard/loyalty" class="button">Check Balance</a>
+            <a href="https://silkmartbd.com/dashboard/loyalty" class="button">Check Balance</a>
           </div>
         </div>
         <div class="footer">
@@ -444,7 +444,7 @@
           <p>If you have any questions about your new role, please don't hesitate to contact us.</p>
           
           <div style="text-align: center;">
-            <a href="http://localhost:3000/dashboard" class="button">Go to Dashboard</a>
+            <a href="https://silkmartbd.com/dashboard" class="button">Go to Dashboard</a>
           </div>
         </div>
         <div class="footer">
@@ -516,7 +516,7 @@
           <p>Great news! Your account on CTG Collection has been reactivated. You can now log in and access all features.</p>
           <p>We're happy to have you back!</p>
           <div style="text-align: center;">
-            <a href="http://localhost:3000/login" class="button">Log In Now</a>
+            <a href="https://silkmartbd.com/login" class="button">Log In Now</a>
           </div>
         </div>
         <div class="footer">
