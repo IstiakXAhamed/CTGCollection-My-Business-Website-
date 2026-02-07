@@ -2,6 +2,9 @@
 deployment:
   tasks:
     - export DEPLOY_PATH=/home/silkmart/silkmart
+    - /usr/bin/npm install
+    - /usr/bin/npm run build
+    - /usr/bin/node prepare-deploy.js
     - /usr/bin/pkill -f node || true
     - /bin/cp -rf deploy/. $DEPLOY_PATH
     - /usr/bin/touch $DEPLOY_PATH/tmp/restart.txt
