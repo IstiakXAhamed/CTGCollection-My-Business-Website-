@@ -74,17 +74,54 @@ export default function NewProductPage() {
     }
   }, [formData.name])
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files) return
+  const [uploading, setUploading] = useState(false)
 
-    Array.from(files).forEach(file => {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImages(prev => [...prev, reader.result as string])
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setUploading(true)
+    const newImages: string[] = []
+
+    try {
+      for (const file of Array.from(files)) {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('folder', 'products') // Organize in 'products' folder
+
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (res.ok) {
+          const data = await res.json()
+          if (data.success && data.url) {
+            newImages.push(data.url)
+          }
+        } else {
+          console.error('Upload failed')
+          toast({
+            title: 'Upload Failed',
+            description: `Failed to upload ${file.name}`,
+            variant: 'destructive'
+          })
+        }
       }
-      reader.readAsDataURL(file)
-    })
+      
+      setImages(prev => [...prev, ...newImages])
+    } catch (error) {
+      console.error('Upload error:', error)
+      toast({
+        title: 'Error',
+        description: 'An error occurred while uploading images',
+        variant: 'destructive'
+      })
+    } finally {
+      setUploading(false)
+      // Reset input
+      e.target.value = ''
+    }
   }
 
   const removeImage = (index: number) => {
@@ -310,8 +347,14 @@ export default function NewProductPage() {
               ))}
               
               <label className="aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition-colors">
-                <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                <span className="text-sm text-muted-foreground">Upload Image</span>
+                {uploading ? (
+                  <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-2" />
+                ) : (
+                  <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                )}
+                <span className="text-sm text-muted-foreground">
+                  {uploading ? 'Uploading...' : 'Upload Image'}
+                </span>
                 <input
                   type="file"
                   accept="image/*"
