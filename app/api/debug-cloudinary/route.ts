@@ -8,6 +8,8 @@ export async function GET() {
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
+    console.log('Debug Cloudinary: Checking config...');
+
     // Configure Cloudinary
     cloudinary.config({
       cloud_name: cloudName,
@@ -16,7 +18,7 @@ export async function GET() {
     });
 
     const maskedSecret = apiSecret 
-      ? \`\${apiSecret.substring(0, 3)}...\${apiSecret.substring(apiSecret.length - 3)}\` 
+      ? `${apiSecret.substring(0, 3)}...${apiSecret.substring(apiSecret.length - 3)}` 
       : 'MISSING';
 
     const configStatus = {
@@ -25,14 +27,18 @@ export async function GET() {
       api_secret: maskedSecret,
     };
 
+    console.log('Debug Cloudinary: Config status:', configStatus);
+
     // Attempt a test upload (1x1 pixel transparent GIF)
     const testUpload = await cloudinary.uploader.upload(
       "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7", 
       {
         folder: 'debug_test',
-        public_id: \`test_\${Date.now()}\`
+        public_id: `test_${Date.now()}`
       }
     );
+
+    console.log('Debug Cloudinary: Upload success:', testUpload.secure_url);
 
     return NextResponse.json({
       status: 'success',
@@ -41,6 +47,7 @@ export async function GET() {
     });
 
   } catch (error: any) {
+    console.error('Debug Cloudinary: Error:', error);
     return NextResponse.json({
       status: 'error',
       message: error.message,
