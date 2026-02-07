@@ -48,11 +48,11 @@ export function ProductFeatures() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {features.map((feature) => {
-        // Feature Logic
-        if (feature.key === 'featureShipping' && !settings.showFreeShipping) return null
-        if (feature.key === 'featureReturn' && (!settings.showEasyReturns || !settings.returnsEnabled)) return null
-        if (feature.key === 'featureCOD' && !settings.showCOD) return null
-        if (feature.key === 'featureAuthentic' && !settings.showAuthentic) return null
+        // Feature Logic - Only hide if explicitly set to false (default to true)
+        if (feature.key === 'featureShipping' && settings.showFreeShipping === false) return null
+        if (feature.key === 'featureReturn' && (settings.showEasyReturns === false || settings.returnsEnabled === false)) return null
+        if (feature.key === 'featureCOD' && settings.showCOD === false) return null
+        if (feature.key === 'featureAuthentic' && settings.showAuthentic === false) return null
 
         const Icon = feature.icon
         return (
