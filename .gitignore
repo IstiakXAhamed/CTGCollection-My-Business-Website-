@@ -46,3 +46,10 @@ prisma/*.db-journal
 *.swp
 *.swo
 *~
+
+# Force-include deployment folder (Even if it breaks other rules)
+!deploy/
+
+
+# Deployment secrets
+deploy/.env

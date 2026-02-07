@@ -78,8 +78,18 @@ if (fs.existsSync(prismaSource)) {
     copyDir(prismaSource, prismaDest);
     console.log('   - Prisma files copied successfully.');
 } else {
-    console.warn('⚠️  WARNING: node_modules/.prisma/client not found. Database might fail!');
     console.warn('   Run "npx prisma generate" before "npm run build".');
+}
+
+// 6.5 Manual Copy for dotenv (Required for server.js patch)
+const dotenvSource = path.join(__dirname, 'node_modules', 'dotenv');
+const dotenvDest = path.join(deployDir, 'node_modules', 'dotenv');
+
+if (fs.existsSync(dotenvSource)) {
+    console.log('🔌 Copying dotenv package...');
+    copyDir(dotenvSource, dotenvDest);
+} else {
+    console.warn('⚠️  dotenv package not found in node_modules!');
 }
 
 
