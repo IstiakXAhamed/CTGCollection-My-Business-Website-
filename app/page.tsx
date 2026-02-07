@@ -291,19 +291,20 @@ export default function HomePage() {
                               <Eye className="w-3.5 h-3.5 text-gray-600" />
                             </button>
                           </div>
-                          {/* Badges - separated on mobile for better visibility */}
-                          <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-col gap-1 z-10">
-                            {product.isFeatured && (
-                              <span className="bg-blue-600 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium flex items-center gap-0.5 shadow-sm">
+                          {/* Badges - Strictly Separated */}
+                          {/* Featured: Top Left */}
+                          {product.isFeatured && (
+                            <div className="absolute top-1.5 left-1.5 z-10">
+                              <span className="bg-blue-600 text-white text-[9px] sm:text-xs px-1.5 py-0.5 rounded-full font-medium flex items-center gap-0.5 shadow-sm">
                                 <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Featured
                               </span>
-                            )}
-                          </div>
+                            </div>
+                          )}
                           
-                          {/* Discount Badge - Moved to right on mobile to prevent overlap */}
+                          {/* Discount: Top Right */}
                           {discount > 0 && (
-                            <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10">
-                              <span className="bg-red-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-bold shadow-sm">
+                            <div className="absolute top-1.5 right-1.5 z-10">
+                              <span className="bg-red-500 text-white text-[9px] sm:text-xs px-1.5 py-0.5 rounded-full font-bold shadow-sm">
                                 {discount}% OFF
                               </span>
                             </div>
@@ -319,7 +320,7 @@ export default function HomePage() {
                               {formatPrice(product.salePrice || product.basePrice)}
                             </span>
                             {product.salePrice && product.basePrice > product.salePrice && (
-                              <span className="text-[10px] text-gray-400 line-through">
+                              <span className="text-[10px] text-gray-400 line-through truncate">
                                 {formatPrice(product.basePrice)}
                               </span>
                             )}
