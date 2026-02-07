@@ -252,7 +252,7 @@ export default function UnifiedPromoBanner() {
         </div>
       )}
 
-      <div className={`max-w-7xl mx-auto ${paddingClass} ${sizeClass.py} relative ${sizeClass.height} flex items-center`}>
+      <div className={`max-w-7xl mx-auto ${paddingClass} ${sizeClass.py} relative ${sizeClass.height} flex items-center px-12 sm:px-4`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentBanner.id}
