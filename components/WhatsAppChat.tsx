@@ -66,7 +66,7 @@ export function WhatsAppChat({
       {/* Chat Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-4 md:bottom-6 ${positionClasses} z-50 w-14 h-14 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition-colors flex items-center justify-center`}
+        className={`fixed bottom-4 md:bottom-6 ${positionClasses} z-50 w-12 h-12 md:w-14 md:h-14 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition-colors flex items-center justify-center`}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         aria-label="WhatsApp Chat"

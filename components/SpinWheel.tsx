@@ -112,6 +112,13 @@ export function SpinWheel({
     }
 
     init()
+
+    const handleOpenEvent = () => setIsOpen(true)
+    window.addEventListener('open-spin-wheel', handleOpenEvent)
+
+    return () => {
+      window.removeEventListener('open-spin-wheel', handleOpenEvent)
+    }
   }, [trigger, checkAlreadySpun])
 
   // Weighted random selection

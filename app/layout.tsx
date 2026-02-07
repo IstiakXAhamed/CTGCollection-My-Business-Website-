@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import LiveChat from "@/components/LiveChat";
+import { SpinWheel } from "@/components/SpinWheel";
 import { AIChatAssistant } from "@/components/AIChatAssistant";
 import UnifiedPromoBanner from "@/components/UnifiedPromoBanner";
 import { Toaster } from "@/components/ui/toaster";
@@ -64,9 +64,9 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
-          <Footer />
-          <LiveChat />
+
           <AIChatAssistant />
+          <SpinWheel />
           
           {/* Premium Global Features */}
           <Analytics />

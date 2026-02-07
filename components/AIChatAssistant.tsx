@@ -119,7 +119,7 @@ export function AIChatAssistant() {
   }
 
   return (
-    <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end pointer-events-none">
+    <div className="fixed bottom-20 md:bottom-24 right-4 md:right-6 z-50 flex flex-col items-end pointer-events-none">
       <AnimatePresence>
         {isOpen && !isMinimized && (
           <motion.div
@@ -254,9 +254,9 @@ export function AIChatAssistant() {
                 setIsOpen(true)
                 setIsMinimized(false)
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg shadow-blue-600/30 flex items-center justify-center relative group"
+              className="w-12 h-12 md:w-14 md:h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg shadow-blue-600/30 flex items-center justify-center relative group"
             >
-              <MessageSquare className="w-6 h-6" />
+              <MessageSquare className="w-5 h-5 md:w-6 md:h-6" />
               <span className="absolute right-0 top-0 flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
