@@ -291,36 +291,64 @@ export default function HomePage() {
                               <Eye className="w-3.5 h-3.5 text-gray-600" />
                             </button>
                           </div>
-                          {/* Badges - Strictly Separated */}
-                          {/* Featured: Top Left */}
-                          {product.isFeatured && (
-                            <div className="absolute top-1.5 left-1.5 z-10">
-                              <span className="bg-blue-600 text-white text-[9px] sm:text-xs px-1.5 py-0.5 rounded-full font-medium flex items-center gap-0.5 shadow-sm">
-                                <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Featured
-                              </span>
-                            </div>
-                          )}
+                          {/* SMART RESPONSIVE LAYOUT */}
                           
-                          {/* Discount: Top Right */}
-                          {discount > 0 && (
-                            <div className="absolute top-1.5 right-1.5 z-10">
-                              <span className="bg-red-500 text-white text-[9px] sm:text-xs px-1.5 py-0.5 rounded-full font-bold shadow-sm">
-                                {discount}% OFF
-                              </span>
+                          {/* === MOBILE BADGES (Minimalist) - Block on mobile, Hidden on SM+ === */}
+                          <div className="block sm:hidden">
+                            {/* Discount: Red Tag Top-Left */}
+                            {discount > 0 && (
+                              <div className="absolute top-2 left-2 z-10">
+                                <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm">
+                                  -{discount}%
+                                </span>
+                              </div>
+                            )}
+                            {/* Featured: Star Icon Top-Right */}
+                            {product.isFeatured && (
+                              <div className="absolute top-2 right-2 z-10">
+                                <div className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm">
+                                  <Sparkles className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* === DESKTOP BADGES (Classic) - Hidden on mobile, Block on SM+ === */}
+                          <div className="hidden sm:block">
+                            <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                              {product.isFeatured && (
+                                <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-0.5 shadow-sm">
+                                  <Sparkles className="w-3 h-3" /> Featured
+                                </span>
+                              )}
                             </div>
-                          )}
+                            {discount > 0 && (
+                              <div className="absolute top-2 right-2 z-10">
+                                <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-bold shadow-sm">
+                                  {discount}% OFF
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
                         </div>
+                        
                         <CardContent className="p-2 sm:p-3">
-                          <p className="text-[9px] sm:text-xs text-gray-400 mb-0.5">{product.category?.name || 'Product'}</p>
-                          <h3 className="font-medium text-[11px] sm:text-sm text-gray-800 line-clamp-1 mb-1 group-hover:text-blue-600 transition-colors">
+                          {/* Category */}
+                          <p className="text-[10px] sm:text-xs text-gray-500 sm:text-gray-400 mb-1 sm:mb-0.5 truncate">{product.category?.name || 'Product'}</p>
+                          
+                          {/* Name */}
+                          <h3 className="font-medium text-xs sm:text-sm text-gray-900 sm:text-gray-800 line-clamp-2 sm:line-clamp-1 h-8 sm:h-auto mb-2 sm:mb-1 leading-tight group-hover:text-blue-600 transition-colors">
                             {product.name}
                           </h3>
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-sm font-bold text-blue-600 truncate">
+                          
+                          {/* Price Stack - Responsive Layout */}
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 flex-wrap">
+                            <span className="text-sm sm:text-base font-bold text-blue-600 truncate">
                               {formatPrice(product.salePrice || product.basePrice)}
                             </span>
                             {product.salePrice && product.basePrice > product.salePrice && (
-                              <span className="text-[10px] text-gray-400 line-through truncate">
+                              <span className="text-[10px] sm:text-xs text-gray-400 line-through truncate">
                                 {formatPrice(product.basePrice)}
                               </span>
                             )}
