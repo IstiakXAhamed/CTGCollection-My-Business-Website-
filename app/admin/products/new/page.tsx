@@ -228,15 +228,7 @@ export default function NewProductPage() {
               }}
             />
 
-            {/* AI Image Generator */}
-            {formData.name && (
-              <AIImageGenerator 
-                productName={formData.name}
-                onImageSelect={(imageData) => {
-                  setImages(prev => [...prev, imageData])
-                }}
-              />
-            )}
+
 
             <div className="space-y-2">
               <Label htmlFor="category">Category *</Label>
