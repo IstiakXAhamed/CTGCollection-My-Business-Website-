@@ -223,7 +223,8 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
               <Label>Product Type</Label>
               <Select 
                 value={formData.productType} 
-                onValueChange={(v: ProductType) => {
+                onValueChange={(value: string) => {
+                  const v = value as ProductType
                   setFormData(prev => ({ ...prev, productType: v }))
                   // Reset variants when type changes to avoid confusion
                   if (confirm('Changing type will reset variants. Continue?')) {
