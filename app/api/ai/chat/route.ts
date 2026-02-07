@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     } catch (e) {
       console.log('Failed to fetch settings for AI chat', e)
     }
-    //n
+    
     // 2. Product Search Intent
     const searchMatch = message.match(/(search|find|looking for|buy|price of|show me) (.+)/i) // Simple regex for demo
     if (searchMatch && searchMatch[2]) {
