@@ -54,9 +54,9 @@ export default function InventoryForecastPage() {
         body: JSON.stringify({
           productData: {
             name: product.name,
-            category: product.category,
-            currentStock: product.stock,
-            price: product.price
+            category: product.category?.name || 'Uncategorized',
+            currentStock: product.variants?.reduce((sum: number, v: any) => sum + (v.stock || 0), 0) || 0,
+            price: product.basePrice
           },
           salesHistory
         })
@@ -78,7 +78,12 @@ export default function InventoryForecastPage() {
 
   // Helper to bulk analyze low stock items
   const analyzeLowStock = async () => {
-    const lowStockProducts = products.filter(p => p.stock < 20)
+    // Calculate stock for each product to filter
+    const lowStockProducts = products.filter(p => {
+      const stock = p.variants?.reduce((sum: number, v: any) => sum + (v.stock || 0), 0) || 0
+      return stock < 20
+    })
+    
     for (const p of lowStockProducts) {
       await generateForecast(p)
     }
@@ -115,7 +120,10 @@ export default function InventoryForecastPage() {
           {products.map(product => {
             const forecast = forecasts[product.id]
             const isAnalyzing = analyzingIds.includes(product.id)
-            const isLowStock = product.stock < 10
+            
+            // Calculate total stock from variants
+            const totalStock = product.variants?.reduce((sum: number, v: any) => sum + (v.stock || 0), 0) || 0
+            const isLowStock = totalStock < 10
 
             return (
               <Card key={product.id} className={`overflow-hidden transition-all ${isLowStock ? 'border-amber-200 bg-amber-50/30' : ''}`}>
@@ -128,10 +136,10 @@ export default function InventoryForecastPage() {
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="outline" className="bg-white">
                           <Package className="w-3 h-3 mr-1" />
-                          Stock: {product.stock}
+                          Stock: {totalStock}
                         </Badge>
                         <Badge variant="secondary" className="bg-gray-100">
-                          {product.category}
+                          {product.category?.name || 'Uncategorized'}
                         </Badge>
                       </div>
                     </div>
