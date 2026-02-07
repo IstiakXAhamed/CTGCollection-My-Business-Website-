@@ -54,12 +54,13 @@ function ShopContent() {
   const fetchProducts = async () => {
     setLoading(true)
     try {
-      // Build URL with params
-      let url = '/api/products?limit=50'
-      if (isFeatured) url += '&featured=true'
-      if (categoryParam) url += `&category=${categoryParam}`
+      // Build URL with params safely
+      const params = new URLSearchParams({ limit: '50' })
+      if (isFeatured) params.append('featured', 'true')
+      if (categoryParam) params.append('category', categoryParam)
+      if (searchParam) params.append('search', searchParam)
       
-      const res = await fetch(url)
+      const res = await fetch(`/api/products?${params.toString()}`)
       if (res.ok) {
         let data = await res.json()
         let allProducts = data.products || []

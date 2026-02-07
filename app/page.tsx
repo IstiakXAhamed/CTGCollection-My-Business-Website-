@@ -291,26 +291,30 @@ export default function HomePage() {
                               <Eye className="w-3.5 h-3.5 text-gray-600" />
                             </button>
                           </div>
-                          {/* Badges - smaller on mobile */}
-                          <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-col gap-1">
+                          {/* Badges - separated on mobile for better visibility */}
+                          <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-col gap-1 z-10">
                             {product.isFeatured && (
-                              <span className="bg-blue-600 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium flex items-center gap-0.5">
+                              <span className="bg-blue-600 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium flex items-center gap-0.5 shadow-sm">
                                 <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Featured
                               </span>
                             )}
-                            {discount > 0 && (
-                              <span className="bg-red-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-bold">
+                          </div>
+                          
+                          {/* Discount Badge - Moved to right on mobile to prevent overlap */}
+                          {discount > 0 && (
+                            <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10">
+                              <span className="bg-red-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-bold shadow-sm">
                                 {discount}% OFF
                               </span>
-                            )}
-                          </div>
+                            </div>
+                          )}
                         </div>
                         <CardContent className="p-2 sm:p-3">
                           <p className="text-[10px] sm:text-xs text-gray-400 mb-0.5">{product.category?.name || 'Product'}</p>
                           <h3 className="font-medium text-xs sm:text-sm text-gray-800 line-clamp-1 mb-1 group-hover:text-blue-600 transition-colors">
                             {product.name}
                           </h3>
-                          <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 flex-wrap">
                             <span className="text-sm sm:text-base font-bold text-blue-600">
                               {formatPrice(product.salePrice || product.basePrice)}
                             </span>
