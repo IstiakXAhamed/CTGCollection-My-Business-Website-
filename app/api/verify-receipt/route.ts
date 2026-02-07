@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { rateLimit } from '@/lib/rate-limit'
 import { headers } from 'next/headers'
 
+export const dynamic = 'force-dynamic'
+
 const limiter = rateLimit({
   interval: 60 * 1000, // 60 seconds
   uniqueTokenPerInterval: 500,

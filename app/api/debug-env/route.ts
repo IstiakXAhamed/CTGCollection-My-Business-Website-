@@ -11,6 +11,7 @@ export async function GET() {
     JWT_SECRET: process.env.JWT_SECRET ? 'Set' : 'Missing',
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY ? 'Set' : 'Missing',
+    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? 'Set' : 'Missing',
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Missing',
     SMTP_HOST: process.env.SMTP_HOST,
   }
