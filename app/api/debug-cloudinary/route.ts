@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
