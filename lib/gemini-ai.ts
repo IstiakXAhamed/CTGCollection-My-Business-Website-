@@ -7,12 +7,17 @@
 
 const GEMINI_MODELS = {
   primary: {
-    url: 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent',
+    // Using v1beta as it generally has better support for newer/experimental model names
+    url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
     name: 'Gemini 2.5 Flash'
   },
-  fallback: {
+  secondary: {
     url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
     name: 'Gemini 1.5 Flash'
+  },
+  fallback: {
+    url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+    name: 'Gemini Pro'
   }
 }
 
@@ -53,12 +58,18 @@ export async function callGeminiAI(prompt: string, options?: {
   }
 
   try {
-    // 1. Try Primary Model (Gemini 2.5)
+    // 1. Try Primary Model (Gemini 2.5 as requested by user)
     let response = await makeRequest(GEMINI_MODELS.primary.url, GEMINI_MODELS.primary.name)
 
-    // 2. Fallback if Primary fails (404 Not Found, 400 Bad Request, 429 Too Many Requests)
+    // 2. Fallback if Primary fails (404, 400, 429)
     if (!response.ok) {
-      console.warn(`⚠️ ${GEMINI_MODELS.primary.name} failed (${response.status}). Switching to fallback...`)
+      console.warn(`⚠️ ${GEMINI_MODELS.primary.name} failed (${response.status}). Trying secondary ${GEMINI_MODELS.secondary.name}...`)
+      response = await makeRequest(GEMINI_MODELS.secondary.url, GEMINI_MODELS.secondary.name)
+    }
+    
+    // 3. Last resort fallback
+    if (!response.ok) {
+      console.warn(`⚠️ ${GEMINI_MODELS.secondary.name} failed (${response.status}). Trying legacy fallback...`)
       response = await makeRequest(GEMINI_MODELS.fallback.url, GEMINI_MODELS.fallback.name)
     }
 
