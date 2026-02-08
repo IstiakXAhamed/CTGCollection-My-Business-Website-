@@ -118,42 +118,47 @@ export async function PUT(req: NextRequest) {
         update: updateData,
         create: {
           id: 'main',
-          ...updateData,
-          createdAt: new Date()
+          ...updateData
         }
       })
     }
 
     let result
     let skippedFields: string[] = []
+    let currentData = { ...data }
+    let success = false
+    let lastError: any = null
 
-    try {
-      result = await attemptUpdate(data)
-    } catch (firstError: any) {
-      console.warn('[Settings API] First attempt failed:', firstError.message)
-      
-      // If it's a schema mismatch (Unknown argument), try to heal by removing the problematic field
-      if (firstError.message.includes('Unknown argument')) {
-        const match = firstError.message.match(/Unknown argument `([^`]+)`/)
-        const problematicField = match ? match[1] : null
+    // Loop to handle potential multiple schema mismatches (missing columns)
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        result = await attemptUpdate(currentData)
+        success = true
+        break
+      } catch (error: any) {
+        lastError = error
+        console.warn(`[Settings API] Attempt ${attempt + 1} failed:`, error.message)
         
-        if (problematicField && data[problematicField] !== undefined) {
-          console.warn(`[Settings API] Retrying without field: ${problematicField}`)
-          skippedFields.push(problematicField)
+        if (error.message.includes('Unknown argument')) {
+          const match = error.message.match(/Unknown argument `([^`]+)`/)
+          const problematicField = match ? match[1] : null
           
-          const { [problematicField]: _, ...healedData } = data
-          try {
-            result = await attemptUpdate(healedData)
-          } catch (secondError: any) {
-            console.error('[Settings API] Second attempt failed:', secondError.message)
-            throw secondError
+          if (problematicField && currentData[problematicField] !== undefined) {
+            console.warn(`[Settings API] Removing problematic field: ${problematicField}`)
+            skippedFields.push(problematicField)
+            const { [problematicField]: _, ...nextData } = currentData
+            currentData = nextData
+            continue // Try again with the field removed
           }
-        } else {
-          throw firstError
         }
-      } else {
-        throw firstError
+        
+        // If it's not an 'Unknown argument' or we couldn't identify the field, stop
+        break
       }
+    }
+
+    if (!success) {
+      throw lastError || new Error('Failed to update settings after multiple attempts')
     }
 
     return NextResponse.json({ 
