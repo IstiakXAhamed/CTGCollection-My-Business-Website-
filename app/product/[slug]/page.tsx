@@ -37,10 +37,10 @@ export async function generateMetadata(
   // Using explicit type assertion because Prisma types might be stale
   const p = product as any
   const title = p.metaTitle || `${product.name} | Silk Mart`
-  const description = p.metaDescription || product.description.substring(0, 160)
+  const description = p.metaDescription || (product.description as unknown as string)?.substring(0, 160)
   const keywords = p.metaKeywords ? (p.metaKeywords as string).split(',').map(k => k.trim()) : []
   
-  const images = JSON.parse(product.images as string || '[]')
+  const images = JSON.parse((product.images as unknown as string) || '[]')
   const mainImage = images[0] || '/placeholder.png'
 
   return {
