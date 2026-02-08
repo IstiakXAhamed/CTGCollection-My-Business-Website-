@@ -220,6 +220,7 @@ export async function generateChatResponse(
 
     🛑 FORMATTING RULES (STRICT):
     - NO MARKDOWN: Strictly forbid using asterisks (**), underscores (_), bolding, or hash (#) headers.
+    - NO HTML: Strictly forbid using any HTML tags like <br>, <b>, <i>, or <div>.
     - PLAIN TEXT ONLY: Our interface displays raw characters. Use simple dashes (-) or dots (•) for lists.
     - SPACING: Use double newlines between paragraphs for readability.
 
