@@ -108,7 +108,7 @@ export function Footer() {
               <span className="text-2xl font-bold">{settings?.storeName || 'Silk Mart'}</span>
             </Link>
             <p className="text-gray-400 mb-6 max-w-md">
-              {settings?.footerAbout || 'Your premier destination for quality products in Bangladesh. We offer a wide range of fashion, electronics, and lifestyle products with the best prices and fastest delivery.'}
+              {settings?.footerAbout || 'Silk Mart is Bangladesh\'s premier destination for quality products. We offer a curated range of fashion, electronics, and lifestyle essentials with the best prices and lightning-fast delivery.'}
             </p>
             
             {/* Contact Info - Dynamic */}
@@ -119,11 +119,11 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-3 text-gray-400">
                 <Phone className="w-5 h-5 text-blue-500" />
-                <span>{settings?.storePhone || '+880 1234 567890'}</span>
+                <span>{settings?.storePhone || '+8801991523289'}</span>
               </div>
               <div className="flex items-center gap-3 text-gray-400">
                 <Mail className="w-5 h-5 text-blue-500" />
-                <span>{settings?.storeEmail || 'support@ctgcollection.com'}</span>
+                <span>{settings?.storeEmail || 'support@silkmartbd.com'}</span>
               </div>
             </div>
           </div>

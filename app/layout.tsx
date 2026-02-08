@@ -28,8 +28,8 @@ export const metadata: Metadata = {
     default: "Silk Mart - Best Online Shopping in Bangladesh | Buy Fashion, Electronics & More",
     template: "%s | Silk Mart"
   },
-  description: "Silk Mart is Bangladesh's premium online shopping destination. Shop the latest fashion, electronics, and lifestyle products with the best prices and lightning-fast delivery. Trust Silk Mart for quality and authenticity.",
-  keywords: ["Silk Mart", "Silk Mart BD", "Silk Mart Bangladesh", "Online Shopping Bangladesh", "Fashion BD", "Electronics BD", "Chittagong E-commerce", "Authentic Products BD"],
+  description: "Shop at Silk Mart BD for premium fashion, electronics, and lifestyle products in Bangladesh. Enjoy the best prices, authentic quality, and lightning-fast delivery nationwide. Your trusted online shopping partner.",
+  keywords: ["Silk Mart", "Silk Mart BD", "Silk Mart Bangladesh", "Online Shopping Bangladesh", "Fashion BD", "Electronics BD", "Chittagong E-commerce", "Authentic Products BD", "Silkmartbd"],
   authors: [{ name: "Silk Mart" }],
   creator: "Silk Mart",
   publisher: "Silk Mart",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.ico' },
+      { url: '/favicon.ico', sizes: 'any' },
       { url: '/logo.png', sizes: '32x32', type: 'image/png' },
       { url: '/logo.png', sizes: '192x192', type: 'image/png' },
     ],
@@ -124,7 +124,7 @@ export default function RootLayout({
                 '@context': 'https://schema.org',
                 '@type': 'WebSite',
                 name: 'Silk Mart',
-                alternateName: ['Silk Mart BD', 'Silk Mart Bangladesh'],
+                alternateName: ['Silk Mart BD', 'Silk Mart Bangladesh', 'Silkmartbd'],
                 url: 'https://silkmartbd.com',
                 potentialAction: {
                   '@type': 'SearchAction',

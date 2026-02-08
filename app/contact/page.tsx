@@ -86,13 +86,13 @@ export default function ContactPage() {
     {
       icon: Phone,
       title: 'Phone',
-      content: settings.storePhone || '+880 1234 567890',
+      content: settings.storePhone || '+8801991523289',
       subContent: settings.phone2 || ''
     },
     {
       icon: Mail,
       title: 'Email',
-      content: settings.storeEmail || 'support@ctgcollection.com',
+      content: settings.storeEmail || 'support@silkmartbd.com',
       subContent: settings.email2 || ''
     },
     {

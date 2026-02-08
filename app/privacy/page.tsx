@@ -75,9 +75,9 @@ export default function PrivacyPolicyPage() {
             <p className="text-muted-foreground mb-6">
               If you have any questions about this Privacy Policy, please contact us at:
               <br />
-              Email: privacy@ctgcollection.com
+              Email: support@silkmartbd.com
               <br />
-              Phone: +880 1234 567890
+              Phone: +8801991523289
             </p>
           </div>
         </div>
