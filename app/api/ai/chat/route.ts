@@ -55,11 +55,11 @@ export async function POST(request: NextRequest) {
     }
 
     // B. Universal Product Search & Best Offers
-    // Ignore short greetings to save DB calls
-    const isGreeting = /^(hi|hello|hey|greetings|good morning|good evening)$/i.test(message.trim());
+    // Ignore pure short greetings to save DB calls, but search if message is long or contains keywords
+    const isPureGreeting = /^(hi|hello|hey|greetings|good morning|good evening|yo|hola|assalamu alaikum)$/i.test(message.trim());
     const isOfferRequest = /(offer|sale|deal|discount|promo|code|coupon)/i.test(message);
 
-    if (!isGreeting && message.length > 3) {
+    if (!isPureGreeting || message.length > 10) {
       try {
         let finalProducts: any[] = [];
 
@@ -229,19 +229,20 @@ export async function POST(request: NextRequest) {
          if (mMatch) {
             const term = mMatch[1];
             finalResponse = finalResponse.replace(mMatch[0], '').trim();
-            await notifyAdmin('stock_alert', 'Missing Product Request', `A customer asked for "${term}" but we don't have it in stock.`, `Missing Stock Request: ${term}`);
+            const notificationMsg = `Customer is looking for: "${term}"\nOriginal message: "${message}"`;
+            await notifyAdmin('stock_alert', 'Missing Product Request', notificationMsg, `Missing Stock Request: ${term}`, user);
          }
       }
 
       if (finalResponse.includes('[ACTION:HANDOFF]')) {
          finalResponse = finalResponse.replace('[ACTION:HANDOFF]', '').trim();
          action = { type: 'open_live_chat', payload: { context: message } };
-         await notifyAdmin('urgent', 'Human Handoff Requested', `A customer requested to talk to a human agent. Message: "${message}"`, `Handoff Request: ${user?.email || 'Guest'}`);
+         await notifyAdmin('customer_support', 'Human Agent Requested', `User "${user?.name || 'Guest'}" is requesting a human agent.\nMessage: "${message}"`, 'Human Agent Handoff Request', user);
       }
 
       if (finalResponse.includes('[URGENT_COMPLAINT]')) {
          finalResponse = finalResponse.replace('[URGENT_COMPLAINT]', '').trim();
-         await notifyAdmin('urgent', 'Urgent Complaint Logged', `A customer logged a complaint: "${message}"`, `[URGENT] Customer Complaint: ${user?.email || 'Guest'}`);
+         await notifyAdmin('complaint', 'Urgent Complaint', `User "${user?.name || 'Guest'}" filed an urgent complaint.\nMessage: "${message}"`, 'Urgent Customer Complaint', user);
       }
 
       return NextResponse.json({ 
@@ -258,19 +259,19 @@ export async function POST(request: NextRequest) {
 }
 
 // Helper for Admin Notifications
-async function notifyAdmin(type: string, title: string, message: string, subject: string) {
+async function notifyAdmin(type: string, title: string, message: string, subject: string, customer?: any) {
   try {
     const admin = await prisma.user.findFirst({ where: { role: 'admin' }, select: { id: true } });
     if (admin) {
       await prisma.notification.create({
-        data: { userId: admin.id, type, title, message, link: '/admin/messages' }
+        data: { userId: admin.id, type, title, message: `${message}\nCustomer: ${customer?.email || 'Guest'}`, link: '/admin/messages' }
       });
       await prisma.contactMessage.create({
         data: {
-          name: 'AI Assistant Escalation',
-          email: 'ai-bot@system.local',
+          name: customer?.name ? `AI Alert: ${customer.name}` : 'AI Assistant Escalation',
+          email: customer?.email || 'ai-bot@system.local',
           subject: subject,
-          message: `Summary: ${message}\n\nTime: ${new Date().toLocaleString()}`,
+          message: `Summary: ${message}\n\nTime: ${new Date().toLocaleString()}\n\nNote: This message was generated automatically by Silk Lite because a customer requested something unavailable or needs assistance.`,
           isRead: false
         }
       });
