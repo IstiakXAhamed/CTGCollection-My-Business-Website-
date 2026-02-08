@@ -14,7 +14,7 @@ export async function GET() {
 
     if (!settings) {
       settings = await (prisma as any).siteSettings.create({
-        data: { id: 'main' }
+        data: { id: 'main', storeName: 'Silk Mart' }
       })
     }
 
@@ -39,7 +39,11 @@ export async function GET() {
         supportPhone: '+880 1234 567890',
         aiContactEmail: 'support@ctgcollection.com',
         aiContactPhone: '+880 1234 567890',
-        adminProductMode: 'simple'
+        adminProductMode: 'simple',
+        chatStatus: 'online',
+        promoEnabled: true,
+        promoCode: 'WELCOME10',
+        promoMessage: '🎉 FLASH SALE! Use code WELCOME10 for 10% OFF'
       }
     })
   }

@@ -169,7 +169,8 @@ export async function generateChatResponse(customerMessage: string, context?: { 
     If the user asks to speak to a human/admin, suggest they click the "Live Chat" button or call the phone number above.
     ` : ''
 
-    const prompt = `You are a helpful customer support agent for CTG Collection (Bangladesh e-commerce).
+    const storeName = settings?.storeName || 'Silk Mart'
+    const prompt = `You are a helpful customer support agent for ${storeName} (Bangladesh e-commerce).
     ${contactInfo}
     Customer message: "${customerMessage}"
     ${contextInfo}
@@ -201,7 +202,9 @@ export async function suggestChatReplies(customerMessage: string): Promise<AIRes
 export async function analyzeReview(reviewText: string, rating: number): Promise<AIResponse> {
   try {
     console.log('[Gemini] Analyzing Review:', reviewText.substring(0, 50) + '...')
-    const prompt = `Analyze this customer review for "CTG Collection":
+    // We don't have settings here easily, but we can default to Silk Mart or pass it. 
+    // For now, let's use the default "Silk Mart" which is the user's intended brand.
+    const prompt = `Analyze this customer review for "Silk Mart":
 Text: "${reviewText}"
 Rating: ${rating}/5
 

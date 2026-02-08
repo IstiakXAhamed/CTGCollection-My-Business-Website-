@@ -11,6 +11,7 @@ import {
   CheckCircle2, Wifi, WifiOff, Clock, Loader2,
   Store, Truck, CreditCard, RotateCcw
 } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 import { Switch } from '@/components/ui/switch'
 
 interface SiteSettings {
@@ -20,6 +21,8 @@ interface SiteSettings {
   promoMessage: string
   promoEndTime: string | null
   storeName: string
+  storeTagline?: string
+  storeDescription?: string
   storeEmail: string
   storePhone: string
   storeAddress: string
@@ -42,6 +45,7 @@ interface SiteSettings {
 }
 
 export default function AdminSettingsPage() {
+  const { toast } = useToast()
   const [settings, setSettings] = useState<SiteSettings>({
     chatStatus: 'online',
     promoEnabled: true,
@@ -66,7 +70,6 @@ export default function AdminSettingsPage() {
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     fetchSettings()
@@ -93,8 +96,6 @@ export default function AdminSettingsPage() {
   const saveSettings = async (updates?: Partial<SiteSettings>) => {
     setSaving(true)
     try {
-      // If updates provided, use them. Otherwise send current state.
-      // We merge with current settings to ensure we don't accidentally wipe other fields if API expects full object
       const payload = updates ? { ...settings, ...updates } : settings
 
       const res = await fetch('/api/settings', {
@@ -106,19 +107,28 @@ export default function AdminSettingsPage() {
       
       if (res.ok) {
         const data = await res.json()
-        
-        // Update local state with returned settings if available
         if (data.settings) {
            setSettings(data.settings)
         } 
-        
-        setSaved(true)
-        setTimeout(() => setSaved(false), 2000)
+        toast({
+          title: "Settings Saved",
+          description: "All changes have been successfully saved to the database.",
+        })
       } else {
-        console.error("Save failed", res.status)
+        const errData = await res.json()
+        toast({
+          title: "Save Failed",
+          description: errData.error || "Failed to update settings. Please try again.",
+          variant: "destructive"
+        })
       }
     } catch (error) {
       console.error('Failed to save settings:', error)
+      toast({
+        title: "Network Error",
+        description: "Could not connect to the server. Check your internet.",
+        variant: "destructive"
+      })
     } finally {
       setSaving(false)
     }
@@ -153,20 +163,15 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-          <Settings className="w-8 h-8 text-blue-600" />
-          Settings
-        </h1>
-        <p className="text-muted-foreground">Manage your store settings (saved to database)</p>
-      </div>
-
-      {saved && (
-        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center gap-2">
-          <CheckCircle2 className="w-5 h-5" />
-          Settings saved successfully!
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
+            <Settings className="w-8 h-8 text-blue-600" />
+            Settings
+          </h1>
+          <p className="text-muted-foreground">Manage your store settings (saved to database)</p>
         </div>
-      )}
+      </div>
 
       <div className="grid gap-6">
         {/* General Configuration */}
@@ -322,7 +327,37 @@ export default function AdminSettingsPage() {
             <CardDescription>Configure AI Bot contact info and Gamification</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-purple-700 font-bold">Store Name (AI Identity)</Label>
+                <Input
+                  value={settings.storeName || ''}
+                  onChange={(e) => handlePromoChange('storeName', e.target.value)}
+                  placeholder="Silk Mart"
+                  className="border-purple-200 focus-visible:ring-purple-500"
+                />
+                <p className="text-xs text-muted-foreground italic">The AI will use this name to represent your business.</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Store Tagline</Label>
+                <Input
+                  value={settings.storeTagline || ''}
+                  onChange={(e) => handlePromoChange('storeTagline', e.target.value)}
+                  placeholder="Premium E-Commerce Store"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Store Description / Mission (AI Context)</Label>
+                <textarea
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={settings.storeDescription || ''}
+                  onChange={(e) => handlePromoChange('storeDescription', e.target.value)}
+                  placeholder="Describe your business, mission, and what makes you unique. The AI will use this to answer customer questions."
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
               <div className="space-y-2">
                 <Label>AI Bot Contact Email</Label>
                 <Input

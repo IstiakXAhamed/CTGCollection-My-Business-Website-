@@ -22,7 +22,7 @@ export async function GET() {
   } catch (error) {
     return NextResponse.json({ 
       multiVendorEnabled: false,
-      siteName: 'CTG Collection',
+      siteName: 'Silk Mart',
       spinWheelConfig: null
     })
   }
