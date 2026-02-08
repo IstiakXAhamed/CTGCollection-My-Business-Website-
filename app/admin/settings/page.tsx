@@ -177,6 +177,22 @@ export default function AdminSettingsPage() {
                 <span className={`text-sm ${settings.adminProductMode === 'advanced' ? 'font-bold text-blue-600' : 'text-muted-foreground'}`}>Advanced</span>
               </div>
             </div>
+
+            <div className="flex items-center justify-between border-t pt-4">
+              <div className="space-y-0.5">
+                <Label className="text-base">Spin & Win Game</Label>
+                <p className="text-sm text-muted-foreground">
+                  Enable or disable the floating spin wheel game for customers.
+                </p>
+              </div>
+              <Switch
+                checked={settings.spinWheelConfig?.enabled !== false}
+                onCheckedChange={(checked) => {
+                   const currentConfig = settings.spinWheelConfig || {}
+                   handlePromoChange('spinWheelConfig', { ...currentConfig, enabled: checked })
+                }}
+              />
+            </div>
             
             <div className="flex justify-end pt-4 border-t">
               <Button onClick={() => saveSettings({ adminProductMode: settings.adminProductMode })} disabled={saving}>

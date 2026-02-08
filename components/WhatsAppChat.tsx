@@ -39,6 +39,19 @@ export function WhatsAppChat({
     checkRole()
   }, [])
 
+  // Listen for global open-live-chat event (from AI Chat)
+  useEffect(() => {
+    const handleOpenChat = (e: any) => {
+      setIsOpen(true)
+      if (e.detail?.context) {
+        setMessage(`Hi! I need help. Context:\n${e.detail.context}`)
+      }
+    }
+
+    window.addEventListener('open-live-chat', handleOpenChat)
+    return () => window.removeEventListener('open-live-chat', handleOpenChat)
+  }, [])
+
   if (!isVisible) return null
 
   const handleSend = () => {
