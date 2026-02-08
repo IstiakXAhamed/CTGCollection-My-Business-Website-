@@ -169,8 +169,20 @@ export async function generateProductDescription(productName: string, category?:
 
 export async function analyzeProductForSuggestions(productName: string): Promise<AIResponse> {
   try {
-    const prompt = `Analyze this product: "${productName}". Return JSON with: { "category": "...", "priceRange": { "min": number, "max": number } (in BDT), "sizes": [...], "colors": [...], "tags": [...] }. Return ONLY valid JSON.`
-    const result = await callGeminiAI(prompt, { temperature: 0.3 })
+    const prompt = `Analyze this product: "${productName}" for a Bangladeshi E-commerce store.
+    Return JSON with:
+    {
+      "productType": "Specific type (e.g., Running Shoe, Matte Lipstick)",
+      "suggestedCategory": "Best matching category",
+      "priceRange": { "min": number, "max": number } (Realistic price in BDT),
+      "suggestedVariants": { "sizes": ["size1", "size2"], "colors": ["color1", "color2"] },
+      "keywords": ["tag1", "tag2", "tag3", "tag4", "tag5"],
+      "confidence": "high"
+    }
+    Return ONLY valid JSON.`
+    
+    // Using a more creative temperature for better analysis
+    const result = await callGeminiAI(prompt, { temperature: 0.4 })
     const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
@@ -181,29 +193,63 @@ export async function analyzeProductForSuggestions(productName: string): Promise
 // ============ Customer Support AI ============
 
 
-export async function generateChatResponse(customerMessage: string, context?: { orderStatus?: string, previousMessages?: string[] }, settings?: any): Promise<AIResponse> {
+export async function generateChatResponse(
+  message: string, 
+  context?: { 
+    orderStatus?: string, 
+    previousMessages?: any[],
+    foundProducts?: string, // New: Pre-fetched product data
+    categories?: string,    // New: List of categories
+    storePolicies?: string, // New: Shipping/Return info
+    coupons?: string        // New: Active coupons
+  },
+  settings?: any
+): Promise<AIResponse> {
   try {
-    const contextInfo = context?.orderStatus ? `Order Status: ${context.orderStatus}` : ''
-    const contactInfo = settings ? `
-    Store Contact Info:
-    - Phone: ${settings.aiContactPhone || settings.storePhone}
-    - Email: ${settings.aiContactEmail || settings.storeEmail}
-    If the user asks to speak to a human/admin, suggest they click the "Live Chat" button or call the phone number above.
-    ` : ''
-
-    const storeName = settings?.storeName || 'Silk Mart'
-    const prompt = `You are a helpful customer support agent for ${storeName} (Bangladesh e-commerce).
-    ${contactInfo}
-    Customer message: "${customerMessage}"
-    ${contextInfo}
+    const shopName = settings?.siteName || 'Silk Mart'
     
-    Write a professional, helpful response in 2-3 sentences. Be polite and solution-oriented. If about order, provide tracking info or next steps.`
-    const result = await callGeminiAI(prompt)
-    return { success: true, result: result.trim() }
-  } catch (e: any) {
-    console.error('[Gemini] Chat Error:', e)
-    // Only fallback if strictly necessary, but for now let's see the error in the UI if possible or just log it hard.
-    return { success: false, error: e.message, fallback: true, result: 'I am taking a quick nap. Please try again in a moment.' }
+    let systemPrompt = `You are the elite, charming, and highly persuasive AI Sales Associate for ${shopName}. 
+    Your goal is not just to answer, but to SELL and delight the customer. 
+    
+    PERSONALITY:
+    - EXPERT & CONFIDENT: You know everything about the products.
+    - CHARMING & MANIPULATIVE (In a good way): Use psychology to encourage buying. "This would look stunning on you," "It's selling out fast."
+    - POLITE & EMPATHETIC: If a product is missing, apologize profusely but immediately pivot to a better alternative.
+
+    CRITICAL INSTRUCTIONS:
+    1. USE CONTEXT: Use the "Found Products" list to recommend specific items with their prices.
+    2. VISUAL CARDS (MAGIC TAGS):
+       - If recommending a SPECIFIC PRODUCT, end with "[SHOW:product-slug]".
+       - If recommending a CATEGORY, end with "[CATEGORY:category-slug]".
+    3. MISSING ITEMS (ZERO-STOCK PROTOCOL):
+       - If the user asks for something completely unavailable (not in context), say: "I'm so sorry, we don't have that specific item right now, but I've personally noted your request for our team! However, check out this [Alternative]..."
+       - End the message with "[MISSING:search_term]" so we can notify the admin.
+    4. CLICKABLE LINKS: Always format links as [Product Name](/product/slug).
+
+    STORE CONTEXT:
+    ${context?.orderStatus ? `\n[ORDER INFO]\n${context.orderStatus}` : ''}
+    ${context?.foundProducts ? `\n[MATCHING PRODUCTS]\n${context.foundProducts}` : ''}
+    ${context?.categories ? `\n[AVAILABLE CATEGORIES]\n${context.categories}` : ''}
+    ${context?.coupons ? `\n[ACTIVE COUPONS]\n${context.coupons}` : ''}
+    ${context?.storePolicies ? `\n[STORE POLICIES]\n${context.storePolicies}` : ''}
+    
+    Current User Message: "${message}"`
+
+    // Use history for continuity if available
+    let history: any[] = []
+    if (context?.previousMessages && context.previousMessages.length > 0) {
+       history = context?.previousMessages.map(msg => ({
+         role: msg.sender === 'user' ? 'user' : 'model',
+         parts: [{ text: msg.text }]
+       }))
+    }
+
+    const result = await callGeminiAI(systemPrompt)
+    return { success: true, result }
+
+  } catch (error: any) {
+    console.error('Chat Gen Error:', error)
+    return { success: false, error: error.message }
   }
 }
 

@@ -362,6 +362,32 @@ export default function AIProductAssist({ productName, category, currentDescript
                   </div>
                 </div>
               )}
+
+              {analysis.keywords && analysis.keywords.length > 0 && (
+                <div className="p-2 bg-indigo-50 rounded-lg sm:col-span-2">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-indigo-600 font-medium flex items-center gap-1">
+                      <Tag className="w-3 h-3" />
+                      Keywords / Tags:
+                    </span>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      onClick={() => acceptAnalysisSuggestion('tags', analysis.keywords?.join(', '))}
+                      className="h-5 text-[10px] px-2 text-indigo-700 hover:bg-indigo-200"
+                    >
+                      Use All
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {analysis.keywords.map(keyword => (
+                      <Badge key={keyword} variant="outline" className="text-xs bg-white text-indigo-700 border-indigo-200">
+                        {keyword}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <Button 
