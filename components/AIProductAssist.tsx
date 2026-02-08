@@ -227,6 +227,7 @@ export default function AIProductAssist({ productName, category, currentDescript
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-2">
         <Button 
+          type="button"
           size="sm" 
           variant="outline"
           onClick={generateDescription}
@@ -238,6 +239,7 @@ export default function AIProductAssist({ productName, category, currentDescript
         </Button>
 
         <Button 
+          type="button"
           size="sm" 
           variant="outline"
           onClick={generateTags}
@@ -249,6 +251,7 @@ export default function AIProductAssist({ productName, category, currentDescript
         </Button>
 
         <Button 
+          type="button"
           size="sm" 
           variant="outline"
           onClick={generateSEO}
@@ -263,6 +266,7 @@ export default function AIProductAssist({ productName, category, currentDescript
       {/* Smart Actions */}
       <div className="flex flex-wrap gap-2 pt-2 border-t border-purple-200">
         <Button 
+          type="button"
           size="sm" 
           onClick={smartAnalyze}
           disabled={!!loading}
@@ -273,6 +277,7 @@ export default function AIProductAssist({ productName, category, currentDescript
         </Button>
 
         <Button 
+          type="button"
           size="sm" 
           onClick={autoFillAll}
           disabled={!!loading}
@@ -371,6 +376,7 @@ export default function AIProductAssist({ productName, category, currentDescript
                       Keywords / Tags:
                     </span>
                     <Button 
+                      type="button"
                       size="sm" 
                       variant="ghost" 
                       onClick={() => acceptAnalysisSuggestion('tags', analysis.keywords?.join(', '))}
@@ -391,6 +397,7 @@ export default function AIProductAssist({ productName, category, currentDescript
             </div>
 
             <Button 
+              type="button"
               size="sm" 
               variant="outline" 
               onClick={() => setAnalysis(null)}
@@ -414,11 +421,11 @@ export default function AIProductAssist({ productName, category, currentDescript
             <p className="text-sm font-semibold text-purple-600 mb-2 capitalize">{showSuggestion} Suggestion:</p>
             <p className="text-sm text-gray-700 whitespace-pre-wrap">{suggestions[showSuggestion]}</p>
             <div className="flex gap-2 mt-3">
-              <Button size="sm" onClick={() => acceptSuggestion(showSuggestion)} className="gap-2">
+              <Button type="button" size="sm" onClick={() => acceptSuggestion(showSuggestion)} className="gap-2">
                 <CheckCircle className="w-4 h-4" />
                 Accept
               </Button>
-              <Button size="sm" variant="outline" onClick={() => setShowSuggestion(null)}>
+              <Button type="button" size="sm" variant="outline" onClick={() => setShowSuggestion(null)}>
                 Dismiss
               </Button>
             </div>
@@ -436,7 +443,7 @@ export default function AIProductAssist({ productName, category, currentDescript
               <CheckCircle className="w-5 h-5" />
               All fields have been populated by AI! Review and adjust as needed.
             </p>
-            <Button size="sm" variant="outline" onClick={() => setShowSuggestion(null)} className="mt-2">
+            <Button type="button" size="sm" variant="outline" onClick={() => setShowSuggestion(null)} className="mt-2">
               Got it
             </Button>
           </motion.div>

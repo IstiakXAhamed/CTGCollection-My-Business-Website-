@@ -246,12 +246,14 @@ export default function EditProductPage() {
         {/* Toggle Mode */}
         <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg">
            <Button 
+             type="button"
              variant={!useAdvancedMode ? 'ghost' : 'ghost'} 
              size="sm" 
              onClick={() => setUseAdvancedMode(false)}
              className={!useAdvancedMode ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-900'}
            >Simple</Button>
            <Button 
+             type="button"
              variant={useAdvancedMode ? 'ghost' : 'ghost'} 
              size="sm" 
              onClick={() => setUseAdvancedMode(true)}
