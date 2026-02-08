@@ -105,15 +105,14 @@ export default function AdminSettingsPage() {
       })
       
       if (res.ok) {
+      if (res.ok) {
         const data = await res.json()
-        setSettings(prev => ({ ...prev, ...data })) // Update local state with server response if possible or just keep prev
-         // Ideally server returns the updated settings object. If not, we trust our local state if success.
-         if (data.settings) {
-            setSettings(data.settings)
-         } else {
-             // If server just says {success:true}, we keep our local updates
-             setSettings(payload as SiteSettings)
-         }
+        
+        // Update local state with returned settings if available
+        if (data.settings) {
+           setSettings(data.settings)
+        } 
+        
         setSaved(true)
         setTimeout(() => setSaved(false), 2000)
       } else {

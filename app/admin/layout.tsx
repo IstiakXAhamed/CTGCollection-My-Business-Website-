@@ -32,7 +32,8 @@ import {
   ShieldAlert,
   Wallet,
   Sparkles,
-  TrendingUp
+  TrendingUp,
+  Bot
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AdminNotificationBell from '@/components/AdminNotificationBell'
@@ -93,6 +94,7 @@ const getMenuItems = (role: string, permissions: string[] = []) => {
     
     ...(hasPerm('manage_marketing') ? [
       { icon: Crown, label: 'Loyalty & Referrals', href: '/admin/loyalty' },
+      { icon: Bot, label: 'AI Hub', href: '/admin/ai-tools' },
       { icon: Sparkles, label: 'Marketing AI', href: '/admin/marketing/ai' },
     ] : []),
     

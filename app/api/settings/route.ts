@@ -49,10 +49,12 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json()
-    const { spinWheelConfig, ...otherSettings } = body
+    // Destructure to remove system fields and special JSON fields
+    const { id, createdAt, updatedAt, spinWheelConfig, ...otherSettings } = body
 
     // Ensure spinWheelConfig is valid JSON (not undefined or malformed)
-    const validSpinConfig = spinWheelConfig ? JSON.parse(JSON.stringify(spinWheelConfig)) : undefined
+    // Only parse if it exists and is not null
+    const validSpinConfig = spinWheelConfig !== undefined ? spinWheelConfig : undefined
     
     // Check if settings exist
     const currentSettings = await (prisma as any).siteSettings.findUnique({
@@ -60,18 +62,20 @@ export async function PUT(req: NextRequest) {
     })
 
     if (currentSettings) {
-      // Build update data carefully
+      // Build update data
+      // We ONLY include fields that are present in the body to allow partial updates
       const updateData: any = {
         updatedAt: new Date()
       }
       
-      // Only add spinWheelConfig if it's provided
+      // Handle spinWheelConfig separately
       if (validSpinConfig !== undefined) {
         updateData.spinWheelConfig = validSpinConfig
       }
       
-      // Add other settings (allow empty strings)
+      // Add other settings
       Object.entries(otherSettings).forEach(([key, value]) => {
+        // filter out nulls or undefined if necessary, but usually we want to allow updating to null if schema allows
         if (value !== undefined) {
           updateData[key] = value
         }
@@ -87,12 +91,19 @@ export async function PUT(req: NextRequest) {
         data: {
           id: 'main',
           ...otherSettings,
-          spinWheelConfig: validSpinConfig
+          spinWheelConfig: validSpinConfig !== undefined ? validSpinConfig : undefined,
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       })
     }
     
-    return NextResponse.json({ success: true })
+    // Return the updated settings to the client to keep state in sync
+    const updatedSettings = await (prisma as any).siteSettings.findUnique({
+      where: { id: 'main' }
+    })
+
+    return NextResponse.json({ success: true, settings: updatedSettings })
   } catch (error: any) {
     console.error('Settings update error:', error?.message || error)
     return NextResponse.json({ 

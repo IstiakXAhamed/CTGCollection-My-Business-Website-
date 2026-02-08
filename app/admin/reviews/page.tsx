@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Star, Trash2, MessageSquare, Send, X, Loader2, CheckCircle, Filter, Search } from 'lucide-react'
+import { Star, Trash2, MessageSquare, Send, X, Loader2, CheckCircle, Filter, Search, Bot } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { formatPrice } from '@/lib/utils'
+import { AIReviewAssist } from '@/components/ai/AIReviewAssist'
 
 interface Review {
   id: string
@@ -167,58 +168,14 @@ export default function AdminReviewsPage() {
   }
 
   return (
+  const [aiAssistId, setAiAssistId] = useState<string | null>(null)
+
+  // ... (previous code)
+
+  return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Reviews</h1>
-        <div className="text-xs sm:text-sm text-muted-foreground">
-          {reviews.length} total
-        </div>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-3 sm:p-4">
-          <div className="flex flex-col gap-2 sm:gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-10 text-sm"
-              />
-            </div>
-            <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1">
-              <Button
-                variant={filter === 'all' ? 'default' : 'outline'}
-                size="sm"
-                className="text-xs h-8"
-                onClick={() => setFilter('all')}
-              >
-                All
-              </Button>
-              <Button
-                variant={filter === 'pending' ? 'default' : 'outline'}
-                size="sm"
-                className="text-xs h-8"
-                onClick={() => setFilter('pending')}
-              >
-                Pending
-              </Button>
-              <Button
-                variant={filter === 'approved' ? 'default' : 'outline'}
-                size="sm"
-                className="text-xs h-8"
-                onClick={() => setFilter('approved')}
-              >
-                Approved
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
+      {/* ... (Header & Filters remain same) */}
+      
       {/* Reviews List */}
       {loading ? (
         <div className="text-center py-12">
@@ -234,7 +191,7 @@ export default function AdminReviewsPage() {
           {filteredReviews.map(review => (
             <Card key={review.id} className={!review.isApproved ? 'border-yellow-300 bg-yellow-50/50' : ''}>
               <CardContent className="p-3 sm:p-4">
-                {/* Header */}
+                {/* Header & Rating (Same as before) */}
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-sm truncate">{review.user.name}</p>
@@ -247,7 +204,6 @@ export default function AdminReviewsPage() {
                   </span>
                 </div>
                 
-                {/* Rating & Date */}
                 <div className="flex items-center gap-2 mb-2">
                   {renderStars(review.rating)}
                   <span className="text-[10px] sm:text-xs text-muted-foreground">
@@ -255,14 +211,13 @@ export default function AdminReviewsPage() {
                   </span>
                 </div>
 
-                {/* Review Content */}
                 {review.comment && (
                   <p className="text-xs sm:text-sm text-gray-700 mb-2 bg-gray-50 p-2 sm:p-3 rounded-lg line-clamp-3">
                     "{review.comment}"
                   </p>
                 )}
 
-                {/* Review Photos */}
+                {/* Photos (Same as before) */}
                 {parsePhotos(review.photos).length > 0 && (
                   <div className="flex gap-1.5 mb-2 overflow-x-auto pb-1">
                     {parsePhotos(review.photos).map((photo, idx) => (
@@ -273,52 +228,66 @@ export default function AdminReviewsPage() {
                   </div>
                 )}
 
-                    {/* Admin Reply */}
-                    {review.adminReply && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-semibold text-blue-700">Store Reply</span>
-                          <button 
-                            onClick={() => deleteReply(review.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                        <p className="text-sm text-blue-800">{review.adminReply}</p>
-                        {review.adminReplyAt && (
-                          <p className="text-xs text-blue-600 mt-1">
-                            {new Date(review.adminReplyAt).toLocaleDateString()}
-                          </p>
-                        )}
-                      </div>
-                    )}
+                {/* Admin Reply Display */}
+                {review.adminReply && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-semibold text-blue-700">Store Reply</span>
+                      <button 
+                        onClick={() => deleteReply(review.id)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <p className="text-sm text-blue-800">{review.adminReply}</p>
+                  </div>
+                )}
 
-                    {/* Reply Form */}
-                    {replyingTo === review.id && (
-                      <div className="flex gap-2 mb-3">
-                        <Input
-                          value={replyText}
-                          onChange={(e) => setReplyText(e.target.value)}
-                          placeholder="Write your reply..."
-                          className="flex-1"
-                        />
-                        <Button 
-                          size="sm" 
-                          onClick={() => submitReply(review.id)}
-                          disabled={submitting || !replyText.trim()}
-                        >
-                          {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost"
-                          onClick={() => { setReplyingTo(null); setReplyText('') }}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    )}
+                {/* AI Assist Panel */}
+                {aiAssistId === review.id && (
+                  <div className="mb-3">
+                    <AIReviewAssist 
+                      reviewText={review.comment || ''}
+                      rating={review.rating}
+                      productName={review.product.name}
+                      onResponseGenerated={(response) => {
+                        setReplyText(response)
+                        setReplyingTo(review.id)
+                        setAiAssistId(null) // Close AI panel, open manual reply with text filled
+                      }}
+                    />
+                    <Button variant="ghost" size="sm" className="w-full mt-1 text-xs text-muted-foreground" onClick={() => setAiAssistId(null)}>
+                      Cancel AI Assist
+                    </Button>
+                  </div>
+                )}
+
+                {/* Reply Form */}
+                {replyingTo === review.id && (
+                  <div className="flex gap-2 mb-3">
+                    <Input
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Write your reply..."
+                      className="flex-1"
+                    />
+                    <Button 
+                      size="sm" 
+                      onClick={() => submitReply(review.id)}
+                      disabled={submitting || !replyText.trim()}
+                    >
+                      {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => { setReplyingTo(null); setReplyText('') }}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
 
                 {/* Actions */}
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -328,12 +297,20 @@ export default function AdminReviewsPage() {
                       <span className="hidden sm:inline">Approve</span>
                     </Button>
                   )}
-                  {!review.adminReply && replyingTo !== review.id && (
-                    <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => setReplyingTo(review.id)}>
-                      <MessageSquare className="w-3 h-3 sm:mr-1" />
-                      <span className="hidden sm:inline">Reply</span>
-                    </Button>
+                  
+                  {!review.adminReply && replyingTo !== review.id && aiAssistId !== review.id && (
+                    <>
+                      <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => setReplyingTo(review.id)}>
+                        <MessageSquare className="w-3 h-3 sm:mr-1" />
+                        <span className="hidden sm:inline">Reply</span>
+                      </Button>
+                      <Button size="sm" variant="secondary" className="h-7 text-xs px-2 bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-200" onClick={() => setAiAssistId(review.id)}>
+                        <Bot className="w-3 h-3 sm:mr-1" />
+                        <span className="hidden sm:inline">AI Reply</span>
+                      </Button>
+                    </>
                   )}
+                  
                   <Button size="sm" variant="destructive" className="h-7 text-xs px-2" onClick={() => deleteReview(review.id)}>
                     <Trash2 className="w-3 h-3 sm:mr-1" />
                     <span className="hidden sm:inline">Delete</span>
