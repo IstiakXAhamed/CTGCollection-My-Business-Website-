@@ -55,14 +55,21 @@ function ShopContent() {
     setLoading(true)
     try {
       // Build URL with params safely
-      const params = new URLSearchParams({ limit: '50' })
+      const params = new URLSearchParams()
+      params.append('limit', '100') // Show more by default
       if (isFeatured) params.append('featured', 'true')
       if (categoryParam) params.append('category', categoryParam)
       if (searchParam) params.append('search', searchParam)
       
-      const res = await fetch(`/api/products?${params.toString()}`)
+      // Add cache buster to force fresh data from server
+      params.append('_t', Date.now().toString())
+      
+      const res = await fetch(`/api/products?${params.toString()}`, {
+        headers: { 'Cache-Control': 'no-cache' }
+      })
+
       if (res.ok) {
-        let data = await res.json()
+        const data = await res.json()
         let allProducts = data.products || []
         
         // Filter for sale items (products with discount)
@@ -73,6 +80,9 @@ function ShopContent() {
         }
         
         setProducts(allProducts)
+      } else {
+        const errorData = await res.json().catch(() => ({}))
+        console.error('Products fetch failed:', res.status, errorData)
       }
     } catch (error) {
       console.error('Error fetching products:', error)

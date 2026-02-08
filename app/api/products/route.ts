@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
       orderBy.createdAt = order
     }
 
-    // Fetch products with count
+    // Fetch products with count - with extra safety for cPanel environment
     console.log('Fetching products with where:', JSON.stringify(where))
     
     const [products, total] = await Promise.all([
@@ -89,23 +89,35 @@ export async function GET(request: NextRequest) {
         take: limit
       }),
       db.product.count({ where })
-    ])
+    ]).catch(err => {
+      console.error('Database query failed:', err)
+      return [[], 0]
+    })
     
-    console.log('Found products:', total)
+    console.log(`Found ${products.length} products (total: ${total})`)
 
-    // Fetch settings for multi-vendor check
-    const settings = await db.siteSettings.findFirst()
-    const isMultiVendor = settings?.multiVendorEnabled ?? true
+    // Fetch settings for multi-vendor check safely
+    let isMultiVendor = true
+    try {
+      const settings = await db.siteSettings.findFirst()
+      if (settings) isMultiVendor = settings.multiVendorEnabled
+    } catch (e) {
+      console.error('Settings fetch failed, defaulting to multi-vendor true')
+    }
 
     // Parse images JSON safely and handle Multi-Vendor logic
-    const productsWithImages = products.map((p: any) => {
+    const productsWithImages = (products || []).map((p: any) => {
       let images: string[] = []
       try {
-        const imageStr = p.images as string || '[]'
-        const cleanStr = imageStr.replace(/\\"/g, '"')
-        images = JSON.parse(cleanStr)
+        if (Array.isArray(p.images)) {
+          images = p.images
+        } else {
+          const imageStr = p.images as string || '[]'
+          const cleanStr = imageStr.replace(/\\"/g, '"')
+          images = JSON.parse(cleanStr)
+        }
       } catch (error) {
-        console.error('Image parse error:', error)
+        console.error('Image parse error for product:', p.id, error)
         images = []
       }
 
