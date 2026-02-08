@@ -105,7 +105,6 @@ export default function AdminSettingsPage() {
       })
       
       if (res.ok) {
-      if (res.ok) {
         const data = await res.json()
         
         // Update local state with returned settings if available

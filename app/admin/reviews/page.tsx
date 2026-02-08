@@ -33,6 +33,7 @@ export default function AdminReviewsPage() {
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyText, setReplyText] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [aiAssistId, setAiAssistId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchReviews()
@@ -168,13 +169,57 @@ export default function AdminReviewsPage() {
   }
 
   return (
-  const [aiAssistId, setAiAssistId] = useState<string | null>(null)
-
-  // ... (previous code)
-
-  return (
     <div className="space-y-4 sm:space-y-6">
-      {/* ... (Header & Filters remain same) */}
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Reviews</h1>
+        <div className="text-xs sm:text-sm text-muted-foreground">
+          {reviews.length} total
+        </div>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col gap-2 sm:gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-10 text-sm"
+              />
+            </div>
+            <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1">
+              <Button
+                variant={filter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                className="text-xs h-8"
+                onClick={() => setFilter('all')}
+              >
+                All
+              </Button>
+              <Button
+                variant={filter === 'pending' ? 'default' : 'outline'}
+                size="sm"
+                className="text-xs h-8"
+                onClick={() => setFilter('pending')}
+              >
+                Pending
+              </Button>
+              <Button
+                variant={filter === 'approved' ? 'default' : 'outline'}
+                size="sm"
+                className="text-xs h-8"
+                onClick={() => setFilter('approved')}
+              >
+                Approved
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       
       {/* Reviews List */}
       {loading ? (
