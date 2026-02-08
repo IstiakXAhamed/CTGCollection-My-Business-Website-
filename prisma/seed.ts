@@ -89,9 +89,9 @@ async function main() {
     }),
     prisma.category.create({
       data: {
-        name: 'Beauty',
-        slug: 'beauty',
-        description: 'Premium beauty and skincare products',
+        name: 'Fragrance',
+        slug: 'fragrance',
+        description: 'Premium fragrance and perfume products',
         isActive: true,
       },
     }),
@@ -246,8 +246,8 @@ async function main() {
     },
   ]
 
-  // Beauty Products
-  const beautyProducts = [
+  // Fragrance Products
+  const fragranceProducts = [
     {
       name: 'Luxury Skincare Set',
       slug: 'luxury-skincare-set',
@@ -286,7 +286,7 @@ async function main() {
     ...fashionProducts,
     ...electronicsProducts,
     ...homeProducts,
-    ...beautyProducts,
+    ...fragranceProducts,
   ]
 
   for (const productData of allProducts) {
