@@ -113,7 +113,7 @@ export default function HomePage() {
         
         <div className="relative container mx-auto px-4 py-8 sm:py-16 md:py-24 lg:py-32">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="text-center max-w-3xl mx-auto px-2"

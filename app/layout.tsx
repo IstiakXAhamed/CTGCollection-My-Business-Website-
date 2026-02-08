@@ -19,7 +19,7 @@ const AIChatAssistant = dynamic(() => import('@/components/AIChatAssistant').the
 const WhatsAppChat = dynamic(() => import('@/components/WhatsAppChat').then(mod => mod.WhatsAppChat), { ssr: false })
 const FloatingActions = dynamic(() => import('@/components/FloatingActions'), { ssr: false })
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], display: 'swap' });
 
 export const viewport: Viewport = {
   width: "device-width",

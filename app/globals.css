@@ -49,6 +49,7 @@
   }
 }
 
+@layer utilities {
 /* Real Fire Animation */
 @keyframes fire-flicker {
   0% { background-position: 0% 50%; box-shadow: 0 0 5px rgba(255, 69, 0, 0.5), 0 -5px 10px rgba(255, 140, 0, 0.3); }
@@ -458,6 +459,8 @@
   top: -10px;
   font-size: 16px;
   animation: legendary-crown-float 2s ease-in-out infinite, diamond-pulse 3s ease-in-out infinite;
+}
+
 }
 
 @layer base {
