@@ -1,7 +1,7 @@
 {
-  "name": "Silk Mart - Best Online Shopping in BD",
+  "name": "Silk Mart - Best Online Shopping in Bangladesh",
   "short_name": "Silk Mart",
-  "description": "Premium fashion, electronics and lifestyle products with fast delivery in Bangladesh.",
+  "description": "Premium fashion, electronics, and lifestyle products with fast delivery in Bangladesh. Shop at Silk Mart for authentic quality.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -11,13 +11,18 @@
       "src": "/logo.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "180x180",
+      "type": "image/png"
     }
   ]
 }

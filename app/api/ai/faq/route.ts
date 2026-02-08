@@ -1,5 +1,6 @@
 
 import { NextRequest, NextResponse } from 'next/server'
+const { prisma } = require('@/lib/prisma')
 import { generateProductFAQ } from '@/lib/gemini-ai'
 
 export const dynamic = 'force-dynamic'
@@ -12,8 +13,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Product name and category are required' }, { status: 400 })
     }
 
+    // Fetch site settings for store name
+    let storeName = 'Silk Mart'
+    try {
+      const settings = await prisma.siteSettings.findUnique({ where: { id: 'main' } })
+      if (settings?.storeName) storeName = settings.storeName
+    } catch (e) {
+      console.warn('Failed to fetch settings for FAQ AI:', e)
+    }
+
     const start = Date.now()
-    const result = await generateProductFAQ(productName, description || '', category, { count: 5 })
+    const result = await generateProductFAQ(productName, description || '', category, { count: 5, storeName })
     const duration = Date.now() - start
     
     console.log(`FAQ generation for ${productName} took ${duration}ms`)

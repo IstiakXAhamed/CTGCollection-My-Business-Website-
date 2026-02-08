@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 import { 
   parseAIJSON, 
   callGeminiAI,
@@ -36,11 +37,20 @@ export async function POST(request: NextRequest) {
     }
 
     let result: any = {}
+    
+    // Fetch site settings for store name
+    let storeName = 'Silk Mart'
+    try {
+      const settings = await (prisma as any).siteSettings.findUnique({ where: { id: 'main' } })
+      if (settings?.storeName) storeName = settings.storeName
+    } catch (e) {
+      console.warn('Failed to fetch settings for product assist:', e)
+    }
 
     try {
       switch (action) {
         case 'description':
-          const descRes = await generateAdvancedDescription(productName, { category, tone, language })
+          const descRes = await generateAdvancedDescription(productName, { category, tone, language, storeName })
           if (descRes.success) result.suggestion = descRes.result
           else throw new Error(descRes.error)
           break
@@ -50,22 +60,21 @@ export async function POST(request: NextRequest) {
           else throw new Error(tagsRes.error)
           break
         case 'seo':
-          const seoRes = await getSmartSuggestions(productName, 'product_name') // Using this for now or could add generateSEO to lib
-          if (seoRes.success) result.suggestion = `${productName} | Premium Quality | CTG Collection`
+          const seoRes = await getSmartSuggestions(productName, 'product_name') 
+          if (seoRes.success) result.suggestion = `${productName} | Premium Quality | ${storeName}`
           else throw new Error(seoRes.error)
           break
         case 'analyze':
-          const analyzeRes = await analyzeProductForSuggestions(productName)
+          const analyzeRes = await analyzeProductForSuggestions(productName, storeName)
           if (analyzeRes.success) result = analyzeRes.result
           else throw new Error(analyzeRes.error)
           break
         case 'complete':
-          // We can use a combination or add a direct 'complete' to lib
-          const compRes = await callGeminiAI(`Generate complete product details for "${productName}" in JSON format...`) // Simplified for now
+          const compRes = await callGeminiAI(`Generate complete product details for "${productName}" in the context of "${storeName}" in JSON format...`)
           result = parseAIJSON(compRes, {})
           break
         case 'rewrite':
-          const rewriteRes = await rewriteContent(description, { tone, language })
+          const rewriteRes = await rewriteContent(description, { tone, language, storeName })
           if (rewriteRes.success) result.suggestion = rewriteRes.result
           else throw new Error(rewriteRes.error)
           break
@@ -73,14 +82,12 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
       }
     } catch (aiError: any) {
-      // Fallback is now largely handled inside lib/gemini-ai.ts
-      // But we keep this catch for catastrophic failures
       console.error('AI Route Critical Failure:', aiError.message)
       return NextResponse.json({ 
         success: false, 
         error: aiError.message,
         fallback: true,
-        suggestion: action === 'description' ? 'Discover our premium collection at CTG Collection.' : productName
+        suggestion: action === 'description' ? `Discover our premium collection at ${storeName}.` : productName
       }, { status: 500 })
     }
 

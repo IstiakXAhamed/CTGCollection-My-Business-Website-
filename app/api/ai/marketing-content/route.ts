@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 import { generateMarketingContent, generateHashtags } from '@/lib/gemini-ai'
 
 export const dynamic = 'force-dynamic'
@@ -26,10 +27,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Topic is required' }, { status: 400 })
     }
 
+    // Fetch site settings for store name
+    let storeName = 'Silk Mart'
+    try {
+      const settings = await prisma.siteSettings.findUnique({ where: { id: 'main' } })
+      if (settings?.storeName) storeName = settings.storeName
+    } catch (e) {
+      console.warn('Failed to fetch settings for marketing AI:', e)
+    }
+
     // Generate marketing content
     const result = await generateMarketingContent(type, topic, {
       language: language || 'en',
-      includeEmoji: includeEmoji !== false
+      includeEmoji: includeEmoji !== false,
+      storeName: storeName
     })
 
     if (!result.success) {

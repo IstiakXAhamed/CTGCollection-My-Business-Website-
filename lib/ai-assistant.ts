@@ -75,9 +75,9 @@ export async function generateSEOTags(product: ProductData): Promise<{
 }> {
   if (!GEMINI_API_KEY || !isAIEnabled()) {
     return {
-      metaTitle: `${product.name} - Buy Online | CTG Collection`,
+      metaTitle: `${product.name} - Buy Online | Silk Mart`,
       metaDescription: `Shop ${product.name} from ${product.category} at best prices. Quality products with fast delivery in Bangladesh.`,
-      keywords: [product.name, product.category, 'buy online', 'bangladesh', 'ctg collection']
+      keywords: [product.name, product.category, 'buy online', 'bangladesh', 'silk mart']
     }
   }
 
@@ -117,9 +117,9 @@ Return JSON with these exact fields:
   }
 
   return {
-    metaTitle: `${product.name} - Buy Online | CTG Collection`,
+    metaTitle: `${product.name} - Buy Online | Silk Mart`,
     metaDescription: `Shop ${product.name} from ${product.category} at best prices.`,
-    keywords: [product.name.toLowerCase(), product.category.toLowerCase()]
+    keywords: [product.name.toLowerCase(), product.category.toLowerCase(), 'silk mart']
   }
 }
 
@@ -145,7 +145,7 @@ export async function aiChatResponse(
       contextInfo += `\nCustomer is on: ${context.currentPage}`
     }
 
-    const prompt = `You are a helpful customer support AI for CTG Collection, a premium e-commerce store in Bangladesh.
+    const prompt = `You are a helpful customer support AI for a premium e-commerce store in Bangladesh.
 
 Customer message: "${message}"
 ${contextInfo}
@@ -225,9 +225,9 @@ Return as JSON array of strings. Max 5 terms.`
 // Template-based description fallback
 function generateTemplateDescription(product: ProductData): string {
   const templates = [
-    `Introducing the ${product.name} - a premium quality product from our ${product.category} collection. Designed with attention to detail and crafted for excellence, this item is perfect for those who appreciate quality and style.\n\nExperience the difference with CTG Collection. Order now and enjoy fast delivery across Bangladesh!`,
-    `Discover the ${product.name}, your new favorite from our ${product.category} range. Built to last and designed to impress, this product combines functionality with aesthetics.\n\nAt CTG Collection, we believe in providing only the best. Shop with confidence and enjoy our hassle-free return policy.`,
-    `The ${product.name} is here to elevate your ${product.category.toLowerCase()} experience. Whether you're looking for quality, style, or value, this product delivers on all fronts.\n\nJoin thousands of satisfied customers. Order from CTG Collection today!`
+    `Introducing the ${product.name} - a premium quality product from our ${product.category} collection. Designed with attention to detail and crafted for excellence, this item is perfect for those who appreciate quality and style.\n\nExperience the difference with our store. Order now and enjoy fast delivery across Bangladesh!`,
+    `Discover the ${product.name}, your new favorite from our ${product.category} range. Built to last and designed to impress, this product combines functionality with aesthetics.\n\nWe believe in providing only the best. Shop with confidence and enjoy our hassle-free return policy.`,
+    `The ${product.name} is here to elevate your ${product.category.toLowerCase()} experience. Whether you're looking for quality, style, or value, this product delivers on all fronts.\n\nJoin thousands of satisfied customers. Order today!`
   ]
 
   return templates[Math.floor(Math.random() * templates.length)]

@@ -5,6 +5,8 @@
  * All AI calls go through this library for consistency and control.
  */
 
+const DEFAULT_STORE_NAME = 'Silk Mart'
+
 const FALLBACK_MODELS = [
   // 1. Primary: Gemini 2.5 Flash (User's choice)
   { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
@@ -156,9 +158,9 @@ export function parseAIJSON<T>(text: string, defaultValue: T): T {
 
 // ============ Product AI ============
 
-export async function generateProductDescription(productName: string, category?: string): Promise<AIResponse> {
+export async function generateProductDescription(productName: string, category?: string, storeName: string = DEFAULT_STORE_NAME): Promise<AIResponse> {
   try {
-    const prompt = `Write a compelling, detailed 5-7 sentence product description for "${productName}"${category ? ` in ${category}` : ''} for a premium Bangladeshi e-commerce store "CTG Collection". 
+    const prompt = `Write a compelling, detailed 5-7 sentence product description for "${productName}"${category ? ` in ${category}` : ''} for a premium Bangladeshi e-commerce store "${storeName}". 
     Highlight specific features, luxury appeal, and sensory details. Make it extremely professional and engaging. Return ONLY the description, no placeholders.`
     const result = await callGeminiAI(prompt)
     return { success: true, result: result.trim() }
@@ -167,9 +169,9 @@ export async function generateProductDescription(productName: string, category?:
   }
 }
 
-export async function analyzeProductForSuggestions(productName: string): Promise<AIResponse> {
+export async function analyzeProductForSuggestions(productName: string, storeName: string = DEFAULT_STORE_NAME): Promise<AIResponse> {
   try {
-    const prompt = `Analyze this product: "${productName}" for a Bangladeshi E-commerce store.
+    const prompt = `Analyze this product: "${productName}" for a Bangladeshi E-commerce store "${storeName}".
     Return JSON with:
     {
       "productType": "Specific type (e.g., Running Shoe, Matte Lipstick)",
@@ -206,7 +208,7 @@ export async function generateChatResponse(
   settings?: any
 ): Promise<AIResponse> {
   try {
-    const shopName = settings?.siteName || 'Silk Mart'
+    const shopName = settings?.storeName || settings?.siteName || DEFAULT_STORE_NAME
     
     let systemPrompt = `You are the elite, charming, and highly persuasive AI Sales Associate for ${shopName}. 
     Your goal is not just to answer, but to SELL and delight the customer. 
@@ -286,12 +288,10 @@ export async function suggestChatReplies(customerMessage: string): Promise<AIRes
 
 // ============ Review AI ============
 
-export async function analyzeReview(reviewText: string, rating: number): Promise<AIResponse> {
+export async function analyzeReview(reviewText: string, rating: number, storeName: string = DEFAULT_STORE_NAME): Promise<AIResponse> {
   try {
-    console.log('[Gemini] Analyzing Review:', reviewText.substring(0, 50) + '...')
-    // We don't have settings here easily, but we can default to Silk Mart or pass it. 
-    // For now, let's use the default "Silk Mart" which is the user's intended brand.
-    const prompt = `Analyze this customer review for "Silk Mart":
+    console.log(`[Gemini] Analyzing Review for ${storeName}:`, reviewText.substring(0, 50) + '...')
+    const prompt = `Analyze this customer review for "${storeName}":
 Text: "${reviewText}"
 Rating: ${rating}/5
 
@@ -344,9 +344,10 @@ Keep it professional, 2-3 sentences. If negative, offer to help resolve issues.`
 
 // ============ Coupon AI ============
 
-export async function generateCouponIdeas(options: { occasion?: string, targetAudience?: string, discountType?: string }): Promise<AIResponse> {
+export async function generateCouponIdeas(options: { occasion?: string, targetAudience?: string, discountType?: string, storeName?: string }): Promise<AIResponse> {
   try {
-    const prompt = `Generate 5 creative coupon/promo code ideas for a Bangladesh e-commerce store.
+    const storeName = options.storeName || DEFAULT_STORE_NAME
+    const prompt = `Generate 5 creative coupon/promo code ideas for "${storeName}" in Bangladesh.
 ${options.occasion ? `Occasion: ${options.occasion}` : ''}
 ${options.targetAudience ? `Target: ${options.targetAudience}` : ''}
 ${options.discountType ? `Type: ${options.discountType}` : ''}
@@ -363,9 +364,9 @@ Use creative, memorable codes. Return ONLY valid JSON array.`
 
 // ============ Announcement AI ============
 
-export async function generateAnnouncement(topic: string, type: 'sale' | 'new_arrival' | 'event' | 'policy' | 'general'): Promise<AIResponse> {
+export async function generateAnnouncement(topic: string, type: 'sale' | 'new_arrival' | 'event' | 'policy' | 'general', storeName: string = DEFAULT_STORE_NAME): Promise<AIResponse> {
   try {
-    const prompt = `Write an engaging store announcement for CTG Collection:
+    const prompt = `Write an engaging store announcement for ${storeName}:
 Topic: ${topic}
 Type: ${type}
 
@@ -411,10 +412,10 @@ Return ONLY valid JSON.`
 
 // ============ SEO AI ============
 
-export async function generateSEOContent(pageName: string, pageType: 'category' | 'product' | 'blog' | 'page'): Promise<AIResponse> {
+export async function generateSEOContent(pageName: string, pageType: 'category' | 'product' | 'blog' | 'page', storeName: string = DEFAULT_STORE_NAME): Promise<AIResponse> {
   try {
     const prompt = `Generate SEO content for: "${pageName}" (${pageType} page)
-Store: CTG Collection (Bangladesh e-commerce)
+Store: ${storeName} (Bangladesh e-commerce)
 
 Return JSON: {
   "metaTitle": "Max 60 chars, include keywords",
@@ -450,9 +451,10 @@ Return ONLY the translated text, nothing else.`
 
 // ============ Email AI ============
 
-export async function generateOrderEmail(type: 'confirmation' | 'shipped' | 'delivered' | 'cancelled', orderDetails: { orderId: string, customerName: string, items: string[], total: number }): Promise<AIResponse> {
+export async function generateOrderEmail(type: 'confirmation' | 'shipped' | 'delivered' | 'cancelled', orderDetails: { orderId: string, customerName: string, items: string[], total: number, storeName?: string }): Promise<AIResponse> {
   try {
-    const prompt = `Write an order ${type} email for CTG Collection:
+    const storeName = orderDetails.storeName || DEFAULT_STORE_NAME
+    const prompt = `Write an order ${type} email for ${storeName}:
 Order ID: ${orderDetails.orderId}
 Customer: ${orderDetails.customerName}
 Items: ${orderDetails.items.join(', ')}
@@ -473,9 +475,9 @@ Be warm, professional. Include relevant info for ${type} emails. Return ONLY val
   }
 }
 
-export async function generateMarketingEmail(campaign: string, targetAudience: string): Promise<AIResponse> {
+export async function generateMarketingEmail(campaign: string, targetAudience: string, storeName: string = DEFAULT_STORE_NAME): Promise<AIResponse> {
   try {
-    const prompt = `Write a marketing email for CTG Collection:
+    const prompt = `Write a marketing email for ${storeName}:
 Campaign: ${campaign}
 Target: ${targetAudience}
 
@@ -528,11 +530,12 @@ export type AILanguage = 'en' | 'bn'
 // 1. Advanced Product Description with Tone & Language
 export async function generateAdvancedDescription(
   productName: string, 
-  options?: { category?: string, tone?: AITone, language?: AILanguage }
+  options?: { category?: string, tone?: AITone, language?: AILanguage, storeName?: string }
 ): Promise<AIResponse> {
   try {
     const tone = options?.tone || 'professional'
     const lang = options?.language || 'en'
+    const storeName = options?.storeName || DEFAULT_STORE_NAME
     const langName = lang === 'bn' ? 'Bengali (বাংলা)' : 'English'
     
     const toneGuides: Record<AITone, string> = {
@@ -547,7 +550,7 @@ export async function generateAdvancedDescription(
 
 TONE: ${toneGuides[tone]}
 LANGUAGE: Write in ${langName}
-STORE: CTG Collection (Premium Bangladesh Fashion & Lifestyle)
+STORE: ${storeName} (Premium Bangladesh Fashion & Lifestyle)
 
 Requirements:
 - Be highly specific, professional, and engaging
@@ -567,7 +570,7 @@ Requirements:
 // 2. Magic Rewrite - Improve existing content
 export async function rewriteContent(
   text: string, 
-  options?: { tone?: AITone, language?: AILanguage, action?: 'improve' | 'shorten' | 'expand' | 'fix_grammar' }
+  options?: { tone?: AITone, language?: AILanguage, action?: 'improve' | 'shorten' | 'expand' | 'fix_grammar', storeName?: string }
 ): Promise<AIResponse> {
   try {
     const action = options?.action || 'improve'
@@ -625,7 +628,7 @@ Make queries specific enough to find relevant images. Return ONLY valid JSON.`
 export async function generateMarketingContent(
   type: 'facebook_post' | 'instagram_caption' | 'email_campaign' | 'ad_copy' | 'sms',
   productOrCampaign: string,
-  options?: { language?: AILanguage, tone?: AITone, includeEmoji?: boolean }
+  options?: { language?: AILanguage, tone?: AITone, includeEmoji?: boolean, storeName?: string }
 ): Promise<AIResponse> {
   try {
     const lang = options?.language || 'en'
@@ -643,7 +646,9 @@ export async function generateMarketingContent(
     
     const config = typeConfigs[type]
     
-    const prompt = `Act as an expert Digital Marketer and Copywriter for "CTG Collection", a premium fashion and lifestyle brand in Bangladesh.
+    const storeName = options?.storeName || DEFAULT_STORE_NAME
+    
+    const prompt = `Act as an expert Digital Marketer and Copywriter for "${storeName}", a premium fashion and lifestyle brand in Bangladesh.
     
     Task: Create high-quality, engaging ${type.replace(/_/g, ' ')} content.
     Topic/Product: ${productOrCampaign}
@@ -676,15 +681,16 @@ export async function generateMarketingContent(
     return { success: true, result: json }
   } catch (e: any) {
     console.error('Marketing AI Error:', e)
+    const storeName = options?.storeName || DEFAULT_STORE_NAME
     // Fallback content to prevent "undefined" in UI
     const fallbackContent = {
       subject: `Special Offer: ${productOrCampaign}`,
       headline: productOrCampaign,
       preheader: 'Don\'t miss out on our latest updates!',
-      body: `Check out ${productOrCampaign} at CTG Collection. We have amazing deals tailored just for you. Visit our store today to explore the collection.`,
-      text: `Check out ${productOrCampaign} at CTG Collection! Shop now.`,
+      body: `Check out ${productOrCampaign} at ${storeName}. We have amazing deals tailored just for you. Visit our store today to explore the collection.`,
+      text: `Check out ${productOrCampaign} at ${storeName}! Shop now.`,
       cta: 'Shop Now',
-      hashtags: ['#CTGCollection', '#Fashion']
+      hashtags: [`#${storeName.replace(/\s+/g, '')}`, '#Fashion']
     }
     return { success: true, result: fallbackContent, error: e.message }
   }
@@ -728,10 +734,12 @@ export async function predictInventoryNeeds(productData: {
   category: string,
   currentStock: number,
   salesLast30Days: number,
-  salesLast7Days: number
+  salesLast7Days: number,
+  storeName?: string
 }): Promise<AIResponse> {
   try {
-    const prompt = `Predict inventory needs for this product:
+    const storeName = productData.storeName || DEFAULT_STORE_NAME
+    const prompt = `Predict inventory needs for this product for "${storeName}":
 
 Product: ${productData.name}
 Category: ${productData.category}
@@ -797,7 +805,8 @@ export async function detectOrderFraud(orderDetails: {
   paymentMethod: string,
   shippingAddress: string,
   customerOrderCount: number,
-  itemCount: number
+  itemCount: number,
+  storeName?: string
 }): Promise<AIResponse> {
   try {
     const prompt = `Analyze this order for potential fraud indicators:
@@ -866,7 +875,7 @@ export async function generateProductFAQ(
   productName: string,
   description: string,
   category: string,
-  options?: { language?: AILanguage, count?: number }
+  options?: { language?: AILanguage, count?: number, storeName?: string }
 ): Promise<AIResponse> {
   try {
     const lang = options?.language || 'en'
@@ -932,23 +941,24 @@ Return ONLY valid JSON.`
 export async function generateHashtags(
   productName: string,
   category: string,
-  options?: { platform?: 'instagram' | 'facebook' | 'tiktok', count?: number }
+  options?: { platform?: 'instagram' | 'facebook' | 'tiktok', count?: number, storeName?: string }
 ): Promise<AIResponse> {
   try {
     const platform = options?.platform || 'instagram'
     const count = options?.count || 15
+    const storeName = options?.storeName || DEFAULT_STORE_NAME
     
     const prompt = `Generate ${count} trending hashtags for ${platform}:
-
+  
 Product: ${productName}
 Category: ${category}
-Store: CTG Collection (Bangladesh)
+Store: ${storeName} (Bangladesh)
 
 Return JSON: {
   "primary": ["#topHashtag1", "#topHashtag2", "#topHashtag3"],
   "secondary": ["other", "relevant", "hashtags"],
   "trending": ["currently", "trending", "ones"],
-  "branded": ["#CTGCollection", "#ShopBangladesh"]
+  "branded": ["#${storeName.replace(/\s+/g, '')}", "#ShopBangladesh"]
 }
 Mix English and Bengali hashtags. Return ONLY valid JSON.`
 
@@ -963,11 +973,12 @@ Mix English and Bengali hashtags. Return ONLY valid JSON.`
 // 13. Order Communication Generator (Bengali/English)
 export async function generateOrderCommunication(
   type: 'confirmation' | 'shipped' | 'out_for_delivery' | 'delivered' | 'delayed',
-  orderDetails: { orderId: string, customerName: string, items: string[], estimatedDelivery?: string },
+  orderDetails: { orderId: string, customerName: string, items: string[], estimatedDelivery?: string, storeName?: string },
   language: AILanguage = 'en'
 ): Promise<AIResponse> {
   try {
     const langName = language === 'bn' ? 'Bengali (বাংলা)' : 'English'
+    const storeName = orderDetails.storeName || DEFAULT_STORE_NAME
     
     const prompt = `Write an order ${type.replace(/_/g, ' ')} message:
 
@@ -977,7 +988,7 @@ Items: ${orderDetails.items.join(', ')}
 ${orderDetails.estimatedDelivery ? `Expected Delivery: ${orderDetails.estimatedDelivery}` : ''}
 
 Language: ${langName}
-Store: CTG Collection
+Store: ${storeName}
 
 Return JSON: {
   "sms": "Short SMS version (max 160 chars)",

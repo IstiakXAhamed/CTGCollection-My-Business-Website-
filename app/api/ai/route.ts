@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 import * as AI from '@/lib/gemini-ai'
 
 export const dynamic = 'force-dynamic'
@@ -37,21 +38,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Action required' }, { status: 400 })
     }
 
+    // Fetch site settings for store name
+    let storeName = 'Silk Mart'
+    let fullSettings = null
+    try {
+      const settings = await (prisma as any).siteSettings.findUnique({ where: { id: 'main' } })
+      if (settings?.storeName) storeName = settings.storeName
+      fullSettings = settings
+    } catch (e) {
+      console.warn('Failed to fetch settings for generic AI route:', e)
+    }
+
     let result: AI.AIResponse
 
     switch (action) {
       // ===== Product AI =====
       case 'product_description':
-        result = await AI.generateProductDescription(params.productName, params.category)
+        result = await AI.generateProductDescription(params.productName, params.category, storeName)
         break
       
       case 'product_analyze':
-        result = await AI.analyzeProductForSuggestions(params.productName)
+        result = await AI.analyzeProductForSuggestions(params.productName, storeName)
         break
 
       // ===== Chat AI =====
       case 'chat_response':
-        result = await AI.generateChatResponse(params.message, params.context)
+        result = await AI.generateChatResponse(params.message, params.context, fullSettings || { siteName: storeName })
         break
       
       case 'chat_suggestions':
@@ -60,7 +72,7 @@ export async function POST(request: NextRequest) {
 
       // ===== Review AI =====
       case 'review_analyze':
-        result = await AI.analyzeReview(params.reviewText, params.rating)
+        result = await AI.analyzeReview(params.reviewText, params.rating, storeName)
         break
       
       case 'review_response':
@@ -72,13 +84,14 @@ export async function POST(request: NextRequest) {
         result = await AI.generateCouponIdeas({
           occasion: params.occasion,
           targetAudience: params.targetAudience,
-          discountType: params.discountType
+          discountType: params.discountType,
+          storeName: storeName
         })
         break
 
       // ===== Announcement AI =====
       case 'announcement_generate':
-        result = await AI.generateAnnouncement(params.topic, params.type || 'general')
+        result = await AI.generateAnnouncement(params.topic, params.type || 'general', storeName)
         break
 
       // ===== Order AI =====
@@ -88,7 +101,7 @@ export async function POST(request: NextRequest) {
 
       // ===== SEO AI =====
       case 'seo_content':
-        result = await AI.generateSEOContent(params.pageName, params.pageType || 'page')
+        result = await AI.generateSEOContent(params.pageName, params.pageType || 'page', storeName)
         break
 
       // ===== Translation AI =====
@@ -98,11 +111,11 @@ export async function POST(request: NextRequest) {
 
       // ===== Email AI =====
       case 'email_order':
-        result = await AI.generateOrderEmail(params.emailType, params.orderDetails)
+        result = await AI.generateOrderEmail(params.emailType, { ...params.orderDetails, storeName })
         break
       
       case 'email_marketing':
-        result = await AI.generateMarketingEmail(params.campaign, params.targetAudience)
+        result = await AI.generateMarketingEmail(params.campaign, params.targetAudience, storeName)
         break
 
       // ===== Smart Suggestions =====

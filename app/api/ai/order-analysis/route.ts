@@ -1,5 +1,6 @@
 
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
 import { detectOrderFraud } from '@/lib/gemini-ai'
 
@@ -26,7 +27,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Order data is required' }, { status: 400 })
     }
 
-    const analysis = await detectOrderFraud(orderData)
+    // Fetch site settings for store name
+    let storeName = 'Silk Mart'
+    try {
+      const settings = await prisma.siteSettings.findUnique({ where: { id: 'main' } })
+      if (settings?.storeName) storeName = settings.storeName
+    } catch (e) {
+      console.warn('Failed to fetch settings for order analysis AI:', e)
+    }
+
+    const analysis = await detectOrderFraud({ ...orderData, storeName })
 
     return NextResponse.json({ success: true, analysis })
   } catch (error: any) {
