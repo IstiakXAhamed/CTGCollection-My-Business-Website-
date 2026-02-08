@@ -92,7 +92,7 @@ export function SpinWheel({
         
         setConfig(wheelConfig)
 
-        if (wheelConfig.enabled === false) return 
+        if (wheelConfig.enabled !== true) return 
         if (wheelConfig.prizes && wheelConfig.prizes.length > 0) {
           setPrizes(wheelConfig.prizes)
         }

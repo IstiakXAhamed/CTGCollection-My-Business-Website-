@@ -561,7 +561,7 @@ export default function HomePage() {
         </motion.div>
         {/* Testimonials Section */}
         <TestimonialsCarousel />
-        <SpinWheel />
+        <TestimonialsCarousel />
       </section>
     </div>
   )

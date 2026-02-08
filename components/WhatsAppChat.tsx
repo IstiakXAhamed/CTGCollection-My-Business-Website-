@@ -58,7 +58,7 @@ export function WhatsAppChat({
   }
 
   const positionClasses = position === 'bottom-right' 
-    ? 'right-[5.5rem] md:right-24' // Position beside LiveChat button
+    ? 'right-4 md:right-6' // Stacked under AI Chat
     : 'left-4 md:left-6'
 
   return (
@@ -66,7 +66,7 @@ export function WhatsAppChat({
       {/* Chat Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-4 md:bottom-6 ${positionClasses} z-50 w-12 h-12 md:w-14 md:h-14 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition-colors flex items-center justify-center`}
+        className={`fixed bottom-4 md:bottom-6 ${positionClasses} z-[40] w-12 h-12 md:w-14 md:h-14 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition-colors flex items-center justify-center`}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         aria-label="WhatsApp Chat"

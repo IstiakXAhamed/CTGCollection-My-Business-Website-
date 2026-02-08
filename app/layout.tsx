@@ -28,32 +28,6 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export const metadata: Metadata = {
-  title: "Silk Mart - Premium E-Commerce Store | Bangladesh",
-  description: "Shop the latest fashion and lifestyle products from Silk Mart. Quality products with fast delivery across Bangladesh. SSLCommerz & COD available.",
-  keywords: ["ecommerce", "online shopping", "Bangladesh", "Silk Mart", "fashion", "lifestyle", "Chittagong"],
-  authors: [{ name: "Silk Mart" }],
-  openGraph: {
-    title: "Silk Mart - Premium E-Commerce Store",
-    description: "Shop the latest fashion and lifestyle products with free shipping on orders over ৳2000",
-    type: "website",
-    locale: "en_BD",
-    siteName: "Silk Mart",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Silk Mart",
-    description: "Shop the latest fashion and lifestyle products",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  verification: {
-    google: "ATFkhJUh2kPUMLtxfQ24KXiN_nkaSnnsFNeZ5tasD1M",
-  },
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -62,6 +36,77 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
       <body className={`${inter.className} overflow-x-hidden`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                '@context': 'https://schema.org',
+                '@type': 'Organization',
+                name: 'Silk Mart',
+                url: 'https://silkmartbd.com',
+                logo: 'https://silkmartbd.com/logo.png',
+                sameAs: [
+                  'https://facebook.com/silkmartbd',
+                  'https://instagram.com/silkmartbd'
+                ],
+                contactPoint: {
+                  '@type': 'ContactPoint',
+                  telephone: '+8801991523289',
+                  contactType: 'customer service',
+                  areaServed: 'BD',
+                  availableLanguage: ['en', 'bn']
+                }
+              },
+              {
+                '@context': 'https://schema.org',
+                '@type': 'WebSite',
+                name: 'Silk Mart',
+                alternateName: ['Silk Mart BD', 'Silk Mart Bangladesh'],
+                url: 'https://silkmartbd.com',
+                potentialAction: {
+                  '@type': 'SearchAction',
+                  target: 'https://silkmartbd.com/shop?q={search_term_string}',
+                  'query-input': 'required name=search_term_string'
+                }
+              },
+              {
+                '@context': 'https://schema.org',
+                '@type': 'LocalBusiness',
+                name: 'Silk Mart',
+                image: 'https://silkmartbd.com/logo.png',
+                '@id': 'https://silkmartbd.com',
+                url: 'https://silkmartbd.com',
+                telephone: '+8801991523289',
+                address: {
+                  '@type': 'PostalAddress',
+                  streetAddress: 'Chittagong',
+                  addressLocality: 'Chittagong',
+                  addressCountry: 'BD'
+                },
+                geo: {
+                  '@type': 'GeoCoordinates',
+                  latitude: 22.3569,
+                  longitude: 91.7832
+                },
+                openingHoursSpecification: {
+                  '@type': 'OpeningHoursSpecification',
+                  dayOfWeek: [
+                    'Monday',
+                    'Tuesday',
+                    'Wednesday',
+                    'Thursday',
+                    'Friday',
+                    'Saturday',
+                    'Sunday'
+                  ],
+                  opens: '00:00',
+                  closes: '23:59'
+                }
+              }
+            ])
+          }}
+        />
         <Providers>
           <Navbar />
           {/* Unified Promo Banner - After Navbar */}
