@@ -45,8 +45,8 @@ export async function GET() {
   }
 }
 
-// POST - Update site settings (admin only)
-export async function POST(req: NextRequest) {
+// PUT - Update site settings (admin only)
+export async function PUT(req: NextRequest) {
   try {
     const body = await req.json()
     const { spinWheelConfig, ...otherSettings } = body
