@@ -22,6 +22,64 @@ const FloatingActions = dynamic(() => import('@/components/FloatingActions'), { 
 
 const inter = Inter({ subsets: ["latin"], display: 'swap' });
 
+export const metadata: Metadata = {
+  title: {
+    default: "Silk Mart | Premium E-Commerce Store in Bangladesh",
+    template: "%s | Silk Mart"
+  },
+  description: "Silk Mart offers a wide range of fashion, electronics, and lifestyle products with the best prices and fastest delivery in Chittagong, Bangladesh. Silk Mart is your trusted destination for quality shopping.",
+  keywords: ["Silk Mart", "Silk Mart BD", "Silk Mart Bangladesh", "Online Shopping Bangladesh", "Fashion BD", "Electronics BD", "Chittagong E-commerce"],
+  authors: [{ name: "Silk Mart" }],
+  creator: "Silk Mart",
+  publisher: "Silk Mart",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: '/logo.png' },
+      { url: '/logo.png', sizes: '32x32', type: 'image/png' },
+    ],
+    shortcut: '/logo.png',
+    apple: [
+      { url: '/logo.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_BD",
+    url: "https://silkmartbd.com",
+    title: "Silk Mart | Premium E-Commerce Store",
+    description: "Discover the best fashion, electronics, and lifestyle products at Silk Mart. Fast delivery and best prices nationwide.",
+    siteName: "Silk Mart",
+    images: [{
+      url: "/logo.png",
+      width: 800,
+      height: 600,
+      alt: "Silk Mart Logo"
+    }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Silk Mart | Premium E-Commerce Store",
+    description: "Discover the best fashion, electronics, and lifestyle products at Silk Mart.",
+    images: ["/logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
