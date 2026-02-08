@@ -176,11 +176,12 @@ export async function analyzeProductForSuggestions(productName: string, storeNam
     {
       "productType": "Specific type (e.g., Running Shoe, Matte Lipstick)",
       "suggestedCategory": "Best matching category",
-      "priceRange": { "min": number, "max": number } (Realistic price in BDT),
+      "priceRange": { "min": number, "max": number },
       "suggestedVariants": { "sizes": ["size1", "size2"], "colors": ["color1", "color2"] },
       "keywords": ["tag1", "tag2", "tag3", "tag4", "tag5"],
       "confidence": "high"
     }
+    CRITICAL: For "priceRange", the difference between max and min MUST NOT exceed 3000 BDT.
     Return ONLY valid JSON.`
     
     // Using a more creative temperature for better analysis
