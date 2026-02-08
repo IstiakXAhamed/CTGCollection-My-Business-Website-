@@ -1,13 +1,14 @@
 // Client-side PDF generation utility using html2canvas + jspdf
 // This works on Vercel serverless and keeps the beautiful HTML templates
 
-import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
-
 export async function generatePDFFromHTML(
   html: string,
   filename: string = 'receipt.pdf'
 ): Promise<Blob> {
+  // Dynamic imports to reduce bundle size
+  const html2canvas = (await import('html2canvas')).default
+  const { jsPDF } = await import('jspdf')
+
   // Create a temporary container
   const container = document.createElement('div')
   container.innerHTML = html

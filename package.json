@@ -9,6 +9,11 @@
     "lint": "next lint",
     "postinstall": "prisma generate"
   },
+  "browserslist": [
+    "defaults",
+    "not IE 11",
+    "maintained node versions"
+  ],
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
     "@hookform/resolvers": "^3.9.0",
