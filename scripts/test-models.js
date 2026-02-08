@@ -1,40 +1,47 @@
+const FALLBACK_MODELS = [
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+  { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite' },
+  { id: 'gemini-3-flash', name: 'Gemini 3 Flash' },
+  { id: 'gemma-3-27b-it', name: 'Gemma 3 27B' },
+  { id: 'gemma-3-12b-it', name: 'Gemma 3 12B' },
+  { id: 'gemma-3-4b-it', name: 'Gemma 3 4B' },
+  { id: 'gemma-3-1b-it', name: 'Gemma 3 1B' },
+  { id: 'gemma-3-2b-it', name: 'Gemma 3 2B' },
+  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash' },
+];
 
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-require('dotenv').config({ path: '.env' });
-
-async function listModels() {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
+async function testModels() {
+  const apiKey = process.env.GOOGLE_AI_API_KEY; // Ensure this is set or replace manually for test
   if (!apiKey) {
-    console.error("No API key found in .env");
+    console.error('API Key not found in env');
     return;
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  
-  console.log("Checking available models...");
-  
-  try {
-      // There isn't a direct "listModels" in the simple usage, but we can try to instantiate models and run a basic prompt.
-      // Actually, the API supports list models via REST, but the SDK hiding it?
-      // Let's just try to generate content with the suspect models.
-      
-      const modelsToTest = ["gemini-2.5-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-pro"];
-      
-      for (const modelName of modelsToTest) {
-          console.log(`\nTesting model: ${modelName}`);
-          try {
-            const model = genAI.getGenerativeModel({ model: modelName });
-            const result = await model.generateContent("Hello");
-            const response = await result.response;
-            console.log(`✅ ${modelName} is WORKING. Response: ${response.text()}`);
-          } catch (error) {
-            console.log(`❌ ${modelName} FAILED. Error: ${error.message}`);
-          }
+  console.log('🧪 Testing AI Model Availability...');
+
+  for (const model of FALLBACK_MODELS) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model.id}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: "Hello" }] }],
+          generationConfig: { maxOutputTokens: 10 }
+        })
+      });
+
+      if (response.ok) {
+        console.log(`✅ [${model.name}] -> AVAILABLE (200 OK)`);
+      } else {
+        console.log(`❌ [${model.name}] -> FAILED (${response.status} ${response.statusText})`);
       }
-      
-  } catch (error) {
-    console.error("Global error:", error);
+    } catch (e) {
+      console.log(`⚠️ [${model.name}] -> ERROR (${e.message})`);
+    }
   }
 }
 
-listModels();
+// Mocking fetch for node environment if needed, but assuming simple node
+// Actually, fetch is global in Node 18+.
+testModels();

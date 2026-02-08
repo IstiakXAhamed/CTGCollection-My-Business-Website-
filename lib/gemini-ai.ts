@@ -5,27 +5,35 @@
  * All AI calls go through this library for consistency and control.
  */
 
-const GEMINI_MODELS = {
-  primary: {
-    // Using v1beta as it generally has better support for newer/experimental model names
-    url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-    name: 'Gemini 2.5 Flash'
-  },
-  secondary: {
-    url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-    name: 'Gemini 1.5 Flash'
-  },
-  fallback: {
-    url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
-    name: 'Gemini Pro'
-  }
-}
+const FALLBACK_MODELS = [
+  // 1. Primary: Gemini 2.5 Flash (User's choice)
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+  
+  // 2. Flash Lite: Lighter, potentially separate quota
+  { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite' },
+  
+  // 3. Next Gen: Gemini 3 Flash
+  { id: 'gemini-3-flash', name: 'Gemini 3 Flash' },
+  
+  // 4. Gemma 3 Models (Open Models hosted on API) - Assuming 'it' (instruction tuned) variants for chat
+  { id: 'gemma-3-27b-it', name: 'Gemma 3 27B' },
+  { id: 'gemma-3-12b-it', name: 'Gemma 3 12B' },
+  { id: 'gemma-3-4b-it', name: 'Gemma 3 4B' },
+  { id: 'gemma-3-1b-it', name: 'Gemma 3 1B' },
+  { id: 'gemma-3-2b-it', name: 'Gemma 3 2B' },
+
+  // 5. Reliable Fallbacks (Known stable models)
+  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash' },
+  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' },
+  { id: 'gemini-pro', name: 'Gemini Pro (Legacy)' }
+]
 
 export interface AIResponse {
   success: boolean
   result?: any
   error?: string
   fallback?: boolean
+  modelUsed?: string
 }
 
 // ============ Core AI Function ============
@@ -41,50 +49,64 @@ export async function callGeminiAI(prompt: string, options?: {
     throw new Error('GOOGLE_AI_API_KEY not configured')
   }
 
-  const makeRequest = async (url: string, modelName: string) => {
-    /* console.log(`[Gemini] Attempting with ${modelName}...`) */
-    const response = await fetch(`${url}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: options?.temperature ?? 0.7,
-          maxOutputTokens: options?.maxTokens ?? 2048,
-        }
+  let lastError: any = null
+
+  // Loop through all models in priority order
+  for (const model of FALLBACK_MODELS) {
+    try {
+      /* console.log(`[Gemini] Attempting with ${model.name}...`) */
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model.id}:generateContent`
+      
+      const response = await fetch(`${url}?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: options?.temperature ?? 0.7,
+            maxOutputTokens: options?.maxTokens ?? 2048,
+          }
+        })
       })
-    })
-    return response
-  }
 
-  try {
-    // 1. Try Primary Model (Gemini 2.5 as requested by user)
-    let response = await makeRequest(GEMINI_MODELS.primary.url, GEMINI_MODELS.primary.name)
+      if (response.ok) {
+        // Success! Return immediately
+        const data = await response.json()
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+        if (!text) throw new Error('Empty response from AI')
+        
+        // Log successful fallback if not primary
+        if (model.id !== FALLBACK_MODELS[0].id) {
+          console.log(`✅ AI Success using fallback model: ${model.name}`)
+        }
+        return text
+      }
 
-    // 2. Fallback if Primary fails (404, 400, 429)
-    if (!response.ok) {
-      console.warn(`⚠️ ${GEMINI_MODELS.primary.name} failed (${response.status}). Trying secondary ${GEMINI_MODELS.secondary.name}...`)
-      response = await makeRequest(GEMINI_MODELS.secondary.url, GEMINI_MODELS.secondary.name)
-    }
-    
-    // 3. Last resort fallback
-    if (!response.ok) {
-      console.warn(`⚠️ ${GEMINI_MODELS.secondary.name} failed (${response.status}). Trying legacy fallback...`)
-      response = await makeRequest(GEMINI_MODELS.fallback.url, GEMINI_MODELS.fallback.name)
-    }
-
-    if (!response.ok) {
+      // Handle Errors
+      const status = response.status
       const errorText = await response.text()
-      throw new Error(`AI Request Failed: ${response.status} ${response.statusText} - ${errorText}`)
+      
+      // If 429 (Rate Limit), 503 (Overload), or 404/400 (Model issue), we continue to next model
+      if (status === 429 || status === 503) {
+        console.warn(`⚠️ ${model.name} hit rate limit/overload (${status}). Switching to next model...`)
+      } else if (status === 404 || status === 400) {
+        console.warn(`⚠️ ${model.name} not found/supported (${status}). Switching to next model...`)
+      } else {
+        console.error(`❌ ${model.name} failed with ${status}: ${errorText}`)
+      }
+      
+      lastError = new Error(`[${model.name}] ${status} ${response.statusText}`)
+
+    } catch (error: any) {
+      // Network errors etc
+      console.warn(`⚠️ Error calling ${model.name}: ${error.message}`)
+      lastError = error
     }
-
-    const data = await response.json()
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
-
-  } catch (error: any) {
-    console.error('[Gemini] Critical Error:', error.message)
-    throw error
   }
+
+  // If we get here, ALL models failed
+  console.error('❌ All AI models failed. Please check API Key or Quota.')
+  throw lastError || new Error('All AI models failed')
 }
 
 // ============ Helper for JSON Parsing ============

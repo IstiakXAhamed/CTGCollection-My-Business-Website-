@@ -85,6 +85,11 @@ export default function InventoryForecastPage() {
       } else {
         const err = await res.json()
         console.error(`Forecast failed for ${product.name}:`, err)
+        toast({
+          title: "Forecast Failed",
+          description: err.error || "AI service is currently unavailable. Please try again later.",
+          variant: "destructive"
+        })
       }
       return false
     } catch (error) {
