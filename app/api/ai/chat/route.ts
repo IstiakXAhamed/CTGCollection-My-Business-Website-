@@ -1,21 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateChatResponse } from '@/lib/gemini-ai'
 import { prisma } from '@/lib/prisma'
+import { verifyAuth } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
     let { message, context } = await request.json()
     
+    // 1. Identify User
+    const user = await verifyAuth(request)
+    
     // Initialize context data object
     const contextData: any = { 
        orderStatus: context || '', 
-       previousMessages: [] 
+       previousMessages: [],
+       user: user ? { name: user.name, id: user.id } : null
     }
     
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
-
 
     // Fetch site settings for contact info
     let settings = null
@@ -33,75 +37,100 @@ export async function POST(request: NextRequest) {
     // 2. ENHANCED CONTEXT GATHERING
     // ==========================================
 
-    // A. Universal Product Search (Run on almost every message)
+    // A. Fetch Past Orders (For Re-Order Feature)
+    if (user) {
+      try {
+        const pastOrders = await prisma.order.findMany({
+          where: { userId: user.id },
+          take: 3,
+          orderBy: { createdAt: 'desc' },
+          include: { items: { include: { product: { select: { name: true, slug: true } } } } }
+        })
+        if (pastOrders.length > 0) {
+          contextData.pastOrders = pastOrders.map(o => 
+            `Order #${o.orderNumber}: ${o.items.map(i => i.product.name).join(', ')} (Status: ${o.status})`
+          ).join('\n')
+        }
+      } catch (e) { console.error("Past order fetch error", e) }
+    }
+
+    // B. Universal Product Search & Best Offers
     // Ignore short greetings to save DB calls
     const isGreeting = /^(hi|hello|hey|greetings|good morning|good evening)$/i.test(message.trim());
-    
+    const isOfferRequest = /(offer|sale|deal|discount|promo|code|coupon)/i.test(message);
+
     if (!isGreeting && message.length > 3) {
       try {
-        // Extract potential keywords (simple approach: remove common stopwords)
-        const stopWords = ['the', 'is', 'a', 'an', 'and', 'or', 'do', 'you', 'have', 'i', 'need', 'want', 'looking', 'for', 'show', 'me', 'price', 'of', 'what', 'are'];
-        const keywords = message.split(' ').filter((w: string) => !stopWords.includes(w.toLowerCase()) && w.length > 2).slice(0, 3).join(' | ');
+        let finalProducts: any[] = [];
 
-        if (keywords) {
-          // const products = await prisma.product.findMany({ // TS Error workarounds
-          const products: any[] = await prisma.product.findMany({
-            where: {
-              OR: [
-                { name: { contains: message, mode: 'insensitive' } },
-                // { name: { search: keywords } }, // Removed search to fix TS error
-                { description: { contains: keywords.split(' | ')[0], mode: 'insensitive' } },
-                { category: { name: { contains: keywords.split(' | ')[0], mode: 'insensitive' } } }
-              ],
-              isActive: true
-            },
-            take: 5,
-            select: { 
-                name: true, 
-                basePrice: true, 
-                salePrice: true, 
-                slug: true, 
-                variants: { select: { stock: true } } // Fetch variants to sum stock
-            }
-          });
+        // 1. BEST OFFER SEARCH (Specific Logic)
+        if (isOfferRequest) {
+           const onSaleProducts = await prisma.product.findMany({
+             where: { 
+               isActive: true,
+               salePrice: { not: null } // Only fetch items on sale
+             },
+             take: 20, 
+             select: { 
+                 name: true, basePrice: true, salePrice: true, slug: true,
+                 variants: { select: { stock: true } }
+             }
+           });
 
-          // If standard search fails, try a broader search on the first keyword
-          let finalProducts = products;
-          if (finalProducts.length === 0) {
-             // const broadSearch = await prisma.product.findMany({
-             const broadSearch: any[] = await prisma.product.findMany({
-                where: {
-                   name: { contains: keywords.split(' | ')[0], mode: 'insensitive' },
-                   isActive: true
-                },
-                take: 3,
-                select: { 
-                    name: true, 
-                    basePrice: true, 
-                    salePrice: true, 
-                    slug: true,
-                    variants: { select: { stock: true } }
-                }
+           finalProducts = onSaleProducts
+             .map((p: any) => {
+               const discount = p.salePrice ? Math.round(((p.basePrice - p.salePrice) / p.basePrice) * 100) : 0;
+               return { ...p, discount };
              })
-             finalProducts = broadSearch;
-          }
+             .filter((p: any) => p.discount >= 15)
+             .sort((a: any, b: any) => b.discount - a.discount)
+             .slice(0, 5);
+        } 
+        
+        // 2. STANDARD KEYWORD SEARCH 
+        if (finalProducts.length === 0) {
+           const stopWords = ['the', 'is', 'a', 'an', 'and', 'or', 'do', 'you', 'have', 'i', 'need', 'want', 'looking', 'for', 'show', 'me', 'price', 'of', 'what', 'are', 'best', 'offer'];
+           const keywords = message.split(' ').filter((w: string) => !stopWords.includes(w.toLowerCase()) && w.length > 2).slice(0, 3).join(' | ');
 
-          if (finalProducts.length > 0) {
-            contextData.foundProducts = finalProducts.map((p: any) => {
-              const totalStock = p.variants.reduce((sum: number, v: any) => sum + v.stock, 0);
-              return `- ${p.name}: ৳${p.salePrice || p.basePrice} ${p.salePrice ? '(On Sale!)' : ''} [Stock: ${totalStock}] [Link: /product/${p.slug}]`
-            }).join('\n');
-          }
+           if (keywords) {
+             finalProducts = await prisma.product.findMany({
+               where: {
+                 OR: [
+                   { name: { contains: message, mode: 'insensitive' } },
+                   { description: { contains: keywords.split(' | ')[0], mode: 'insensitive' } },
+                   { category: { name: { contains: keywords.split(' | ')[0], mode: 'insensitive' } } }
+                 ],
+                 isActive: true
+               },
+               take: 5,
+               select: { 
+                   name: true, basePrice: true, salePrice: true, slug: true,
+                   variants: { select: { stock: true } }
+               }
+             });
+           }
+        }
+
+        if (finalProducts.length > 0) {
+           contextData.foundProducts = finalProducts.map((p: any) => {
+             const totalStock = p.variants ? p.variants.reduce((sum: number, v: any) => sum + v.stock, 0) : 0;
+             const discount = p.salePrice ? Math.round(((p.basePrice - p.salePrice) / p.basePrice) * 100) : 0;
+             const priceDisplay = p.salePrice ? `৳${p.salePrice} (Was ৳${p.basePrice})` : `৳${p.basePrice}`;
+             const offerBadge = discount > 0 ? `🔥 ${discount}% OFF!` : '';
+             const stockUrgency = totalStock > 0 && totalStock < 5 ? ` [LOW STOCK: Only ${totalStock} left!]` : '';
+             
+             return `- ${p.name}: ${priceDisplay} ${offerBadge}${stockUrgency} [Stock: ${totalStock}] [Link: /product/${p.slug}]`
+           }).join('\n');
         }
       } catch (e) {
         console.log("Product search error", e);
       }
     }
 
-    // B. Fetch Categories (Always helpful context)
+    // C. Fetch Categories
     try {
       const categories = await prisma.category.findMany({
-        where: { isActive: true, parentId: null }, // Parent categories only to save tokens
+        where: { isActive: true, parentId: null },
         select: { name: true, slug: true },
         take: 10
       });
@@ -110,14 +139,14 @@ export async function POST(request: NextRequest) {
       console.log("Category fetch error", e);
     }
 
-    // C. Store Policies (Hardcoded or fetched)
+    // D. Store Policies
     contextData.storePolicies = `
     - Shipping: Free shipping on orders over ৳2000. Nationwide delivery (2-3 days).
     - Returns: 7-day return policy for unused items.
     - Payment: Cash on Delivery (COD) and Online Payment (Bkash/Nagad/Card).
     `;
 
-    // D. Active Coupons
+    // E. Active Coupons
     try {
       const coupons = await prisma.coupon.findMany({
         where: { isActive: true, validUntil: { gt: new Date() } },
@@ -133,7 +162,7 @@ export async function POST(request: NextRequest) {
         console.log("Coupon fetch error", e);
     }
 
-    // 3. Order Tracking Intent (Existing logic optimized)
+    // 3. Order Tracking Intent
     const orderMatch = message.match(/(?:order|track|tracking)\s*(?:#|no\.?|number)?\s*([a-zA-Z0-9-]+)/i);
     if (orderMatch && orderMatch[1]) {
        const orderId = orderMatch[1];
@@ -155,8 +184,6 @@ export async function POST(request: NextRequest) {
        }
     }
     
-
-
     const aiResponse = await generateChatResponse(message, contextData, settings)
 
     if (aiResponse.success) {
@@ -196,49 +223,25 @@ export async function POST(request: NextRequest) {
         } catch (e) { console.error("Category fetch error:", e); }
       }
 
-      // C. Check for [MISSING:term] (Admin Notification)
-      const missingMatch = finalResponse.match(/\[MISSING:(.+?)\]/);
-      if (missingMatch && missingMatch[1]) {
-        const term = missingMatch[1];
-        finalResponse = finalResponse.replace(missingMatch[0], '').trim();
-        
-        try {
-          // 1. Find an Admin to notify (First available admin)
-          const admin = await prisma.user.findFirst({
-            where: { role: 'admin' },
-            select: { id: true }
-          });
+      // C. Check for [MISSING:term], [ACTION:HANDOFF], [URGENT_COMPLAINT]
+      if (finalResponse.includes('[MISSING:')) {
+         const mMatch = finalResponse.match(/\[MISSING:(.+?)\]/);
+         if (mMatch) {
+            const term = mMatch[1];
+            finalResponse = finalResponse.replace(mMatch[0], '').trim();
+            await notifyAdmin('stock_alert', 'Missing Product Request', `A customer asked for "${term}" but we don't have it in stock.`, `Missing Stock Request: ${term}`);
+         }
+      }
 
-          if (admin) {
-            // 2. Create Notification
-            await prisma.notification.create({
-              data: {
-                userId: admin.id,
-                type: 'stock_alert',
-                title: 'Missing Product Request',
-                message: `A customer asked for "${term}" but we don't have it in stock.`,
-                link: '/admin/messages' // Redirect to messages
-              }
-            });
+      if (finalResponse.includes('[ACTION:HANDOFF]')) {
+         finalResponse = finalResponse.replace('[ACTION:HANDOFF]', '').trim();
+         action = { type: 'open_live_chat', payload: { context: message } };
+         await notifyAdmin('urgent', 'Human Handoff Requested', `A customer requested to talk to a human agent. Message: "${message}"`, `Handoff Request: ${user?.email || 'Guest'}`);
+      }
 
-            // 3. Create Contact Message (for detailed record)
-            await prisma.contactMessage.create({
-              data: {
-                name: 'AI Shopping Assistant',
-                email: 'ai-bot@system.local',
-                subject: `Missing Stock Request: ${term}`,
-                message: `Detailed Report:\n\nCustomer asked for: "${term}"\n\nContext: Item not found in current inventory.\nAction Required: Check supplier availability or update inventory if available.\n\nTimestamp: ${new Date().toLocaleString()}`,
-                isRead: false
-              }
-            });
-
-            console.log(`✅ Admin Notified & Message Created: Customer asked for "${term}"`);
-          } else {
-            console.warn("⚠️ No Admin found to notify about missing item.");
-          }
-        } catch (e) {
-          console.error("Failed to create admin notification:", e);
-        }
+      if (finalResponse.includes('[URGENT_COMPLAINT]')) {
+         finalResponse = finalResponse.replace('[URGENT_COMPLAINT]', '').trim();
+         await notifyAdmin('urgent', 'Urgent Complaint Logged', `A customer logged a complaint: "${message}"`, `[URGENT] Customer Complaint: ${user?.email || 'Guest'}`);
       }
 
       return NextResponse.json({ 
@@ -252,4 +255,25 @@ export async function POST(request: NextRequest) {
     console.error('Chat API Fatal Error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
+}
+
+// Helper for Admin Notifications
+async function notifyAdmin(type: string, title: string, message: string, subject: string) {
+  try {
+    const admin = await prisma.user.findFirst({ where: { role: 'admin' }, select: { id: true } });
+    if (admin) {
+      await prisma.notification.create({
+        data: { userId: admin.id, type, title, message, link: '/admin/messages' }
+      });
+      await prisma.contactMessage.create({
+        data: {
+          name: 'AI Assistant Escalation',
+          email: 'ai-bot@system.local',
+          subject: subject,
+          message: `Summary: ${message}\n\nTime: ${new Date().toLocaleString()}`,
+          isRead: false
+        }
+      });
+    }
+  } catch (e) { console.error("Notify admin failed", e); }
 }

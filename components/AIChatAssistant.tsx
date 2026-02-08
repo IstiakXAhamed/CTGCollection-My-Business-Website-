@@ -64,7 +64,8 @@ export function AIChatAssistant() {
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input })
+        body: JSON.stringify({ message: input }),
+        credentials: 'include' // Important for Re-Order/Auth
       })
 
       if (res.ok) {
@@ -74,8 +75,14 @@ export function AIChatAssistant() {
           role: 'assistant',
           content: data.response,
           timestamp: Date.now(),
-          action: data.action // Capture the action from API
+          action: data.action 
         }
+
+        // Trigger Handoff UI if requested by AI
+        if (data.action?.type === 'open_live_chat') {
+           setTimeout(() => openLiveChat(), 3000); 
+        }
+
         setMessages(prev => [...prev, aiMsg])
       } else {
          const errorData = await res.json().catch(() => ({}))

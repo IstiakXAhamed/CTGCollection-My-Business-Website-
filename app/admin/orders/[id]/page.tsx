@@ -349,8 +349,7 @@ export default function AdminOrderDetailPage() {
           {/* AI Fraud Analysis Card */}
           <AIFraudAnalysis order={order} />
 
-          {/* AI Fraud Analysis Card */}
-          <AIFraudAnalysis order={order} />
+
 
           {/* Customer Info */}
           <Card>
