@@ -5,7 +5,16 @@
  * All AI calls go through this library for consistency and control.
  */
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent'
+const GEMINI_MODELS = {
+  primary: {
+    url: 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent',
+    name: 'Gemini 2.5 Flash'
+  },
+  fallback: {
+    url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+    name: 'Gemini 1.5 Flash'
+  }
+}
 
 export interface AIResponse {
   success: boolean
@@ -20,33 +29,51 @@ export async function callGeminiAI(prompt: string, options?: {
   temperature?: number
   maxTokens?: number
 }): Promise<string> {
-  const apiKey = process.env.GOOGLE_AI_API_KEY?.trim()
-  console.log('[Gemini] API Call Start. Key available:', !!apiKey)
+  const apiKey = process.env.GOOGLE_AI_API_KEY ? process.env.GOOGLE_AI_API_KEY.trim() : null
   
   if (!apiKey) {
     console.error('❌ GOOGLE_AI_API_KEY is missing in environment variables!')
     throw new Error('GOOGLE_AI_API_KEY not configured')
   }
-  console.log('✅ API Key found (length):', apiKey.length)
 
-  const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: options?.temperature ?? 0.7,
-        maxOutputTokens: options?.maxTokens ?? 2048,
-      }
+  const makeRequest = async (url: string, modelName: string) => {
+    /* console.log(`[Gemini] Attempting with ${modelName}...`) */
+    const response = await fetch(`${url}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: options?.temperature ?? 0.7,
+          maxOutputTokens: options?.maxTokens ?? 2048,
+        }
+      })
     })
-  })
-
-  if (!response.ok) {
-    throw new Error('AI request failed')
+    return response
   }
 
-  const data = await response.json()
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+  try {
+    // 1. Try Primary Model (Gemini 2.5)
+    let response = await makeRequest(GEMINI_MODELS.primary.url, GEMINI_MODELS.primary.name)
+
+    // 2. Fallback if Primary fails (404 Not Found, 400 Bad Request, 429 Too Many Requests)
+    if (!response.ok) {
+      console.warn(`⚠️ ${GEMINI_MODELS.primary.name} failed (${response.status}). Switching to fallback...`)
+      response = await makeRequest(GEMINI_MODELS.fallback.url, GEMINI_MODELS.fallback.name)
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`AI Request Failed: ${response.status} ${response.statusText} - ${errorText}`)
+    }
+
+    const data = await response.json()
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+
+  } catch (error: any) {
+    console.error('[Gemini] Critical Error:', error.message)
+    throw error
+  }
 }
 
 // ============ Helper for JSON Parsing ============
@@ -162,23 +189,38 @@ export async function suggestChatReplies(customerMessage: string): Promise<AIRes
 
 export async function analyzeReview(reviewText: string, rating: number): Promise<AIResponse> {
   try {
-    const prompt = `Analyze this product review:
+    console.log('[Gemini] Analyzing Review:', reviewText.substring(0, 50) + '...')
+    const prompt = `Analyze this customer review for "CTG Collection":
 Text: "${reviewText}"
 Rating: ${rating}/5
 
-Return JSON: {
-  "sentiment": "positive/negative/neutral",
-  "isSpam": true/false,
-  "isInappropriate": true/false,
-  "keyPoints": ["..."],
-  "suggestedResponse": "...",
-  "qualityScore": 1-10
-}
+Task: Provide a JSON analysis with:
+1. sentiment: "positive", "negative", "neutral"
+2. isSpam: boolean (random chars, ads, irrelevant)
+3. isInappropriate: boolean (offensive, hate speech)
+4. keyPoints: Array of strings (main topics mentioned)
+5. suggestedResponse: A polite, professional reply (1-2 sentences)
+6. qualityScore: 1-10 (usefulness of review)
+
 Return ONLY valid JSON.`
-    const result = await callGeminiAI(prompt, { temperature: 0.2 })
-    const json = parseAIJSON(result, {})
+
+    const result = await callGeminiAI(prompt, { temperature: 0.1, maxTokens: 1024 })
+    // Ensure result isn't empty
+    if (!result) throw new Error('Empty response from AI')
+    
+    const json = parseAIJSON(result, {
+      sentiment: 'neutral',
+      isSpam: false,
+      isInappropriate: false,
+      keyPoints: [],
+      suggestedResponse: 'Thank you for your feedback.',
+      qualityScore: 5
+    })
+    
+    console.log('[Gemini] Analysis Result:', JSON.stringify(json))
     return { success: true, result: json }
   } catch (e: any) {
+    console.error('[Gemini] Review Analysis Failed:', e)
     return { success: false, error: e.message }
   }
 }
@@ -486,34 +528,49 @@ export async function generateMarketingContent(
 ): Promise<AIResponse> {
   try {
     const lang = options?.language || 'en'
-    const langName = lang === 'bn' ? 'Bengali (বাংলা)' : 'English'
-    const emoji = options?.includeEmoji !== false ? 'Include relevant emojis.' : 'No emojis.'
+    const tone = options?.tone || 'professional'
+    const langName = lang === 'bn' ? 'Bengali (Standard & Elegant)' : 'English'
+    const emoji = options?.includeEmoji !== false ? 'Include relevant, eye-catching emojis.' : 'No emojis.'
     
     const typeConfigs: Record<string, { format: string, length: string }> = {
-      facebook_post: { format: 'Facebook post with hook, body, CTA', length: '150-200 words' },
-      instagram_caption: { format: 'Instagram caption with hook and hashtags', length: '50-100 words + 10 hashtags' },
-      email_campaign: { format: 'Email with subject, preheader, body, CTA', length: '200-250 words' },
-      ad_copy: { format: 'Ad headline + description', length: 'Headline 10 words max, description 30 words max' },
-      sms: { format: 'SMS promotional text', length: 'Max 160 characters' }
+      facebook_post: { format: 'Facebook post with attention-grabbing hook, engaging body, benefits list, and strong CTA', length: 'Short-Medium (150-250 words)' },
+      instagram_caption: { format: 'Instagram caption with hook, emotional storytelling, value proposition', length: 'Medium (100-150 words) + 15 relevant hashtags' },
+      email_campaign: { format: 'High-conversion Email with catchy subject, preview text, personal opening, persuasive body, and clear CTA', length: 'Long (300-400 words)' },
+      ad_copy: { format: 'PPC/Social Ad: Headline (Punchy), Description (Benefit-driven)', length: 'Headline 15 words max, description 50 words max' },
+      sms: { format: 'Urgent and clear SMS promotional text', length: 'Max 160 characters' }
     }
     
     const config = typeConfigs[type]
     
-    const prompt = `Create ${type.replace(/_/g, ' ')} for CTG Collection:
+    const prompt = `Act as an expert Digital Marketer and Copywriter for "CTG Collection", a premium fashion and lifestyle brand in Bangladesh.
+    
+    Task: Create high-quality, engaging ${type.replace(/_/g, ' ')} content.
+    Topic/Product: ${productOrCampaign}
+    
+    Target Audience: Fashion-conscious Bangladeshi customers.
+    Tone: ${tone} (Make it sound authentic and human, not robotic).
+    Language: ${langName}
+    
+    Format Requirements:
+    ${config.format}
+    Target Length: ${config.length}
+    ${emoji}
+    
+    CRITICAL LANGUAGE INSTRUCTION:
+    If Language is Bengali, the ENTIRE output MUST be in proper Bengali script (Bangla). Use a natural, flowing style suitable for the Bangladeshi audience.
+    
+    Return JSON with fields:
+    {
+      "subject": "Email subject or Post title",
+      "headline": "Ad headline or Main hook",
+      "body": "The main content body (formatted with newlines)",
+      "hashtags": ["tag1", "tag2"...],
+      "cta": "Call to Action"
+    }
+    
+    Return ONLY valid JSON.`
 
-Topic/Product: ${productOrCampaign}
-Format: ${config.format}
-Length: ${lang === 'bn' ? 'Detailed and engaging (150-200 words)' : config.length}
-Language: ${langName}
-
-CRITICAL INSTRUCTION: Read the language requirement carefully. 
-If Language is Bengali, the ENTIRE output MUST be in Bengali script (Bangla). Do NOT use English alphabet.
-
-${emoji}
-
-Return JSON with appropriate fields for ${type}. Return ONLY valid JSON.`
-
-    const result = await callGeminiAI(prompt)
+    const result = await callGeminiAI(prompt, { maxTokens: 4096, temperature: 0.7 })
     const json = parseAIJSON(result, {})
     return { success: true, result: json }
   } catch (e: any) {
@@ -526,7 +583,7 @@ Return JSON with appropriate fields for ${type}. Return ONLY valid JSON.`
       body: `Check out ${productOrCampaign} at CTG Collection. We have amazing deals tailored just for you. Visit our store today to explore the collection.`,
       text: `Check out ${productOrCampaign} at CTG Collection! Shop now.`,
       cta: 'Shop Now',
-      hashtags: '#CTGCollection #Fashion #Style'
+      hashtags: ['#CTGCollection', '#Fashion']
     }
     return { success: true, result: fallbackContent, error: e.message }
   }
