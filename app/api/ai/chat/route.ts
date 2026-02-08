@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
         select: { name: true, slug: true },
         take: 10
       });
-      contextData.categories = categories.map((c: any) => `- ${c.name} (/category/${c.slug})`).join('\n');
+      contextData.categories = categories.map((c: any) => `- ${c.name} (/shop?category=${c.slug})`).join('\n');
     } catch (e) {
       console.log("Category fetch error", e);
     }

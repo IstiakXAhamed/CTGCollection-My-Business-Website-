@@ -206,7 +206,7 @@ export function AIChatAssistant() {
                               </div>
                            </div>
                          )}
-                         <Button size="sm" className="w-full mt-1 text-xs h-7 bg-indigo-600 hover:bg-indigo-700" onClick={() => window.location.href = `/category/${msg.action?.payload.slug}`}>
+                         <Button size="sm" className="w-full mt-1 text-xs h-7 bg-indigo-600 hover:bg-indigo-700" onClick={() => window.location.href = `/shop?category=${msg.action?.payload.slug}`}>
                            Browse Collection
                          </Button>
                       </div>

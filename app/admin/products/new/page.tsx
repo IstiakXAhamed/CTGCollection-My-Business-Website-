@@ -13,6 +13,7 @@ import Image from 'next/image'
 import { useToast } from '@/components/ui/use-toast'
 import AIProductAssist from '@/components/AIProductAssist'
 import AdvancedProductForm from '@/components/admin/AdvancedProductForm'
+import VariantManager from '@/components/admin/VariantManager'
 
 // Original "Simple" Form Logic (Inline)
 // ... (Keeping the original simple form mainly as fallback or for "simple" mode users)
@@ -244,6 +245,18 @@ export default function NewProductPage() {
                   <Input type="number" value={formData.salePrice} onChange={e => setFormData({...formData, salePrice: e.target.value})} />
                 </div>
              </CardContent>
+           </Card>
+
+           <Card>
+              <CardHeader><CardTitle>Product Variants</CardTitle></CardHeader>
+              <CardContent>
+                 <VariantManager 
+                    variants={variants} 
+                    onChange={setVariants} 
+                    hasColor={true} // Default to true for simple mode
+                    productName={formData.name}
+                 />
+              </CardContent>
            </Card>
 
            <Card>

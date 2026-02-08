@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
         categoryId,
         sellerId: admin.id, // Set seller to the logged-in user
         basePrice: parseFloat(basePrice),
-        salePrice: salePrice ? parseFloat(salePrice) : null,
+        salePrice: (salePrice !== undefined && salePrice !== null && salePrice !== '') ? parseFloat(salePrice) : null,
         images: JSON.stringify(images),
         isFeatured: isFeatured || false,
         isBestseller: isBestseller || false,

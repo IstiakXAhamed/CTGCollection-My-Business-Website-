@@ -8,11 +8,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ArrowLeft, Plus, X, Upload, Loader2, Sparkles, Wand2 } from 'lucide-react'
+import { ArrowLeft, Plus, X, Upload, Loader2, Sparkles, Wand2, Hash } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useToast } from '@/components/ui/use-toast'
 import AIProductAssist from '@/components/AIProductAssist'
+import VariantManager from './VariantManager'
 
 // Product Types definition
 const PRODUCT_TYPES = [
@@ -22,6 +23,7 @@ const PRODUCT_TYPES = [
   { id: 'fragrance', label: 'Fragrance', sizeLabel: 'Volume', colorLabel: 'Color', hasColor: false },
   { id: 'electronics', label: 'Electronics', sizeLabel: 'Storage/Specs', colorLabel: 'Color', hasColor: true },
   { id: 'general', label: 'General / Other', sizeLabel: 'Option', colorLabel: 'Variant', hasColor: true },
+  { id: 'universal', label: 'Universal (All Options)', sizeLabel: 'Size/Option', colorLabel: 'Color/Variant', hasColor: true },
 ] as const
 
 type ProductType = typeof PRODUCT_TYPES[number]['id']
@@ -189,7 +191,7 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
       const payload = {
         ...formData,
         basePrice: parseFloat(formData.basePrice),
-        salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
+        salePrice: (formData.salePrice !== '' && formData.salePrice !== null) ? parseFloat(formData.salePrice) : null,
         images,
         variants: variants.map(v => ({
           ...v,
@@ -318,71 +320,13 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
 
       {/* 2. Dynamic Variants */}
       <Card className="border-l-4 border-l-purple-500 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex justify-between items-center">
-            <span>Variants ({typeConfig.label})</span>
-            <Button type="button" onClick={addVariant} size="sm" variant="outline">
-              <Plus className="w-4 h-4 mr-2" /> Add Option
-            </Button>
-          </CardTitle>
-          <CardDescription>
-            Manage availablity. 
-            <strong> {typeConfig.sizeLabel}</strong> corresponds to the 'Size' column in DB.
-            {typeConfig.hasColor && <strong> {typeConfig.colorLabel}</strong>} corresponds to 'Color'.
-          </CardDescription>
-        </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-             {variants.length === 0 && (
-                <div className="text-center p-8 bg-slate-50 rounded-lg text-muted-foreground">
-                  No variants added. Click "Add Option" to start.
-                </div>
-             )}
-             
-             {variants.map((variant, index) => (
-                <div key={index} className="flex flex-wrap gap-3 items-end p-3 bg-slate-50 border rounded-lg">
-                  <div className="flex-1 min-w-[120px]">
-                    <Label className="text-xs text-muted-foreground">{typeConfig.sizeLabel}</Label>
-                    <Input 
-                      placeholder={typeConfig.sizeLabel}
-                      value={variant.size} 
-                      onChange={e => updateVariant(index, 'size', e.target.value)} 
-                    />
-                  </div>
-                  
-                  {typeConfig.hasColor && (
-                    <div className="flex-1 min-w-[120px]">
-                       <Label className="text-xs text-muted-foreground">{typeConfig.colorLabel}</Label>
-                       <Input 
-                        placeholder={typeConfig.colorLabel}
-                        value={variant.color} 
-                        onChange={e => updateVariant(index, 'color', e.target.value)} 
-                      />
-                    </div>
-                  )}
-
-                  <div className="w-[100px]">
-                    <Label className="text-xs text-muted-foreground">Stock</Label>
-                    <Input 
-                      type="number" 
-                      placeholder="0"
-                      value={variant.stock} 
-                      onChange={e => updateVariant(index, 'stock', e.target.value)} 
-                    />
-                  </div>
-
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="icon" 
-                    className="text-red-500"
-                    onClick={() => removeVariant(index)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-             ))}
-          </div>
+           <VariantManager 
+              variants={variants} 
+              onChange={setVariants} 
+              hasColor={typeConfig.hasColor}
+              productName={formData.name}
+           />
         </CardContent>
       </Card>
 

@@ -12,6 +12,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useToast } from '@/components/ui/use-toast'
 import AdvancedProductForm from '@/components/admin/AdvancedProductForm'
+import VariantManager from '@/components/admin/VariantManager'
 import AIProductAssist from '@/components/AIProductAssist'
 
 type Variant = {
@@ -313,19 +314,13 @@ export default function EditProductPage() {
                  </div>
                </div>
                
-               {/* Simple Variant Editor */}
-               <div className="space-y-2">
-                  <Label>Variants</Label>
-                  {variants.map((v, i) => (
-                    <div key={i} className="flex gap-2">
-                       <Input placeholder="Size" value={v.size} onChange={e => updateVariant(i, 'size', e.target.value)} className="w-20" />
-                       <Input placeholder="Color" value={v.color} onChange={e => updateVariant(i, 'color', e.target.value)} className="w-24" />
-                       <Input placeholder="Stock" type="number" value={v.stock} onChange={e => updateVariant(i, 'stock', parseInt(e.target.value))} className="w-24" />
-                       <Button type="button" variant="ghost" size="icon" onClick={() => removeVariant(i)}><X className="w-4 h-4"/></Button>
-                    </div>
-                  ))}
-                  <Button type="button" variant="outline" size="sm" onClick={addVariant}><Plus className="w-4 h-4 mr-2"/> Add Variant</Button>
-               </div>
+               {/* Advanced Variant Manager */}
+               <VariantManager 
+                  variants={variants} 
+                  onChange={setVariants} 
+                  hasColor={true}
+                  productName={formData.name}
+               />
             </CardContent>
           </Card>
 

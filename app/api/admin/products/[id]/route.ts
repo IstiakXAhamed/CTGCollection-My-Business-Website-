@@ -77,7 +77,6 @@ export async function PUT(
     if (!admin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
     // Check ownership for sellers
     const { hasAccess } = await checkProductAccess(params.id, admin)
     if (!hasAccess) {
@@ -94,7 +93,12 @@ export async function PUT(
       images,
       isFeatured,
       isBestseller,
-      isActive
+      isActive,
+      variants,
+      productType,
+      metaTitle,
+      metaDescription,
+      metaKeywords
     } = body
 
     const product = await prisma.product.update({
@@ -104,11 +108,24 @@ export async function PUT(
         description,
         categoryId,
         basePrice: parseFloat(basePrice),
-        salePrice: salePrice ? parseFloat(salePrice) : null,
+        salePrice: (salePrice !== undefined && salePrice !== null && salePrice !== '') ? parseFloat(salePrice) : null,
         images: JSON.stringify(images),
         isFeatured,
         isBestseller,
-        isActive
+        isActive,
+        productType: productType || 'clothing',
+        metaTitle,
+        metaDescription,
+        metaKeywords,
+        variants: {
+          deleteMany: {}, // Delete existing variants
+          create: variants?.map((v: any) => ({
+            size: v.size,
+            color: v.color,
+            sku: v.sku || `${params.id.slice(0, 8)}-${v.size}-${v.color}-${Date.now()}`,
+            stock: parseInt(v.stock) || 0
+          })) || []
+        }
       },
       include: {
         category: true,
