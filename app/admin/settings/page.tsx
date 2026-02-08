@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge'
 import { 
   MessageCircle, Gift, Settings, Save, 
   CheckCircle2, Wifi, WifiOff, Clock, Loader2,
-  Store, Truck, CreditCard, RotateCcw
+  Store, Truck, CreditCard, RotateCcw,
+  Smartphone, Monitor, Zap
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Switch } from '@/components/ui/switch'
@@ -42,6 +43,9 @@ interface SiteSettings {
   supportPhone?: string
   spinWheelConfig?: any
   adminProductMode: 'simple' | 'advanced'
+  pwaEnabled: boolean
+  pwaPromptDelay: number
+  pwaShowInstallLink: boolean
 }
 
 export default function AdminSettingsPage() {
@@ -66,7 +70,10 @@ export default function AdminSettingsPage() {
     nagadNumber: '01991523289',
     rocketEnabled: true,
     rocketNumber: '01991523289',
-    adminProductMode: 'simple'
+    adminProductMode: 'simple',
+    pwaEnabled: true,
+    pwaPromptDelay: 30,
+    pwaShowInstallLink: true
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -230,6 +237,75 @@ export default function AdminSettingsPage() {
               <Button onClick={() => saveSettings({ adminProductMode: settings.adminProductMode })} disabled={saving}>
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                 Save General Settings
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* App & PWA Control */}
+        <Card className="border-2 border-amber-100 bg-gradient-to-br from-white to-amber-50/30">
+          <CardHeader className="bg-amber-50/50">
+            <CardTitle className="flex items-center gap-2">
+              <Smartphone className="w-5 h-5 text-amber-600" />
+              App & PWA Control
+            </CardTitle>
+            <CardDescription>Control the Progressive Web App (PWA) installation experience</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6 pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-base">Enable "Add to Home Screen" Popup</Label>
+                <p className="text-sm text-muted-foreground">
+                  Show the automatic popup prompt for customers to install the app.
+                </p>
+              </div>
+              <Switch
+                checked={settings.pwaEnabled}
+                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, pwaEnabled: checked }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between border-t pt-4">
+              <div className="space-y-0.5">
+                <Label className="text-base">Popup Prompt Delay (Seconds)</Label>
+                <p className="text-sm text-muted-foreground">
+                  How many seconds to wait before showing the installation prompt.
+                </p>
+              </div>
+              <div className="w-24">
+                <Input 
+                  type="number" 
+                  value={settings.pwaPromptDelay} 
+                  onChange={(e) => setSettings(prev => ({ ...prev, pwaPromptDelay: parseInt(e.target.value) || 0 }))}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t pt-4">
+              <div className="space-y-0.5">
+                <Label className="text-base font-bold text-amber-800">Show "Install App" Link</Label>
+                <p className="text-sm text-muted-foreground">
+                  Displays a prominent "Install Our App" button for customers.
+                </p>
+              </div>
+              <Switch
+                checked={settings.pwaShowInstallLink}
+                onCheckedChange={(checked) => setSettings(prev => ({ ...prev, pwaShowInstallLink: checked }))}
+              />
+            </div>
+            
+            <div className="flex justify-end pt-4 border-t">
+              <Button 
+                onClick={() => saveSettings({ 
+                  pwaEnabled: settings.pwaEnabled, 
+                  pwaPromptDelay: settings.pwaPromptDelay,
+                  pwaShowInstallLink: settings.pwaShowInstallLink
+                })} 
+                className="bg-amber-600 hover:bg-amber-700"
+                disabled={saving}
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
+                Save App Settings
               </Button>
             </div>
           </CardContent>

@@ -75,7 +75,7 @@ export async function PUT(req: NextRequest) {
       'bkashEnabled', 'bkashNumber', 'nagadEnabled', 'nagadNumber', 'rocketEnabled', 'rocketNumber',
       'pointsPerTaka', 'pointsValue',
       'unifiedLogin', 'multiVendorEnabled', 'defaultCommission', 'couponCostPolicy',
-      'adminProductMode'
+      'adminProductMode', 'pwaEnabled', 'pwaPromptDelay', 'pwaShowInstallLink'
     ]
 
     let data: any = {}

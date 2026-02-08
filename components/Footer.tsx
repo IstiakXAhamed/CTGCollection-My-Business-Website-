@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Logo } from '@/components/Logo'
-import { Facebook, Instagram, Twitter, Youtube, MapPin, Phone, Mail, CreditCard, Truck, ShieldCheck, Headphones, Linkedin } from 'lucide-react'
+import { Facebook, Instagram, Twitter, Youtube, MapPin, Phone, Mail, CreditCard, Truck, ShieldCheck, Headphones, Linkedin, Download } from 'lucide-react'
 
 const footerLinks = {
   shop: [
@@ -153,6 +153,17 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              {settings?.pwaShowInstallLink && (
+                <li>
+                  <button 
+                    onClick={() => window.dispatchEvent(new CustomEvent('pwa-install-requested'))}
+                    className="text-blue-400 hover:text-blue-300 transition flex items-center gap-2 text-sm"
+                  >
+                    <Download className="w-4 h-4" />
+                    Install Our App
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
 

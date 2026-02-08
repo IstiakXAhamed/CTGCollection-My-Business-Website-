@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { ShoppingCart, User, Search, Menu, Heart, LogOut, Settings, Package, ChevronDown } from 'lucide-react'
+import { ShoppingCart, User, Search, Menu, Heart, LogOut, Settings, Package, ChevronDown, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/Logo'
 import { useState, useEffect } from 'react'
@@ -28,6 +28,28 @@ export default function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const [settings, setSettings] = useState<any>(null)
+  
+  useEffect(() => {
+    fetchSettings()
+  }, [])
+
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch('/api/settings')
+      if (res.ok) {
+        const data = await res.json()
+        setSettings(data.settings)
+      }
+    } catch (err) {
+      console.error('Navbar settings fetch failed:', err)
+    }
+  }
+
+  const handleManualInstall = () => {
+    window.dispatchEvent(new CustomEvent('pwa-install-requested'))
+    setIsMenuOpen(false)
+  }
   
   // Use cart store for reactive cart count
   const storeCartCount = useCartStore((state) => state.getTotalItems())
@@ -180,6 +202,19 @@ export default function Navbar() {
                 <Heart className="h-5 w-5" />
               </Link>
             </Button>
+
+            {/* Desktop PWA Install - Discreet */}
+            {settings?.pwaShowInstallLink && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="hidden lg:flex text-blue-600 hover:text-blue-700 hover:bg-blue-50" 
+                onClick={handleManualInstall}
+                title="Install App"
+              >
+                <Download className="h-5 w-5" />
+              </Button>
+            )}
             
             {/* Cart */}
             <Link href="/cart">
@@ -372,6 +407,27 @@ export default function Navbar() {
                 >
                   🔐 Login / Register
                 </Link>
+              )}
+
+              {/* Repositioned PWA Install Trigger - Now at the Bottom */}
+              {settings?.pwaShowInstallLink && (
+                <div className="mt-4 pt-4 border-t px-2">
+                  <button 
+                    onClick={handleManualInstall}
+                    className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-600/10 to-purple-600/10 hover:from-blue-600/20 hover:to-purple-600/20 rounded-2xl border border-blue-100 transition-all group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 group-active:scale-95 transition-transform">
+                        <Download className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-bold text-blue-900">Install Silk Mart App</p>
+                        <p className="text-xs text-blue-700/70">Faster access & offline shopping</p>
+                      </div>
+                    </div>
+                    <ChevronDown className="w-5 h-5 -rotate-90 text-blue-400 opacity-50" />
+                  </button>
+                </div>
               )}
             </div>
           </div>

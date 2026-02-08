@@ -796,6 +796,11 @@ model SiteSettings {
   // Admin Interface Settings
   adminProductMode   String  @default("simple") // simple, advanced
 
+  // PWA & App Controls
+  pwaEnabled         Boolean  @default(true)
+  pwaPromptDelay     Int      @default(30) // Seconds
+  pwaShowInstallLink Boolean  @default(true)
+
   // Gamification (Spin Wheel)
   spinWheelConfig   Json?    // { enabled: boolean, prizes: [], cooldownMinutes: number }
 

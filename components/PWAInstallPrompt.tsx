@@ -15,8 +15,19 @@ export function PWAInstallPrompt() {
   const [isVisible, setIsVisible] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
+  const [settings, setSettings] = useState<{ pwaEnabled: boolean, pwaPromptDelay: number } | null>(null)
 
   useEffect(() => {
+    // Fetch settings
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.settings) {
+          setSettings(data.settings)
+        }
+      })
+      .catch(err => console.error('Error fetching settings for PWA:', err))
+
     // Check if already dismissed
     const dismissed = localStorage.getItem('pwa_prompt_dismissed')
     if (dismissed) return
@@ -35,25 +46,34 @@ export function PWAInstallPrompt() {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
-      // Show prompt after 30 seconds
-      setTimeout(() => {
-        setIsVisible(true)
-      }, 30000)
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 
-    // Show iOS prompt after 30 seconds
-    if (isIOSDevice) {
-      setTimeout(() => {
-        setIsVisible(true)
-      }, 30000)
+    // Listen for manual install requests
+    const handleManualRequest = () => {
+      setIsVisible(true)
     }
+    window.addEventListener('pwa-install-requested', handleManualRequest)
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.removeEventListener('pwa-install-requested', handleManualRequest)
     }
   }, [])
+
+  // Secondary effect to handle visibility once settings are loaded
+  useEffect(() => {
+    if (!settings || settings.pwaEnabled === false || isInstalled) return
+
+    const delay = (settings.pwaPromptDelay || 30) * 1000
+    
+    const timer = setTimeout(() => {
+      setIsVisible(true)
+    }, delay)
+
+    return () => clearTimeout(timer)
+  }, [settings, isInstalled])
 
   const handleInstall = async () => {
     if (!deferredPrompt) return
