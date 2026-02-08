@@ -48,22 +48,17 @@ export default function InventoryForecastPage() {
 
     setAnalyzingIds(prev => [...prev, product.id])
     try {
-      const salesHistory = {
-        last30Days: Math.floor(Math.random() * 50) + 5,
-        last7Days: Math.floor(Math.random() * 10) + 1
-      }
-
       const res = await fetch('/api/ai/inventory-forecast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productData: {
+            id: product.id,
             name: product.name,
             category: product.category?.name || 'Uncategorized',
             currentStock: product.variants?.reduce((sum: number, v: any) => sum + (v.stock || 0), 0) || 0,
             price: product.basePrice
-          },
-          salesHistory
+          }
         })
       })
 
@@ -89,9 +84,8 @@ export default function InventoryForecastPage() {
       return stock < 20
     })
     
-    for (const p of lowStockProducts) {
-      await generateForecast(p)
-    }
+    // Run all forecasts in parallel (limited by analyzingIds state)
+    await Promise.all(lowStockProducts.map(p => generateForecast(p)))
   }
 
   return (
