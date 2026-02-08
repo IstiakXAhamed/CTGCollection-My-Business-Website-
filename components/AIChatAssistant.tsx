@@ -26,7 +26,7 @@ export function AIChatAssistant() {
     {
       id: '1',
       role: 'assistant',
-      content: 'Hi! I\'m "Silk Lite", your intelligent shopping companion. How can I make your experience amazing today?',
+      content: 'Always a pleasure to see you. How can I assist you with our curated collection today?',
       timestamp: Date.now()
     }
   ])
@@ -121,119 +121,121 @@ export function AIChatAssistant() {
       <AnimatePresence>
         {isOpen && !isMinimized && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 40, filter: 'blur(10px)' }}
+            initial={{ opacity: 0, scale: 0.95, y: 20, filter: 'blur(10px)' }}
             animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, scale: 0.9, y: 40, filter: 'blur(10px)' }}
-            className="pointer-events-auto w-[340px] sm:w-[400px] h-[550px] rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl border border-white/20 dark:border-gray-800/20 overflow-hidden flex flex-col mb-4 ring-1 ring-black/5"
+            exit={{ opacity: 0, scale: 0.95, y: 20, filter: 'blur(10px)' }}
+            className="pointer-events-auto w-[340px] sm:w-[380px] h-[580px] rounded-[2.5rem] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)] bg-white/70 dark:bg-gray-900/70 backdrop-blur-3xl border border-white/30 dark:border-gray-800/30 overflow-hidden flex flex-col mb-4 ring-1 ring-black/5"
           >
-            {/* Elegant Header */}
-            <div className="p-5 flex items-center justify-between bg-gradient-to-br from-indigo-600 via-blue-600 to-blue-700 text-white relative overflow-hidden">
-               {/* Decorative Circles */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-400/20 rounded-full blur-2xl -ml-12 -mb-12" />
-              
-               <div className="flex items-center gap-3 relative z-10">
-                <div className="relative">
-                  <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner">
-                    <Sparkles className="w-5 h-5 text-blue-100" />
+            {/* Elite Header */}
+            <div className="pt-7 px-6 pb-5 flex items-center justify-between bg-white/10 relative">
+               <div className="flex items-center gap-3">
+                <div className="relative group">
+                  <div className="w-11 h-11 bg-gradient-to-br from-blue-600/20 to-indigo-600/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/50 shadow-sm transition-transform group-hover:scale-105 duration-500">
+                    <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-indigo-600 rounded-full animate-pulse" />
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-[2.5px] border-white dark:border-gray-900 rounded-full shadow-sm">
+                    <div className="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-50" />
+                  </div>
                 </div>
                 <div>
-                  <h3 className="font-bold text-base tracking-tight">Silk Lite</h3>
-                  <p className="text-[10px] text-blue-100/80 font-medium uppercase tracking-wider flex items-center gap-1">
-                    Truly Intelligent Companion
-                  </p>
+                  <h3 className="font-bold text-lg tracking-tight text-gray-900 dark:text-white leading-none">Silk Lite</h3>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-blue-600/70 dark:text-blue-400/70 uppercase tracking-[0.1em]">Verified Concierge</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 relative z-10">
-                <button onClick={() => setIsMinimized(true)} className="p-2 hover:bg-white/10 rounded-xl transition-all duration-300 active:scale-95"><Minimize2 className="w-4 h-4 opacity-80" /></button>
-                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/10 rounded-xl transition-all duration-300 active:scale-95"><X className="w-4 h-4 opacity-80" /></button>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setIsMinimized(true)} className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all active:scale-90"><Minimize2 className="w-4 h-4 text-gray-500" /></button>
+                <button onClick={() => setIsOpen(false)} className="p-2.5 hover:bg-red-50 dark:hover:bg-red-900/20 group transition-all active:scale-90"><X className="w-4 h-4 text-gray-500 group-hover:text-red-500" /></button>
               </div>
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-6 scroll-smooth custom-scrollbar bg-transparent">
+            <div className="flex-1 overflow-y-auto px-6 py-2 space-y-7 scroll-smooth custom-scrollbar bg-transparent">
               {messages.map((msg) => (
                 <motion.div 
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
                   key={msg.id} 
                   className={cn("flex flex-col w-full", msg.role === 'user' ? "items-end" : "items-start")}
                 >
                   <div className={cn(
-                    "max-w-[85%] rounded-[1.5rem] px-5 py-3 text-[14px] leading-relaxed relative group",
+                    "max-w-[88%] rounded-3xl px-5 py-3.5 text-[14px] leading-relaxed shadow-sm transition-all duration-300",
                     msg.role === 'user' 
-                      ? "bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-tr-none shadow-lg shadow-blue-600/20" 
-                      : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-100 rounded-tl-none shadow-sm"
+                      ? "bg-gradient-to-tr from-blue-600 to-indigo-700 text-white rounded-tr-none shadow-blue-500/10" 
+                      : "bg-white/80 dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700/50 text-gray-800 dark:text-gray-100 rounded-tl-none"
                   )}>
-                    <span className="whitespace-pre-wrap">{msg.content}</span>
-                    <span className={cn(
-                      "text-[9px] font-medium mt-1.5 block opacity-50",
-                      msg.role === 'user' ? "text-right text-blue-100" : "text-left text-gray-500"
+                    <span className="whitespace-pre-wrap font-medium tracking-tight inline-block">{msg.content}</span>
+                    <div className={cn(
+                      "text-[9px] font-bold mt-2 opacity-40 select-none",
+                      msg.role === 'user' ? "text-right" : "text-left"
                     )}>
                       {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                    </div>
                   </div>
                   
                   {/* Actions (Product/Category Cards) */}
                   <AnimatePresence>
                     {msg.action?.type === 'show_product' && (
                       <motion.div 
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="mt-3 ml-2 p-3 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-2xl shadow-xl w-[240px] group transition-all hover:shadow-2xl"
+                        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="mt-4 p-4 bg-white/90 dark:bg-gray-800/90 border border-white dark:border-gray-700 rounded-[2rem] shadow-xl w-[250px] group transition-all hover:shadow-2xl hover:-translate-y-1"
                       >
                          {msg.action.payload.images && (
-                           <div className="w-full h-32 bg-gray-50 dark:bg-gray-900 rounded-xl mb-3 overflow-hidden relative">
+                           <div className="w-full h-36 bg-gray-50 dark:bg-gray-900 rounded-2xl mb-4 overflow-hidden relative shadow-inner">
                               <img 
                                 src={JSON.parse(msg.action.payload.images)[0] || '/placeholder.png'} 
                                 alt={msg.action.payload.name} 
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
                               />
-                               <div className="absolute top-2 right-2 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-2 py-1 rounded-lg text-[10px] font-bold shadow-sm">
+                               <div className="absolute top-3 right-3 bg-white/90 dark:bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full text-[11px] font-black shadow-sm text-blue-600 dark:text-blue-400">
                                 ৳{msg.action.payload.salePrice || msg.action.payload.basePrice}
                               </div>
                            </div>
                          )}
-                         <h4 className="font-bold text-sm truncate dark:text-white px-1">{msg.action.payload.name}</h4>
-                         <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 px-1 truncate">
-                           Premium Collection • In Stock
-                         </p>
-                         <Button 
-                            variant="default"
-                            size="sm" 
-                            className="w-full mt-3 text-[11px] h-8 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/10 transition-all active:scale-95" 
-                            onClick={() => addToCart(msg.action?.payload)}
-                         >
-                           Acquire Now
-                         </Button>
+                         <div className="px-1">
+                           <h4 className="font-bold text-sm truncate dark:text-white">{msg.action.payload.name}</h4>
+                           <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-bold uppercase tracking-widest">
+                             Luxury Piece • In Stock
+                           </p>
+                           <Button 
+                              variant="default"
+                              size="sm" 
+                              className="w-full mt-4 text-[12px] font-black h-10 rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all active:scale-95" 
+                              onClick={() => addToCart(msg.action?.payload)}
+                           >
+                             Experience Details
+                           </Button>
+                         </div>
                       </motion.div>
                     )}
 
                     {msg.action?.type === 'show_category' && (
                       <motion.div 
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="mt-3 ml-2 p-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-2xl shadow-xl w-[240px] overflow-hidden group"
+                        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="mt-4 p-2 bg-white/90 dark:bg-gray-800/90 border border-white dark:border-gray-700 rounded-[2rem] shadow-xl w-[250px] overflow-hidden group hover:shadow-2xl transition-all"
                       >
                          {msg.action.payload.image && (
-                           <div className="w-full h-28 bg-gray-100 dark:bg-gray-900 rounded-xl mb-1 overflow-hidden relative shadow-inner">
-                              <img src={msg.action.payload.image} alt={msg.action.payload.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-3">
-                                <span className="text-white font-bold text-sm drop-shadow-lg tracking-tight">{msg.action.payload.name}</span>
+                           <div className="w-full h-32 bg-gray-100 dark:bg-gray-900 rounded-[1.5rem] mb-2 overflow-hidden relative shadow-inner">
+                              <img src={msg.action.payload.image} alt={msg.action.payload.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4">
+                                <span className="text-white font-black text-base drop-shadow-lg tracking-tight">{msg.action.payload.name}</span>
                               </div>
                            </div>
                          )}
-                         <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="w-full mt-1 text-[11px] h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 font-bold hover:bg-indigo-100 transition-all active:scale-95" 
-                            onClick={() => window.location.href = `/shop?category=${msg.action?.payload.slug}`}
-                         >
-                           Explore Collection
-                         </Button>
+                         <div className="p-2">
+                           <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="w-full text-[11px] font-black h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 transition-all active:scale-95" 
+                              onClick={() => window.location.href = `/shop?category=${msg.action?.payload.slug}`}
+                           >
+                             Explore Collection
+                           </Button>
+                         </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -242,87 +244,97 @@ export function AIChatAssistant() {
               
               {isTyping && (
                 <div className="flex justify-start w-full">
-                  <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-[1.5rem] rounded-tl-none px-5 py-3 shadow-sm">
-                    <div className="flex gap-1.5 items-center h-4">
-                      <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1 }} className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
-                      <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-                      <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-1.5 h-1.5 bg-indigo-600 rounded-full" />
+                  <div className="bg-white/80 dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700 rounded-3xl rounded-tl-none px-5 py-4 shadow-sm backdrop-blur-md">
+                    <div className="flex gap-2 items-center">
+                      {[0, 2, 4].map((delay) => (
+                        <motion.span 
+                          key={delay}
+                          animate={{ y: [0, -5, 0], opacity: [0.3, 1, 0.3] }} 
+                          transition={{ repeat: Infinity, duration: 1.2, delay: delay * 0.1 }} 
+                          className="w-1.5 h-1.5 bg-blue-500 rounded-full" 
+                        />
+                      ))}
                     </div>
                   </div>
                 </div>
               )}
-              <div ref={messagesEndRef} className="h-2" />
+              <div ref={messagesEndRef} className="h-4" />
             </div>
 
-            {/* Quick Action Chips */}
-            <div className="px-4 py-3 bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border-t border-gray-100/30 dark:border-gray-800/30 flex gap-2 overflow-x-auto no-scrollbar scroll-smooth">
-              {[
-                { label: '📦 Track Order', text: 'I want to track my order' },
-                { label: '🔥 Offers', text: 'Any active coupons?' },
-                { label: '👑 Best Sellers', text: 'Show me best selling products' },
-                { label: '👚 New Arrivals', text: 'Show me new arrivals' }
-              ].map((chip) => (
-                <button
-                  key={chip.label}
-                  onClick={() => { setInput(chip.text); handleSend(); }} 
-                  className="flex-shrink-0 text-[11px] font-semibold px-4 py-2 bg-white dark:bg-gray-800 border border-blue-100 dark:border-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all duration-300 shadow-sm whitespace-nowrap active:scale-90"
-                >
-                  {chip.label}
-                </button>
-              ))}
-            </div>
+            {/* Elegant Input Area */}
+            <div className="p-6 pb-8 bg-gradient-to-t from-white via-white/95 to-transparent dark:from-gray-900 dark:via-gray-900/95 dark:to-transparent">
+              {/* Quick Chips - Floating Style */}
+              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-5 -mx-2 px-2">
+                {[
+                  { label: '📦 Track', text: 'Where is my order?' },
+                  { label: '🔥 Deals', text: 'Show me active offers' },
+                  { label: '💎 Best Sellers', text: 'What are your top products?' },
+                  { label: '🌸 Fragrance', text: 'I want to see fragrances' }
+                ].map((chip) => (
+                  <button
+                    key={chip.label}
+                    onClick={() => { setInput(chip.text); handleSend(); }} 
+                    className="flex-shrink-0 text-[11px] font-bold px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-md border border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-2xl hover:bg-blue-600 hover:text-white hover:border-blue-600 dark:hover:bg-blue-600 transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
 
-            {/* Premium Input */}
-            <div className="p-4 border-t border-gray-100/50 dark:border-gray-800/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
               <form 
                 onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-                className="flex gap-2 bg-gray-50 dark:bg-gray-800/50 p-1.5 rounded-[1.5rem] border border-gray-200/50 dark:border-gray-700/50 focus-within:border-blue-500/50 focus-within:ring-4 focus-within:ring-blue-500/5 transition-all duration-300 shadow-inner"
+                className="relative group"
               >
-                <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask Silk Lite..."
-                  className="border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm h-10 px-4 placeholder:text-gray-400"
-                />
-                <Button 
-                  type="submit" 
-                  size="icon" 
-                  className="rounded-2xl bg-blue-600 hover:bg-indigo-600 text-white shrink-0 shadow-lg shadow-blue-500/20 active:scale-90 transition-all duration-300"
-                  disabled={!input.trim() || isTyping}
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-[2rem] blur opacity-10 group-focus-within:opacity-25 transition duration-500" />
+                <div className="relative flex items-center gap-2 bg-gray-50 dark:bg-gray-800/80 p-1.5 rounded-[2rem] border border-gray-200 dark:border-gray-700 group-focus-within:border-blue-500/50 group-focus-within:ring-4 group-focus-within:ring-blue-500/5 transition-all duration-500 shadow-inner">
+                  <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Inquire with Silk Lite..."
+                    className="border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-[14px] h-11 px-4 placeholder:text-gray-400 placeholder:font-medium font-medium tracking-tight"
+                  />
+                  <Button 
+                    type="submit" 
+                    size="icon" 
+                    className="w-10 h-10 rounded-2xl bg-blue-600 hover:bg-indigo-600 text-white shrink-0 shadow-lg shadow-blue-500/30 active:scale-90 transition-all duration-300 mr-1"
+                    disabled={!input.trim() || isTyping}
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
               </form>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Floating Toggle Button */}
+      {/* Premium Toggle Button */}
       <div className="pointer-events-auto">
         <AnimatePresence mode="wait">
           {!isOpen || isMinimized ? (
             <motion.button
-              initial={{ scale: 0, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0, opacity: 0, rotate: 180 }}
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              whileTap={{ scale: 0.9 }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => { setIsOpen(true); setIsMinimized(false); }}
-              className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-indigo-600 to-blue-600 text-white rounded-[1.75rem] shadow-[0_10px_40px_rgba(37,99,235,0.4)] flex items-center justify-center relative group backdrop-blur-md ring-4 ring-white/20 dark:ring-gray-800/20 transition-all duration-500"
+              className="w-14 h-14 md:w-16 md:h-16 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white rounded-[1.75rem] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.2)] flex items-center justify-center relative group backdrop-blur-md ring-1 ring-black/5"
             >
-              <Bot className="w-7 h-7 md:w-8 md:h-8" />
+              <div className="absolute inset-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl opacity-[0.08] group-hover:opacity-20 transition-opacity duration-500" />
+              <Bot className="w-7 h-7 text-blue-600 dark:text-blue-400 relative z-10 transition-transform group-hover:scale-110 duration-500" />
+              
               <div className="absolute -top-1 -right-1 flex h-4 w-4">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 border-2 border-white dark:border-gray-900"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-blue-500 border-2 border-white dark:border-gray-900 shadow-sm"></span>
               </div>
               
               {/* Tooltip */}
-              <div className="absolute right-full mr-5 top-1/2 -translate-y-1/2 flex items-center group-hover:opacity-100 opacity-0 transition-all duration-300 pointer-events-auto">
-                <div className="bg-gray-900/90 backdrop-blur-sm text-white text-[11px] font-bold px-4 py-2 rounded-2xl shadow-xl whitespace-nowrap border border-white/10">
-                  How can Silk Lite help?
+              <div className="absolute right-full mr-5 top-1/2 -translate-y-1/2 flex items-center group-hover:opacity-100 opacity-0 translate-x-3 group-hover:translate-x-0 transition-all duration-500 pointer-events-none">
+                <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg text-gray-900 dark:text-white text-[12px] font-black px-5 py-2.5 rounded-2xl shadow-xl whitespace-nowrap border border-white dark:border-gray-800 ring-1 ring-black/5">
+                  Chat with Concierge
                 </div>
-                <div className="w-2 h-2 bg-gray-900/90 rotate-45 -ml-1 border-r border-t border-white/10" />
+                <div className="w-2.5 h-2.5 bg-white/90 dark:bg-gray-900/90 rotate-45 -ml-1 border-r border-t border-white dark:border-gray-800" />
               </div>
             </motion.button>
           ) : null}
@@ -330,10 +342,12 @@ export function AIChatAssistant() {
       </div>
 
       <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 10px; }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   )
