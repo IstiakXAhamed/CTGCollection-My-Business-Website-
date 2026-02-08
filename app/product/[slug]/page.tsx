@@ -43,7 +43,7 @@ export async function generateMetadata(
   let images: string[] = []
   try {
     if (Array.isArray(product.images)) {
-      images = product.images as string[]
+      images = product.images as unknown as string[]
     } else if (typeof product.images === 'string') {
       images = JSON.parse(product.images)
     }
