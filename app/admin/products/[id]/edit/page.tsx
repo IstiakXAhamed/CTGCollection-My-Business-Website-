@@ -320,6 +320,9 @@ export default function EditProductPage() {
                   onChange={setVariants} 
                   hasColor={true}
                   productName={formData.name}
+                  productType="general"
+                  sizeLabel="Size"
+                  colorLabel="Color"
                />
             </CardContent>
           </Card>

@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { MessageSquare, X, Send, Sparkles, Loader2, Minimize2, ArrowLeft, Phone, Mail, User, Bot } from 'lucide-react'
+import { MessageSquare, X, Send, Sparkles, Loader2, Minimize2, ArrowLeft, Phone, Mail, User, Bot, Mic } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { useCartStore } from '@/store/cart'
 
 interface Message {
   id: string
@@ -13,15 +14,16 @@ interface Message {
   content: string
   timestamp: number
   isAction?: boolean
-  action?: {
-    type: 'show_product' | 'show_category' | 'open_live_chat'
+  actions?: {
+    type: 'show_product' | 'show_category' | 'open_live_chat' | 'compare_products' | 'order_progress'
     payload: any
-  }
+  }[]
 }
 
 export function AIChatAssistant() {
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
+  const cart = useCartStore()
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -32,6 +34,7 @@ export function AIChatAssistant() {
   ])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [isListening, setIsListening] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -61,7 +64,10 @@ export function AIChatAssistant() {
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: currentInput }),
+        body: JSON.stringify({ 
+          message: currentInput,
+          cartItems: cart.items.map(i => ({ name: i.name, quantity: i.quantity, price: i.price }))
+        }),
         credentials: 'include'
       })
 
@@ -72,10 +78,10 @@ export function AIChatAssistant() {
           role: 'assistant',
           content: data.response,
           timestamp: Date.now(),
-          action: data.action 
+          actions: data.actions 
         }
 
-        if (data.action?.type === 'open_live_chat') {
+        if (data.actions?.some((a: any) => a.type === 'open_live_chat')) {
            setTimeout(() => openLiveChat(), 3000); 
         }
 
@@ -104,6 +110,30 @@ export function AIChatAssistant() {
     }
   }
 
+  const startVoiceRecognition = () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert("Voice recognition is not supported in this browser.")
+      return
+    }
+
+    const recognition = new (window as any).webkitSpeechRecognition()
+    recognition.lang = 'en-US'
+    recognition.continuous = false
+    recognition.interimResults = false
+
+    recognition.onstart = () => setIsListening(true)
+    recognition.onend = () => setIsListening(false)
+    recognition.onerror = () => setIsListening(false)
+    
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript
+      setInput(transcript)
+      // Auto-send if context feels right, or just let user review
+    }
+
+    recognition.start()
+  }
+
   const openLiveChat = () => {
     const recentHistory = messages.slice(-4).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n')
     window.dispatchEvent(new CustomEvent('open-internal-chat', { 
@@ -124,7 +154,7 @@ export function AIChatAssistant() {
             initial={{ opacity: 0, scale: 0.95, y: 20, filter: 'blur(10px)' }}
             animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.95, y: 20, filter: 'blur(10px)' }}
-            className="pointer-events-auto w-[340px] sm:w-[380px] h-[580px] rounded-[2.5rem] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)] bg-white/70 dark:bg-gray-900/70 backdrop-blur-3xl border border-white/30 dark:border-gray-800/30 overflow-hidden flex flex-col mb-4 ring-1 ring-black/5"
+            className="pointer-events-auto w-[calc(100vw-2rem)] sm:w-[380px] h-[min(650px,85vh)] max-h-[85vh] rounded-[2.5rem] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)] bg-white/70 dark:bg-gray-900/70 backdrop-blur-3xl border border-white/30 dark:border-gray-800/30 overflow-hidden flex flex-col mb-4 ring-1 ring-black/5"
           >
             {/* Elite Header */}
             <div className="pt-7 px-6 pb-5 flex items-center justify-between bg-white/10 relative">
@@ -175,70 +205,118 @@ export function AIChatAssistant() {
                     </div>
                   </div>
                   
-                  {/* Actions (Product/Category Cards) */}
-                  <AnimatePresence>
-                    {msg.action?.type === 'show_product' && (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="mt-4 p-4 bg-white/90 dark:bg-gray-800/90 border border-white dark:border-gray-700 rounded-[2rem] shadow-xl w-[250px] group transition-all hover:shadow-2xl hover:-translate-y-1"
-                      >
-                         {msg.action.payload.images && (
-                           <div className="w-full h-36 bg-gray-50 dark:bg-gray-900 rounded-2xl mb-4 overflow-hidden relative shadow-inner">
-                              <img 
-                                src={JSON.parse(msg.action.payload.images)[0] || '/placeholder.png'} 
-                                alt={msg.action.payload.name} 
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
-                              />
-                               <div className="absolute top-3 right-3 bg-white/90 dark:bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full text-[11px] font-black shadow-sm text-blue-600 dark:text-blue-400">
-                                ৳{msg.action.payload.salePrice || msg.action.payload.basePrice}
-                              </div>
-                           </div>
-                         )}
-                         <div className="px-1">
-                           <h4 className="font-bold text-sm truncate dark:text-white">{msg.action.payload.name}</h4>
-                           <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-bold uppercase tracking-widest">
-                             Luxury Piece • In Stock
-                           </p>
-                           <Button 
-                              variant="default"
-                              size="sm" 
-                              className="w-full mt-4 text-[12px] font-black h-10 rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all active:scale-95" 
-                              onClick={() => addToCart(msg.action?.payload)}
-                           >
-                             Experience Details
-                           </Button>
-                         </div>
-                      </motion.div>
-                    )}
+                  {/* Actions (Carousel / Multi-Card) */}
+                  {msg.actions && msg.actions.length > 0 && (
+                    <div className="w-full mt-4 overflow-x-auto no-scrollbar flex gap-4 pb-2 -mx-2 px-2 snap-x">
+                      {msg.actions.map((act, i) => (
+                        <motion.div 
+                          key={i}
+                          initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          className="snap-center shrink-0"
+                        >
+                          {act.type === 'show_product' && (
+                            <div className="p-4 bg-white/90 dark:bg-gray-800/90 border border-white dark:border-gray-700 rounded-[2rem] shadow-xl w-[260px] group transition-all hover:shadow-2xl">
+                               {act.payload.images && (
+                                 <div className="w-full h-36 bg-gray-50 dark:bg-gray-900 rounded-2xl mb-4 overflow-hidden relative shadow-inner">
+                                    <img 
+                                      src={typeof act.payload.images === 'string' ? JSON.parse(act.payload.images)[0] : act.payload.images[0] || '/placeholder.png'} 
+                                      alt={act.payload.name} 
+                                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
+                                    />
+                                     <div className="absolute top-3 right-3 bg-white/90 dark:bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full text-[11px] font-black shadow-sm text-blue-600 dark:text-blue-400">
+                                      ৳{act.payload.salePrice || act.payload.basePrice}
+                                    </div>
+                                 </div>
+                               )}
+                               <div className="px-1">
+                                 <h4 className="font-bold text-sm truncate dark:text-white">{act.payload.name}</h4>
+                                 <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-bold uppercase tracking-widest">
+                                   Luxury Piece • In Stock
+                                 </p>
+                                 <Button 
+                                    variant="default"
+                                    size="sm" 
+                                    className="w-full mt-4 text-[12px] font-black h-10 rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all active:scale-95" 
+                                    onClick={() => window.location.href = `/product/${act.payload.slug}`}
+                                 >
+                                   Experience Details
+                                 </Button>
+                               </div>
+                            </div>
+                          )}
 
-                    {msg.action?.type === 'show_category' && (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="mt-4 p-2 bg-white/90 dark:bg-gray-800/90 border border-white dark:border-gray-700 rounded-[2rem] shadow-xl w-[250px] overflow-hidden group hover:shadow-2xl transition-all"
-                      >
-                         {msg.action.payload.image && (
-                           <div className="w-full h-32 bg-gray-100 dark:bg-gray-900 rounded-[1.5rem] mb-2 overflow-hidden relative shadow-inner">
-                              <img src={msg.action.payload.image} alt={msg.action.payload.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4">
-                                <span className="text-white font-black text-base drop-shadow-lg tracking-tight">{msg.action.payload.name}</span>
+                          {act.type === 'show_category' && (
+                            <div className="p-2 bg-white/90 dark:bg-gray-800/90 border border-white dark:border-gray-700 rounded-[2rem] shadow-xl w-[240px] overflow-hidden group hover:shadow-2xl transition-all">
+                               {act.payload.image && (
+                                 <div className="w-full h-32 bg-gray-100 dark:bg-gray-900 rounded-[1.5rem] mb-2 overflow-hidden relative shadow-inner">
+                                    <img src={act.payload.image} alt={act.payload.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4">
+                                      <span className="text-white font-black text-base drop-shadow-lg tracking-tight">{act.payload.name}</span>
+                                    </div>
+                                 </div>
+                               )}
+                               <div className="p-2">
+                                 <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="w-full text-[11px] font-black h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 transition-all active:scale-95" 
+                                    onClick={() => window.location.href = `/shop?category=${act.payload.slug}`}
+                                 >
+                                   Explore Collection
+                                 </Button>
+                               </div>
+                            </div>
+                          )}
+
+                          {act.type === 'compare_products' && (
+                            <div className="p-5 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-[2.5rem] shadow-2xl w-[280px] text-white overflow-hidden relative group">
+                                <Sparkles className="absolute top-4 right-4 w-12 h-12 opacity-10 group-hover:rotate-12 transition-transform duration-700" />
+                                <h4 className="font-black text-sm uppercase tracking-widest opacity-80 mb-4">Smart Comparison</h4>
+                                <div className="grid grid-cols-2 gap-3 items-center relative">
+                                  {act.payload.map((p: any, idx: number) => (
+                                    <div key={idx} className="flex flex-col items-center gap-2">
+                                      <div className="w-full aspect-square bg-white/20 rounded-2xl overflow-hidden border border-white/30 backdrop-blur-md">
+                                        <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                                      </div>
+                                      <span className="text-[10px] font-black truncate w-full text-center">{p.name}</span>
+                                    </div>
+                                  ))}
+                                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-6 w-8 h-8 bg-white text-blue-600 rounded-full flex items-center justify-center font-black text-xs shadow-xl ring-2 ring-blue-400">VS</div>
+                                </div>
+                                <Button 
+                                  className="w-full mt-5 bg-white text-blue-600 hover:bg-gray-100 font-black rounded-2xl h-11"
+                                  onClick={() => window.location.href = `/product/${act.payload[0].slug}`}
+                                >
+                                  Decide Now
+                                </Button>
+                            </div>
+                          )}
+
+                          {act.type === 'order_progress' && (
+                            <div className="p-5 bg-white/95 dark:bg-gray-800/95 border border-white dark:border-gray-700 rounded-[2.5rem] shadow-xl w-[280px]">
+                              <div className="flex justify-between items-center mb-4">
+                                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Order Progress</span>
+                                <span className="text-[10px] font-bold text-gray-400">#{act.payload.number}</span>
                               </div>
-                           </div>
-                         )}
-                         <div className="p-2">
-                           <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="w-full text-[11px] font-black h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 transition-all active:scale-95" 
-                              onClick={() => window.location.href = `/shop?category=${msg.action?.payload.slug}`}
-                           >
-                             Explore Collection
-                           </Button>
-                         </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                              <div className="relative h-2 bg-gray-100 dark:bg-gray-900 rounded-full mb-3 overflow-hidden">
+                                <motion.div 
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${act.payload.progress}%` }}
+                                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-400 to-indigo-600 rounded-full"
+                                />
+                              </div>
+                              <div className="flex justify-between text-[11px] font-black text-gray-800 dark:text-gray-200">
+                                <span>{act.payload.status}</span>
+                                <span className="text-blue-600">{act.payload.progress}%</span>
+                              </div>
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               ))}
               
@@ -293,14 +371,28 @@ export function AIChatAssistant() {
                     placeholder="Inquire with Silk Lite..."
                     className="border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-[14px] h-11 px-4 placeholder:text-gray-400 placeholder:font-medium font-medium tracking-tight"
                   />
-                  <Button 
-                    type="submit" 
-                    size="icon" 
-                    className="w-10 h-10 rounded-2xl bg-blue-600 hover:bg-indigo-600 text-white shrink-0 shadow-lg shadow-blue-500/30 active:scale-90 transition-all duration-300 mr-1"
-                    disabled={!input.trim() || isTyping}
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-1.5 mr-1">
+                    <button
+                      type="button"
+                      onClick={startVoiceRecognition}
+                      className={cn(
+                        "w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 active:scale-90",
+                        isListening 
+                          ? "bg-red-500 text-white shadow-lg shadow-red-500/30 animate-pulse" 
+                          : "bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-blue-600"
+                      )}
+                    >
+                      <Mic className={cn("w-4 h-4", isListening && "animate-bounce")} />
+                    </button>
+                    <Button 
+                      type="submit" 
+                      size="icon" 
+                      className="w-10 h-10 rounded-2xl bg-blue-600 hover:bg-indigo-600 text-white shrink-0 shadow-lg shadow-blue-500/30 active:scale-90 transition-all duration-300"
+                      disabled={!input.trim() || isTyping}
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </form>
             </div>

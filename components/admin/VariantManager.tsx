@@ -14,14 +14,27 @@ interface Variant {
   sku: string
 }
 
+const TYPE_PRESETS: Record<string, { sizes: string[] }> = {
+  clothing: { sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'Free Size'] },
+  footwear: { sizes: ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45'] },
+  beauty: { sizes: ['5ml', '10ml', '30ml', '50ml', '100ml', '200ml', '500ml'] },
+  fragrance: { sizes: ['1ml', '2ml', '5ml', '10ml', '30ml', '50ml', '100ml'] },
+  electronics: { sizes: ['8GB/256GB', '16GB/512GB', '32GB/1TB', 'Standard', 'Pro'] },
+  general: { sizes: ['Small', 'Medium', 'Large', 'Pack of 1', 'Pack of 3'] },
+  universal: { sizes: ['Option A', 'Option B', 'Standard'] }
+}
+
 interface VariantManagerProps {
   variants: Variant[]
   onChange: (variants: Variant[]) => void
   productName?: string
   hasColor?: boolean
+  productType?: string
+  sizeLabel?: string
+  colorLabel?: string
 }
 
-const PRESET_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'Free Size']
+// Preset sizes moved to TYPE_PRESETS
 const PRESET_COLORS = [
   { name: 'Black', hex: '#000000' },
   { name: 'White', hex: '#FFFFFF', border: true },
@@ -37,11 +50,21 @@ const PRESET_COLORS = [
   { name: 'Maroon', hex: '#800000' }
 ]
 
-export default function VariantManager({ variants, onChange, productName, hasColor = true }: VariantManagerProps) {
+export default function VariantManager({ 
+  variants, 
+  onChange, 
+  productName, 
+  hasColor = true,
+  productType = 'clothing',
+  sizeLabel = 'Size',
+  colorLabel = 'Color'
+}: VariantManagerProps) {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([])
   const [selectedColors, setSelectedColors] = useState<string[]>([])
   const [customSize, setCustomSize] = useState('')
   const [customColor, setCustomColor] = useState('')
+
+  const presets = TYPE_PRESETS[productType as keyof typeof TYPE_PRESETS] || TYPE_PRESETS.clothing
 
   // Sync internal selection state with incoming variants on mount or if variants change outside
   useEffect(() => {
@@ -128,44 +151,50 @@ export default function VariantManager({ variants, onChange, productName, hasCol
 
   return (
     <div className="space-y-6">
-      {/* 1. Size Selection */}
-      <div className="space-y-3">
-        <Label className="flex items-center gap-2 text-sm font-semibold">
-           🏷️ Available Sizes (click to toggle)
+      <div className="space-y-4">
+        <Label className="flex items-center gap-2 text-base font-bold text-gray-800 dark:text-gray-200">
+           📦 Product Variants ({productType.charAt(0).toUpperCase() + productType.slice(1)})
         </Label>
-        <div className="flex flex-wrap gap-2">
-          {PRESET_SIZES.map(size => (
-            <button
-              key={size}
-              type="button"
-              onClick={() => toggleSize(size)}
-              className={cn(
-                "px-4 py-2 rounded-lg border text-sm font-medium transition-all",
-                selectedSizes.includes(size)
-                  ? "bg-blue-600 border-blue-600 text-white shadow-md active:scale-95"
-                  : "bg-white border-gray-200 text-gray-700 hover:border-blue-400 active:scale-95"
-              )}
-            >
-              {size}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-2 max-w-sm">
-          <Input 
-            placeholder="অথবা কাস্টম সাইজ লিখুন (e.g., 32, 34, 36)" 
-            value={customSize} 
-            onChange={e => setCustomSize(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addCustomSize())}
-          />
-          <Button type="button" onClick={addCustomSize} variant="outline" size="sm">Add</Button>
+        
+        <div className="space-y-3 p-5 bg-slate-50 dark:bg-gray-800/50 rounded-2xl border border-slate-100 dark:border-gray-700">
+          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+             🏷️ Available {sizeLabel} (click to toggle)
+          </Label>
+          <div className="flex flex-wrap gap-2">
+            {presets.sizes.map(size => (
+              <button
+                key={size}
+                type="button"
+                onClick={() => toggleSize(size)}
+                className={cn(
+                  "px-4 py-2 rounded-xl border text-sm font-semibold transition-all duration-200",
+                  selectedSizes.includes(size)
+                    ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105"
+                    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-blue-400 hover:bg-blue-50/50"
+                )}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2 max-w-sm pt-2">
+            <Input 
+              placeholder={`অথবা কাস্টম ${sizeLabel} লিখুন...`} 
+              value={customSize} 
+              onChange={e => setCustomSize(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addCustomSize())}
+              className="rounded-xl border-slate-200 h-10"
+            />
+            <Button type="button" onClick={addCustomSize} variant="secondary" className="rounded-xl px-6">Add</Button>
+          </div>
         </div>
       </div>
 
       {/* 2. Color Selection */}
       {hasColor && (
-        <div className="space-y-3">
-          <Label className="flex items-center gap-2 text-sm font-semibold">
-             🎨 Available Colors
+        <div className="space-y-3 p-5 bg-slate-50 dark:bg-gray-800/50 rounded-2xl border border-slate-100 dark:border-gray-700">
+          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">
+             🎨 Available {colorLabel}
           </Label>
           <div className="flex flex-wrap gap-2">
             {PRESET_COLORS.map(color => (
@@ -174,41 +203,42 @@ export default function VariantManager({ variants, onChange, productName, hasCol
                 type="button"
                 onClick={() => toggleColor(color.name)}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition-all",
+                  "flex items-center gap-2 px-4 py-2 rounded-xl border text-sm transition-all duration-200",
                   selectedColors.includes(color.name)
-                    ? "border-blue-600 bg-blue-50 ring-1 ring-blue-600"
-                    : "border-gray-200 bg-white hover:border-gray-300"
+                    ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20 ring-1 ring-blue-600 scale-105"
+                    : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-400"
                 )}
               >
                 <div 
-                  className={cn("w-4 h-4 rounded-full", color.border && "border border-gray-200")} 
+                  className={cn("w-4 h-4 rounded-full shadow-sm", color.border && "border border-gray-200")} 
                   style={{ backgroundColor: color.hex }} 
                 />
-                <span className="font-medium text-gray-700">{color.name}</span>
+                <span className="font-semibold text-gray-700 dark:text-gray-300">{color.name}</span>
               </button>
             ))}
           </div>
-          <div className="flex gap-2 max-w-sm">
+          <div className="flex gap-2 max-w-sm pt-2">
             <Input 
-              placeholder="অথবা কাস্টম কালার লিখুন (e.g., Teal, Coral)" 
+              placeholder={`অথবা কাস্টম ${colorLabel} লিখুন...`} 
               value={customColor} 
               onChange={e => setCustomColor(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addCustomColor())}
+              className="rounded-xl border-slate-200 h-10"
             />
-            <Button type="button" onClick={addCustomColor} variant="outline" size="sm">Add</Button>
+            <Button type="button" onClick={addCustomColor} variant="secondary" className="rounded-xl px-6">Add</Button>
           </div>
         </div>
       )}
 
       {/* 3. Variant List & Bulk Actions */}
-      <div className="pt-4 border-t">
-        <div className="flex justify-between items-end mb-4 gap-4">
+      <div className="pt-6 border-t border-slate-100 dark:border-gray-700">
+        <div className="flex justify-between items-center mb-6 gap-4">
            <div>
-              <Label className="flex items-center gap-2 text-sm font-semibold">
-                 📦 Stock per Variant ({variants.length} variants)
+              <Label className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                 📋 Variant Inventory List ({variants.length})
               </Label>
            </div>
-           <div className="flex gap-2">
+           <div className="flex gap-3">
               <Button 
                 type="button" 
                 variant="outline" 
@@ -217,7 +247,7 @@ export default function VariantManager({ variants, onChange, productName, hasCol
                   const val = prompt('Enter stock amount for all variants:', '50')
                   if (val !== null) bulkUpdateStock(parseInt(val) || 0)
                 }}
-                className="text-xs h-8 border-blue-200 text-blue-700 hover:bg-blue-50"
+                className="text-xs h-9 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold"
               >
                 সব ৫০ সেট করুন
               </Button>
@@ -225,9 +255,9 @@ export default function VariantManager({ variants, onChange, productName, hasCol
                 type="button" 
                 size="sm" 
                 onClick={addManualVariant}
-                className="text-xs h-8 bg-blue-600 hover:bg-blue-700"
+                className="text-xs h-9 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 px-4"
               >
-                <Plus className="w-3 h-3 mr-1" /> ম্যানুয়াল যোগ
+                <Plus className="w-3.5 h-3.5 mr-2" /> ম্যানুয়াল যোগ
               </Button>
            </div>
         </div>

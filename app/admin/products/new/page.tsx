@@ -250,12 +250,15 @@ export default function NewProductPage() {
            <Card>
               <CardHeader><CardTitle>Product Variants</CardTitle></CardHeader>
               <CardContent>
-                 <VariantManager 
+                  <VariantManager 
                     variants={variants} 
                     onChange={setVariants} 
-                    hasColor={true} // Default to true for simple mode
+                    hasColor={true} 
                     productName={formData.name}
-                 />
+                    productType="general"
+                    sizeLabel="Size"
+                    colorLabel="Color"
+                  />
               </CardContent>
            </Card>
 

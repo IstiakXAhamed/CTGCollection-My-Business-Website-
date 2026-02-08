@@ -280,6 +280,7 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
           <div className="space-y-2">
             <Label>Category *</Label>
             <Select 
+              key={categories.length}
               value={formData.categoryId} 
               onValueChange={v => setFormData({ ...formData, categoryId: v })}
             >
@@ -326,6 +327,9 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
               onChange={setVariants} 
               hasColor={typeConfig.hasColor}
               productName={formData.name}
+              productType={formData.productType}
+              sizeLabel={typeConfig.sizeLabel}
+              colorLabel={typeConfig.colorLabel}
            />
         </CardContent>
       </Card>

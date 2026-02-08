@@ -5,7 +5,7 @@ import { verifyAuth } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
-    let { message, context } = await request.json()
+    let { message, context, cartItems } = await request.json()
     
     // 1. Identify User
     const user = await verifyAuth(request)
@@ -14,7 +14,8 @@ export async function POST(request: NextRequest) {
     const contextData: any = { 
        orderStatus: context || '', 
        previousMessages: [],
-       user: user ? { name: user.name, id: user.id } : null
+       user: user ? { name: user.name, id: user.id, email: user.email } : null,
+       cart: cartItems || []
     }
     
     if (!message) {
@@ -34,10 +35,20 @@ export async function POST(request: NextRequest) {
     }
     
     // ==========================================
-    // 2. ENHANCED CONTEXT GATHERING
+    // 2. ENHANCED CONTEXT GATHERING (V5)
     // ==========================================
 
-    // A. Fetch Past Orders (For Re-Order Feature)
+    // A. Fetch Trending & Best Seller Products
+    try {
+      const trendingProducts = await prisma.product.findMany({
+        where: { isActive: true, isFeatured: true },
+        take: 5,
+        select: { name: true, slug: true, basePrice: true, salePrice: true }
+      })
+      contextData.trending = trendingProducts.map(p => `- ${p.name} [SHOW:${p.slug}]`).join('\n')
+    } catch (e) { console.error("Trending fetch error", e) }
+
+    // B. Fetch Past Orders (For Re-Order Feature)
     if (user) {
       try {
         const pastOrders = await prisma.order.findMany({
@@ -48,13 +59,13 @@ export async function POST(request: NextRequest) {
         })
         if (pastOrders.length > 0) {
           contextData.pastOrders = pastOrders.map(o => 
-            `Order #${o.orderNumber}: ${o.items.map(i => i.product.name).join(', ')} (Status: ${o.status})`
+            `Order #${o.orderNumber} (Status: ${o.status}): ${o.items.map(i => i.product.name).join(', ')}`
           ).join('\n')
         }
       } catch (e) { console.error("Past order fetch error", e) }
     }
 
-    // B. Universal Product Search & Best Offers
+    // C. Universal Product Search & Best Offers
     // Ignore pure short greetings to save DB calls, but search if message is long or contains keywords
     const isPureGreeting = /^(hi|hello|hey|greetings|good morning|good evening|yo|hola|assalamu alaikum)$/i.test(message.trim());
     const isOfferRequest = /(offer|sale|deal|discount|promo|code|coupon)/i.test(message);
@@ -70,7 +81,7 @@ export async function POST(request: NextRequest) {
                isActive: true,
                salePrice: { not: null } // Only fetch items on sale
              },
-             take: 20, 
+             take: 10, 
              select: { 
                  name: true, basePrice: true, salePrice: true, slug: true,
                  variants: { select: { stock: true } }
@@ -82,7 +93,7 @@ export async function POST(request: NextRequest) {
                const discount = p.salePrice ? Math.round(((p.basePrice - p.salePrice) / p.basePrice) * 100) : 0;
                return { ...p, discount };
              })
-             .filter((p: any) => p.discount >= 15)
+             .filter((p: any) => p.discount >= 10)
              .sort((a: any, b: any) => b.discount - a.discount)
              .slice(0, 5);
         } 
@@ -102,7 +113,7 @@ export async function POST(request: NextRequest) {
                  ],
                  isActive: true
                },
-               take: 5,
+               take: 8,
                select: { 
                    name: true, basePrice: true, salePrice: true, slug: true,
                    variants: { select: { stock: true } }
@@ -116,10 +127,8 @@ export async function POST(request: NextRequest) {
              const totalStock = p.variants ? p.variants.reduce((sum: number, v: any) => sum + v.stock, 0) : 0;
              const discount = p.salePrice ? Math.round(((p.basePrice - p.salePrice) / p.basePrice) * 100) : 0;
              const priceDisplay = p.salePrice ? `৳${p.salePrice} (Was ৳${p.basePrice})` : `৳${p.basePrice}`;
-             const offerBadge = discount > 0 ? `🔥 ${discount}% OFF!` : '';
-             const stockUrgency = totalStock > 0 && totalStock < 5 ? ` [LOW STOCK: Only ${totalStock} left!]` : '';
              
-             return `- ${p.name}: ${priceDisplay} ${offerBadge}${stockUrgency} [Stock: ${totalStock}] [Link: /product/${p.slug}]`
+             return `- ${p.name}: ${priceDisplay} ${discount > 0 ? `🔥 ${discount}% OFF!` : ''} [SHOW:${p.slug}]`
            }).join('\n');
         }
       } catch (e) {
@@ -127,42 +136,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // C. Fetch Categories
+    // D. Fetch Categories 
     try {
       const categories = await prisma.category.findMany({
         where: { isActive: true, parentId: null },
         select: { name: true, slug: true },
-        take: 10
+        take: 12
       });
-      contextData.categories = categories.map((c: any) => `- ${c.name} (/shop?category=${c.slug})`).join('\n');
+      contextData.categories = categories.map((c: any) => `- ${c.name} [CATEGORY:${c.slug}]`).join('\n');
     } catch (e) {
       console.log("Category fetch error", e);
     }
 
-    // D. Store Policies
+    // E. Store Policies
     contextData.storePolicies = `
     - Shipping: Free shipping on orders over ৳2000. Nationwide delivery (2-3 days).
     - Returns: 7-day return policy for unused items.
     - Payment: Cash on Delivery (COD) and Online Payment (Bkash/Nagad/Card).
     `;
 
-    // E. Active Coupons
-    try {
-      const coupons = await prisma.coupon.findMany({
-        where: { isActive: true, validUntil: { gt: new Date() } },
-        select: { code: true, description: true, discountType: true, discountValue: true },
-        take: 3
-      });
-      if (coupons.length > 0) {
-        contextData.coupons = coupons.map((c: any) => 
-          `- Code: ${c.code} (${c.discountType === 'percentage' ? c.discountValue + '%' : '৳' + c.discountValue} OFF) - ${c.description || 'Limited time!'}`
-        ).join('\n');
-      }
-    } catch (e) {
-        console.log("Coupon fetch error", e);
-    }
-
-    // 3. Order Tracking Intent
+    // 3. Order Tracking Intent (Enhanced for V5)
     const orderMatch = message.match(/(?:order|track|tracking)\s*(?:#|no\.?|number)?\s*([a-zA-Z0-9-]+)/i);
     if (orderMatch && orderMatch[1]) {
        const orderId = orderMatch[1];
@@ -170,73 +163,95 @@ export async function POST(request: NextRequest) {
          const whereClause = orderId.length > 20 ? { id: orderId } : { orderNumber: orderId };
          const order = await prisma.order.findFirst({
            where: whereClause,
-           include: { items: { include: { product: true } } }
+           include: { items: { include: { product: { select: { name: true, slug: true } } } } }
          });
          
          if (order) {
            const itemsList = order.items.map((i: any) => `${i.product.name} (x${i.quantity})`).join(', ');
-           contextData.orderStatus = `Order #${order.orderNumber} is ${order.status.toUpperCase()}.\nTotal: ৳${order.total}\nItems: ${itemsList}\nPlaced on: ${order.createdAt.toLocaleDateString()}`;
+           const progress = order.status === 'delivered' ? 100 : order.status === 'shipping' ? 75 : order.status === 'processing' ? 40 : 15;
+           contextData.orderStatus = `Order #${order.orderNumber} is ${order.status.toUpperCase()}.\nTotal: ৳${order.total}\nItems: ${itemsList}\nPlaced on: ${order.createdAt.toLocaleDateString()}\n[ORDER_PROGRESS:${order.orderNumber}:${order.status}:${progress}]`;
          } else {
-           contextData.orderStatus = `Customer asked for Order #${orderId} but it was NOT found. Ask them to double-check the number.`;
+           contextData.orderStatus = `Customer asked for Order #${orderId} but it was NOT found.`;
          }
-       } catch (e) {
-         console.log("Order lookup error", e);
-       }
+       } catch (e) { console.log("Order lookup error", e); }
     }
     
     const aiResponse = await generateChatResponse(message, contextData, settings)
 
     if (aiResponse.success) {
-      // 4. Action Parsing Logic
+      // 4. MULTI-ACTION PARSING LOGIC (V5)
       let finalResponse = aiResponse.result;
-      let action = null;
+      const actions: any[] = [];
 
-      // A. Check for [SHOW:slug] (Product Card)
-      const showMatch = finalResponse.match(/\[SHOW:(.+?)\]/);
-      if (showMatch && showMatch[1]) {
-        const slug = showMatch[1];
-        finalResponse = finalResponse.replace(showMatch[0], '').trim();
+      // A. [SHOW:slug] (Multi-Product)
+      const showMatches = [...finalResponse.matchAll(/\[SHOW:(.+?)\]/g)];
+      for (const match of showMatches) {
+        const slug = match[1];
+        finalResponse = finalResponse.replace(match[0], '').trim();
         try {
           const product = await prisma.product.findUnique({
             where: { slug },
-            select: {
-              id: true, name: true, slug: true, basePrice: true, salePrice: true, images: true,
-              category: { select: { name: true } },
-              variants: { select: { id: true, size: true, color: true, stock: true } }
-            }
+            select: { id: true, name: true, slug: true, basePrice: true, salePrice: true, images: true }
           });
-          if (product) action = { type: 'show_product', payload: product };
-        } catch (e) { console.error("Product fetch error:", e); }
+          if (product) actions.push({ type: 'show_product', payload: product });
+        } catch (e) { console.error("Product action fetch error:", e); }
       }
 
-      // B. Check for [CATEGORY:slug] (Category Card)
-      const catMatch = finalResponse.match(/\[CATEGORY:(.+?)\]/);
-      if (catMatch && catMatch[1]) {
-        const slug = catMatch[1];
-        finalResponse = finalResponse.replace(catMatch[0], '').trim();
+      // B. [CATEGORY:slug] (Multi-Category)
+      const catMatches = [...finalResponse.matchAll(/\[CATEGORY:(.+?)\]/g)];
+      for (const match of catMatches) {
+        const slug = match[1];
+        finalResponse = finalResponse.replace(match[0], '').trim();
         try {
           const category = await prisma.category.findUnique({
              where: { slug },
-             select: { name: true, slug: true, image: true, description: true }
+             select: { name: true, slug: true, image: true }
           });
-          if (category) action = { type: 'show_category', payload: category };
-        } catch (e) { console.error("Category fetch error:", e); }
+          if (category) actions.push({ type: 'show_category', payload: category });
+        } catch (e) { console.error("Category action fetch error:", e); }
       }
 
-      // C. Check for [MISSING:term], [ACTION:HANDOFF], [URGENT_COMPLAINT]
+      // C. [COMPARE:slug1,slug2] (Compare)
+      const compareMatch = finalResponse.match(/\[COMPARE:(.+?),(.+?)\]/);
+      if (compareMatch) {
+         finalResponse = finalResponse.replace(compareMatch[0], '').trim();
+         const slugs = [compareMatch[1], compareMatch[2]];
+         try {
+           const products = await prisma.product.findMany({
+             where: { slug: { in: slugs } },
+             select: { name: true, slug: true, basePrice: true, salePrice: true, images: true }
+           });
+           actions.push({ type: 'compare_products', payload: products.map(p => ({ 
+             name: p.name, 
+             slug: p.slug, 
+             image: typeof p.images === 'string' ? JSON.parse(p.images)[0] : (p.images as any)[0] 
+           })) });
+         } catch (e) { console.error("Compare fetch error:", e); }
+      }
+
+      // D. [ORDER_PROGRESS:number:status:progress]
+      const progressMatch = finalResponse.match(/\[ORDER_PROGRESS:(.+?):(.+?):(.+?)\]/);
+      if (progressMatch) {
+         finalResponse = finalResponse.replace(progressMatch[0], '').trim();
+         actions.push({ 
+           type: 'order_progress', 
+           payload: { number: progressMatch[1], status: progressMatch[2], progress: parseInt(progressMatch[3]) } 
+         });
+      }
+
+      // E. [MISSING:...], [ACTION:HANDOFF], [URGENT_COMPLAINT]
       if (finalResponse.includes('[MISSING:')) {
          const mMatch = finalResponse.match(/\[MISSING:(.+?)\]/);
          if (mMatch) {
             const term = mMatch[1];
             finalResponse = finalResponse.replace(mMatch[0], '').trim();
-            const notificationMsg = `Customer is looking for: "${term}"\nOriginal message: "${message}"`;
-            await notifyAdmin('stock_alert', 'Missing Product Request', notificationMsg, `Missing Stock Request: ${term}`, user);
+            await notifyAdmin('stock_alert', 'Missing Product Request', `Looking for: "${term}"\nMessage: "${message}"`, `Missing Stock Request: ${term}`, user);
          }
       }
 
       if (finalResponse.includes('[ACTION:HANDOFF]')) {
          finalResponse = finalResponse.replace('[ACTION:HANDOFF]', '').trim();
-         action = { type: 'open_live_chat', payload: { context: message } };
+         actions.push({ type: 'open_live_chat', payload: { context: message } });
          await notifyAdmin('customer_support', 'Human Agent Requested', `User "${user?.name || 'Guest'}" is requesting a human agent.\nMessage: "${message}"`, 'Human Agent Handoff Request', user);
       }
 
@@ -247,7 +262,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ 
         response: finalResponse,
-        action: action 
+        actions: actions 
       })
     } else {
       return NextResponse.json({ error: aiResponse.error || 'Failed to generate response' }, { status: 500 })

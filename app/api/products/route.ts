@@ -39,7 +39,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (category && category !== 'All') {
-      where.category = { name: category }
+      where.OR = [
+        { category: { slug: category } },
+        { category: { name: { contains: category, mode: 'insensitive' } } }
+      ]
     }
 
     if (search) {
