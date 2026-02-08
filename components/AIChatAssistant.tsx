@@ -71,11 +71,12 @@ export function AIChatAssistant() {
         }
         setMessages(prev => [...prev, aiMsg])
       } else {
+         const errorData = await res.json().catch(() => ({}))
          setTimeout(() => {
             const aiMsg: Message = {
               id: (Date.now() + 1).toString(),
               role: 'assistant',
-              content: "I can help with that! We have great options in our latest collection.",
+              content: `⚠️ AI Error: ${errorData.error || res.statusText || 'Connection failed'}. (Please check your API Key)`,
               timestamp: Date.now()
             }
             setMessages(prev => [...prev, aiMsg])

@@ -27,41 +27,41 @@ export function AISmartBundles({ currentProduct, category }: AISmartBundlesProps
   const addItem = useCartStore(state => state.addItem)
 
   useEffect(() => {
-    // Simulate AI generating detailed bundle suggestions
-    // In real app: call /api/ai/suggest-bundles
-    const timer = setTimeout(() => {
-      setBundle({
-        name: "Complete The Look",
-        discount: 15,
-        items: [
-          {
-            id: 'mock-1',
-            name: category === 'Saree' ? 'Matching Blouse Piece' : 'Premium Cotton Socks',
-            price: 450,
-            image: '/placeholder-product.jpg', // Replace with real matching product logic
-            originalPrice: 550
-          },
-          {
-            id: 'mock-2',
-            name: category === 'Saree' ? 'Accessorized Belt' : 'Leather Care Kit',
-            price: 1200,
-            image: '/placeholder-product.jpg',
-            originalPrice: 1500
-          }
-        ],
-        reason: "These items are frequently bought together by customers with similar taste."
-      })
-      setLoading(false)
-    }, 1500)
-    
-    return () => clearTimeout(timer)
-  }, [category])
+    if (!currentProduct?.id) return
 
-  if (loading) return null // Don't show anything while loading to avoid layout shift, or show skeleton
+    const fetchBundle = async () => {
+      try {
+        const res = await fetch(`/api/products/recommendations?category=${encodeURIComponent(category)}&excludeId=${currentProduct.id}`)
+        if (res.ok) {
+           const data = await res.json()
+           if (data.bundle && data.bundle.items.length > 0) {
+             setBundle(data.bundle)
+           } else {
+             setBundle(null)
+           }
+        }
+      } catch (e) {
+        console.error("Failed to fetch bundle")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBundle()
+  }, [category, currentProduct.id])
+
+  if (loading || !bundle) return null
 
   const bundleTotal = currentProduct.price + bundle.items.reduce((acc: number, item: any) => acc + item.price, 0)
   const originalTotal = currentProduct.price + bundle.items.reduce((acc: number, item: any) => acc + item.originalPrice, 0)
-  const savings = originalTotal - bundleTotal
+  // Calculate total with discount percentage applied
+  const totalWithDiscount = originalTotal * (1 - (bundle.discount / 100))
+  // Or if backend gives items with discounted price, just sum them up. 
+  // Let's assume the bundleTotal is the sum of sale prices, and we apply an EXTRA bundle discount?
+  // User wants simple "Buy together". Let's show the sum of current prices.
+  
+  const finalPrice = bundleTotal
+  const savedAmount = originalTotal - finalPrice
 
   const handleAddBundle = () => {
     // Add main product
@@ -71,7 +71,7 @@ export function AISmartBundles({ currentProduct, category }: AISmartBundlesProps
       price: currentProduct.price,
       quantity: 1,
       image: currentProduct.image,
-      variantId: 'default' // Should ideally select variant BEFORE bundle
+      variantId: 'default' 
     })
     
     // Add bundle items
@@ -86,7 +86,7 @@ export function AISmartBundles({ currentProduct, category }: AISmartBundlesProps
       })
     })
 
-    alert("✅ Bundle added to cart with 15% discount applied!")
+    alert("✅ All items added to cart!")
   }
 
   return (
@@ -100,8 +100,8 @@ export function AISmartBundles({ currentProduct, category }: AISmartBundlesProps
           <Sparkles className="w-5 h-5 text-indigo-600" />
         </div>
         <div>
-          <h3 className="font-bold text-lg text-gray-900">AI Smart Bundle</h3>
-          <p className="text-xs text-gray-500">Curated just for you</p>
+          <h3 className="font-bold text-lg text-gray-900">You can Buy these together!</h3>
+          <p className="text-xs text-gray-500">Perfectly matched items</p>
         </div>
         <div className="ml-auto bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-200">
           Save {15}%

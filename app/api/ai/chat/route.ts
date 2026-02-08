@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: aiResponse.error || 'Failed to generate response' }, { status: 500 })
     }
   } catch (error) {
-    console.error('Chat API Error:', error)
+    console.error('Chat API Fatal Error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

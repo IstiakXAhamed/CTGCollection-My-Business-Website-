@@ -14,17 +14,32 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const slug = params.slug
 
-  const product = await prisma.product.findUnique({
-    where: { slug: slug },
-    select: {
-      name: true,
-      description: true,
-      images: true,
-      // metaTitle: true,
-      // metaDescription: true,
-      // metaKeywords: true,
-    } as any
-  })
+  // 1. Safe Fetch: Try with meta fields first
+  let product: any = null
+  try {
+    product = await prisma.product.findUnique({
+      where: { slug: slug },
+      select: {
+        name: true,
+        description: true,
+        images: true,
+        metaTitle: true,
+        metaDescription: true,
+        metaKeywords: true,
+      } 
+    })
+  } catch (error) {
+    console.warn("⚠️ Metadata fetch failed (DB mismatch?), falling back to basic fields.", error)
+    // 2. Fallback: Fetch without meta fields
+    product = await prisma.product.findUnique({
+      where: { slug: slug },
+      select: {
+        name: true,
+        description: true,
+        images: true,
+      } 
+    })
+  }
 
   if (!product) {
     return {
@@ -33,12 +48,11 @@ export async function generateMetadata(
     }
   }
 
-  // Use meta tags if available, otherwise fall back to product data
-  // Using explicit type assertion because Prisma types might be stale
-  const p = product as any
+  // Use meta tags if available (and successfully fetched), otherwise fall back to product data
+  const p = product
   const title = p.metaTitle || `${product.name} | Silk Mart`
   const description = p.metaDescription || (product.description as unknown as string)?.substring(0, 160)
-  const keywords = p.metaKeywords ? (p.metaKeywords as string).split(',').map(k => k.trim()) : []
+  const keywords = p.metaKeywords ? (p.metaKeywords as string).split(',').map((k: string) => k.trim()) : []
   
   let images: string[] = []
   try {

@@ -10,7 +10,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, Plus, X, Upload, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
+import AdvancedProductForm from '@/components/admin/AdvancedProductForm'
 
 type Variant = {
   id?: string
@@ -26,11 +27,16 @@ export default function EditProductPage() {
   const productId = params.id as string
   const { toast } = useToast()
   
+  // State
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [categories, setCategories] = useState<any[]>([])
+  const [product, setProduct] = useState<any>(null)
   
-  // Form state
+  // Settings State
+  const [useAdvancedMode, setUseAdvancedMode] = useState(false)
+
+  // Simple Form State
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -47,77 +53,74 @@ export default function EditProductPage() {
   const [variants, setVariants] = useState<Variant[]>([])
 
   useEffect(() => {
-    fetchCategories()
-    fetchProduct()
-  }, [productId])
+    const init = async () => {
+      try {
+        const [catRes, setRes, prodRes] = await Promise.all([
+          fetch('/api/categories'),
+          fetch('/api/settings'),
+          fetch(`/api/admin/products/${productId}`)
+        ])
 
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch('/api/categories')
-      if (res.ok) {
-        const data = await res.json()
-        setCategories(data.categories || [])
-      }
-    } catch (error) {
-      console.error('Failed to fetch categories:', error)
-    }
-  }
-
-  const fetchProduct = async () => {
-    try {
-      const res = await fetch(`/api/admin/products/${productId}`, {
-        credentials: 'include'
-      })
-      
-      if (res.ok) {
-        const data = await res.json()
-        const product = data.product
-        
-        // Populate form
-        setFormData({
-          name: product.name || '',
-          slug: product.slug || '',
-          description: product.description || '',
-          categoryId: product.categoryId || '',
-          basePrice: product.basePrice?.toString() || '',
-          salePrice: product.salePrice?.toString() || '',
-          isFeatured: product.isFeatured || false,
-          isBestseller: product.isBestseller || false,
-          isActive: product.isActive !== false,
-        })
-        // Parse images JSON string if needed
-        let parsedImages: string[] = []
-        if (product.images) {
-          try {
-            parsedImages = typeof product.images === 'string' 
-              ? JSON.parse(product.images) 
-              : product.images
-          } catch {
-            parsedImages = []
-          }
+        // Categories
+        if (catRes.ok) {
+          const data = await catRes.json()
+          setCategories(data.categories || [])
         }
         
-        setImages(parsedImages)
-        setVariants(product.variants || [{ size: 'M', color: 'Default', stock: 0, sku: '' }])
-      } else {
-        toast({
-          title: 'Error',
-          description: 'Failed to load product',
-          variant: 'destructive'
-        })
-        router.push('/admin/products')
+        // Settings
+        if (setRes.ok) {
+          const data = await setRes.json()
+          // Default to simple, but allow override from DB
+          setUseAdvancedMode(data.settings?.adminProductMode === 'advanced')
+        }
+
+        // Product
+        if (prodRes.ok) {
+          const data = await prodRes.json()
+          const p = data.product
+          setProduct(p)
+          
+          // Populate Simple Form
+          setFormData({
+            name: p.name || '',
+            slug: p.slug || '',
+            description: p.description || '',
+            categoryId: p.categoryId || '',
+            basePrice: p.basePrice?.toString() || '',
+            salePrice: p.salePrice?.toString() || '',
+            isFeatured: p.isFeatured || false,
+            isBestseller: p.isBestseller || false,
+            isActive: p.isActive !== false,
+          })
+
+          let parsedImages: string[] = []
+          if (p.images) {
+             try {
+               parsedImages = typeof p.images === 'string' ? JSON.parse(p.images) : p.images
+             } catch { parsedImages = [] }
+          }
+          setImages(parsedImages)
+          setVariants(p.variants || [])
+          
+          // If product has advanced fields (meta, type != clothing), enable advanced mode automatically
+          if (p.metaTitle || p.metaDescription || (p.productType && p.productType !== 'clothing')) {
+            setUseAdvancedMode(true)
+          }
+
+        } else {
+           throw new Error('Product not found')
+        }
+
+      } catch (error) {
+        console.error('Init error:', error)
+         toast({ title: 'Error', description: 'Failed to load data', variant: 'destructive' })
+      } finally {
+        setFetching(false)
       }
-    } catch (error) {
-      console.error('Failed to fetch product:', error)
-      toast({
-        title: 'Error',
-        description: 'An error occurred while loading the product',
-        variant: 'destructive'
-      })
-    } finally {
-      setFetching(false)
     }
-  }
+    init()
+  }, [productId])
+
 
   const [uploading, setUploading] = useState(false)
 
@@ -132,7 +135,7 @@ export default function EditProductPage() {
       for (const file of Array.from(files)) {
         const formData = new FormData()
         formData.append('file', file)
-        formData.append('folder', 'products') // Organize in 'products' folder
+        formData.append('folder', 'products')
 
         const res = await fetch('/api/upload', {
           method: 'POST',
@@ -144,27 +147,13 @@ export default function EditProductPage() {
           if (data.success && data.url) {
             newImages.push(data.url)
           }
-        } else {
-          console.error('Upload failed')
-          toast({
-            title: 'Upload Failed',
-            description: `Failed to upload ${file.name}`,
-            variant: 'destructive'
-          })
         }
       }
-      
       setImages(prev => [...prev, ...newImages])
     } catch (error) {
-      console.error('Upload error:', error)
-      toast({
-        title: 'Error',
-        description: 'An error occurred while uploading images',
-        variant: 'destructive'
-      })
+      toast({ title: 'Upload Failed', variant: 'destructive' })
     } finally {
       setUploading(false)
-      // Reset input
       e.target.value = ''
     }
   }
@@ -178,9 +167,7 @@ export default function EditProductPage() {
   }
 
   const updateVariant = (index: number, field: keyof Variant, value: string | number) => {
-    setVariants(prev => prev.map((v, i) => 
-      i === index ? { ...v, [field]: value } : v
-    ))
+    setVariants(prev => prev.map((v, i) => i === index ? { ...v, [field]: value } : v))
   }
 
   const removeVariant = (index: number) => {
@@ -210,31 +197,17 @@ export default function EditProductPage() {
       const res = await fetch(`/api/admin/products/${productId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        credentials: 'include'
+        body: JSON.stringify(payload)
       })
 
       if (res.ok) {
-        toast({
-          title: 'Success!',
-          description: 'Product updated successfully',
-        })
+        toast({ title: 'Success!', description: 'Product updated successfully' })
         router.push('/admin/products')
       } else {
-        const error = await res.json()
-        toast({
-          title: 'Error',
-          description: error.error || 'Failed to update product',
-          variant: 'destructive'
-        })
+        throw new Error('Failed to update')
       }
     } catch (error) {
-      console.error('Failed to update product:', error)
-      toast({
-        title: 'Error',
-        description: 'An error occurred while updating the product',
-        variant: 'destructive'
-      })
+      toast({ title: 'Error', description: 'Failed to update product', variant: 'destructive' })
     } finally {
       setLoading(false)
     }
@@ -252,298 +225,118 @@ export default function EditProductPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link href="/admin/products">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold">Edit Product</h1>
-          <p className="text-muted-foreground">Update product information</p>
+      <div className="flex items-center justify-between">
+         <div className="flex items-center gap-4">
+          <Link href="/admin/products">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold">Edit Product</h1>
+            <p className="text-muted-foreground">{product?.name}</p>
+          </div>
+        </div>
+        
+        {/* Toggle Mode */}
+        <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg">
+           <Button 
+             variant={!useAdvancedMode ? 'ghost' : 'ghost'} 
+             size="sm" 
+             onClick={() => setUseAdvancedMode(false)}
+             className={!useAdvancedMode ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-900'}
+           >Simple</Button>
+           <Button 
+             variant={useAdvancedMode ? 'ghost' : 'ghost'} 
+             size="sm" 
+             onClick={() => setUseAdvancedMode(true)}
+             className={useAdvancedMode ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-900'}
+           >Advanced</Button>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Product Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Premium Cotton T-Shirt"
-                  required
-                />
+      {useAdvancedMode ? (
+        <AdvancedProductForm categories={categories} initialData={product} />
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Simple Form Implementation */}
+           <Card>
+            <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Product Name *</Label>
+                  <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Category *</Label>
+                  <select className="w-full h-10 px-3 border rounded-md" value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value})} required>
+                     <option value="">Select Category</option>
+                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
               </div>
-              
               <div className="space-y-2">
-                <Label htmlFor="slug">Slug</Label>
-                <Input
-                  id="slug"
-                  value={formData.slug}
-                  onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                  placeholder="premium-cotton-tshirt"
-                  required
-                />
+                <Label>Description</Label>
+                <Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description *</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Detailed product description..."
-                rows={4}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
-              <select
-                id="category"
-                value={formData.categoryId}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData(prev => ({ ...prev, categoryId: e.target.value }))}
-                className="w-full h-10 px-3 rounded-md border border-input bg-background"
-                required
-              >
-                <option value="">Select a category</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Pricing */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Pricing</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="basePrice">Base Price (BDT) *</Label>
-                <Input
-                  id="basePrice"
-                  type="number"
-                  step="0.01"
-                  value={formData.basePrice}
-                  onChange={(e) => setFormData(prev => ({ ...prev, basePrice: e.target.value }))}
-                  placeholder="1999.00"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="salePrice">Sale Price (BDT)</Label>
-                <Input
-                  id="salePrice"
-                  type="number"
-                  step="0.01"
-                  value={formData.salePrice}
-                  onChange={(e) => setFormData(prev => ({ ...prev, salePrice: e.target.value }))}
-                  placeholder="1499.00"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Images */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Product Images</CardTitle>
-            <p className="text-sm text-muted-foreground">Current images (first image is the main image)</p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {images.map((img, index) => (
-                <div key={index} className="relative aspect-square border-2 border-dashed rounded-lg overflow-hidden group">
-                  <Image
-                    src={img}
-                    alt={`Product ${index + 1}`}
-                    fill
-                    className="object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                  {index === 0 && (
-                    <div className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
-                      Main
+          <Card>
+            <CardHeader><CardTitle>Pricing & Variants</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+               <div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-2">
+                   <Label>Base Price</Label>
+                   <Input type="number" value={formData.basePrice} onChange={e => setFormData({...formData, basePrice: e.target.value})} required />
+                 </div>
+                 <div className="space-y-2">
+                   <Label>Sale Price</Label>
+                   <Input type="number" value={formData.salePrice} onChange={e => setFormData({...formData, salePrice: e.target.value})} />
+                 </div>
+               </div>
+               
+               {/* Simple Variant Editor */}
+               <div className="space-y-2">
+                  <Label>Variants</Label>
+                  {variants.map((v, i) => (
+                    <div key={i} className="flex gap-2">
+                       <Input placeholder="Size" value={v.size} onChange={e => updateVariant(i, 'size', e.target.value)} className="w-20" />
+                       <Input placeholder="Color" value={v.color} onChange={e => updateVariant(i, 'color', e.target.value)} className="w-24" />
+                       <Input placeholder="Stock" type="number" value={v.stock} onChange={e => updateVariant(i, 'stock', parseInt(e.target.value))} className="w-24" />
+                       <Button type="button" variant="ghost" size="icon" onClick={() => removeVariant(i)}><X className="w-4 h-4"/></Button>
                     </div>
-                  )}
-                </div>
-              ))}
-              
-              <label className="aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition-colors">
-                {uploading ? (
-                  <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-2" />
-                ) : (
-                  <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                )}
-                <span className="text-sm text-muted-foreground">
-                  {uploading ? 'Uploading...' : 'Add More'}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-              </label>
-            </div>
-          </CardContent>
-        </Card>
+                  ))}
+                  <Button type="button" variant="outline" size="sm" onClick={addVariant}><Plus className="w-4 h-4 mr-2"/> Add Variant</Button>
+               </div>
+            </CardContent>
+          </Card>
 
-        {/* Variants */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Product Variants</CardTitle>
-              <Button type="button" size="sm" onClick={addVariant}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Variant
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {variants.map((variant, index) => (
-              <div key={index} className="p-4 border rounded-lg space-y-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-sm">Variant {index + 1}</span>
-                  {variants.length > 1 && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => removeVariant(index)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                  <div className="space-y-1">
-                    <Label htmlFor={`size-${index}`}>Size</Label>
-                    <Input
-                      id={`size-${index}`}
-                      value={variant.size}
-                      onChange={(e) => updateVariant(index, 'size', e.target.value)}
-                      placeholder="S, M, L, XL"
-                    />
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <Label htmlFor={`color-${index}`}>Color</Label>
-                    <Input
-                      id={`color-${index}`}
-                      value={variant.color}
-                      onChange={(e) => updateVariant(index, 'color', e.target.value)}
-                      placeholder="Red, Blue, etc."
-                    />
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <Label htmlFor={`stock-${index}`}>Stock</Label>
-                    <Input
-                      id={`stock-${index}`}
-                      type="number"
-                      value={variant.stock}
-                      onChange={(e) => updateVariant(index, 'stock', parseInt(e.target.value) || 0)}
-                      placeholder="100"
-                    />
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <Label htmlFor={`sku-${index}`}>SKU (Optional)</Label>
-                    <Input
-                      id={`sku-${index}`}
-                      value={variant.sku}
-                      onChange={(e) => updateVariant(index, 'sku', e.target.value)}
-                      placeholder="TSH-M-RED"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+           <Card>
+              <CardHeader><CardTitle>Images</CardTitle></CardHeader>
+              <CardContent>
+                 <div className="grid grid-cols-4 gap-4">
+                    {images.map((img, i) => (
+                       <div key={i} className="relative aspect-square border rounded overflow-hidden">
+                          <Image src={img} alt="Product" fill className="object-cover" />
+                          <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"><X className="w-3 h-3"/></button>
+                       </div>
+                    ))}
+                    <label className="aspect-square border-2 border-dashed flex items-center justify-center cursor-pointer hover:bg-slate-50">
+                       {uploading ? <Loader2 className="animate-spin"/> : <Upload/>}
+                       <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} />
+                    </label>
+                 </div>
+              </CardContent>
+           </Card>
 
-        {/* Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Product Settings</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.isFeatured}
-                  onChange={(e) => setFormData(prev => ({ ...prev, isFeatured: e.target.checked }))}
-                  className="w-4 h-4"
-                />
-                <span>Featured Product</span>
-              </label>
-              
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.isBestseller}
-                  onChange={(e) => setFormData(prev => ({ ...prev, isBestseller: e.target.checked }))}
-                  className="w-4 h-4"
-                />
-                <span>Bestseller</span>
-              </label>
-              
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
-                  className="w-4 h-4"
-                />
-                <span>Active (Visible on site)</span>
-              </label>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Submit */}
-        <div className="flex gap-4">
-          <Button type="submit" disabled={loading} className="min-w-[150px]">
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Updating...
-              </>
-            ) : (
-              'Update Product'
-            )}
-          </Button>
-          <Link href="/admin/products">
-            <Button type="button" variant="outline">Cancel</Button>
-          </Link>
-        </div>
-      </form>
+          <div className="flex gap-4">
+            <Button type="submit" disabled={loading}>{loading ? 'Updating...' : 'Update Product'}</Button>
+            <Link href="/admin/products"><Button variant="outline">Cancel</Button></Link>
+          </div>
+        </form>
+      )}
     </div>
   )
 }

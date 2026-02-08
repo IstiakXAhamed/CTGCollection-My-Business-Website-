@@ -21,6 +21,7 @@ export async function callGeminiAI(prompt: string, options?: {
   maxTokens?: number
 }): Promise<string> {
   const apiKey = process.env.GOOGLE_AI_API_KEY?.trim()
+  console.log('[Gemini] API Call Start. Key available:', !!apiKey)
   
   if (!apiKey) {
     console.error('❌ GOOGLE_AI_API_KEY is missing in environment variables!')
@@ -139,7 +140,9 @@ export async function generateChatResponse(customerMessage: string, context?: { 
     const result = await callGeminiAI(prompt)
     return { success: true, result: result.trim() }
   } catch (e: any) {
-    return { success: false, error: e.message, fallback: true, result: 'Thank you for contacting us. Our team will get back to you shortly.' }
+    console.error('[Gemini] Chat Error:', e)
+    // Only fallback if strictly necessary, but for now let's see the error in the UI if possible or just log it hard.
+    return { success: false, error: e.message, fallback: true, result: 'I am taking a quick nap. Please try again in a moment.' }
   }
 }
 

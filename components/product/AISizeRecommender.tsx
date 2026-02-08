@@ -29,8 +29,8 @@ export function AISizeRecommender({ productType, category, onSizeSelect }: SizeR
   })
 
   // Determine needed fields based on category/type
-  const isClothing = ['Saree', 'Panjabi', 'Shirt', 'T-Shirt', 'Dress', 'Kameez', 'Kurti'].some(t => 
-    productType.includes(t) || category?.includes(t)
+  const isClothing = ['Saree', 'Panjabi', 'Shirt', 'T-Shirt', 'Dress', 'Kameez', 'Kurti', 'Pant', 'Jeans', 'Trouser', 'Salwar', 'Top', 'Tunics', 'Blazer', 'Jacket', 'Hoodie', 'Sweater'].some(t => 
+    (productType || '').includes(t) || (category || '').includes(t)
   )
 
   if (!isClothing && !productType.toLowerCase().includes('wear')) return null
