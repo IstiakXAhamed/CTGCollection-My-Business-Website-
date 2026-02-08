@@ -53,9 +53,8 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json()
-    console.log('[Settings API] PUT received:', Object.keys(body))
+    console.log('[Settings API] PUT received keys:', Object.keys(body))
 
-    // Valid Prisma fields from schema.prisma
     const whitelist = [
       'storeName', 'storeTagline', 'storeDescription', 'logo',
       'stat1Value', 'stat1Label', 'stat2Value', 'stat2Label', 'stat3Value', 'stat3Label', 'stat4Value', 'stat4Label',
@@ -79,9 +78,7 @@ export async function PUT(req: NextRequest) {
       'adminProductMode'
     ]
 
-    const data: any = {
-      updatedAt: new Date()
-    }
+    let data: any = {}
 
     if (body.spinWheelConfig !== undefined) {
       data.spinWheelConfig = body.spinWheelConfig
@@ -115,17 +112,55 @@ export async function PUT(req: NextRequest) {
       }
     })
 
-    const result = await (prisma as any).siteSettings.upsert({
-      where: { id: 'main' },
-      update: data,
-      create: {
-        id: 'main',
-        ...data,
-        createdAt: new Date()
-      }
-    })
+    const attemptUpdate = async (updateData: any) => {
+      return await (prisma as any).siteSettings.upsert({
+        where: { id: 'main' },
+        update: updateData,
+        create: {
+          id: 'main',
+          ...updateData,
+          createdAt: new Date()
+        }
+      })
+    }
 
-    return NextResponse.json({ success: true, settings: result })
+    let result
+    let skippedFields: string[] = []
+
+    try {
+      result = await attemptUpdate(data)
+    } catch (firstError: any) {
+      console.warn('[Settings API] First attempt failed:', firstError.message)
+      
+      // If it's a schema mismatch (Unknown argument), try to heal by removing the problematic field
+      if (firstError.message.includes('Unknown argument')) {
+        const match = firstError.message.match(/Unknown argument `([^`]+)`/)
+        const problematicField = match ? match[1] : null
+        
+        if (problematicField && data[problematicField] !== undefined) {
+          console.warn(`[Settings API] Retrying without field: ${problematicField}`)
+          skippedFields.push(problematicField)
+          
+          const { [problematicField]: _, ...healedData } = data
+          try {
+            result = await attemptUpdate(healedData)
+          } catch (secondError: any) {
+            console.error('[Settings API] Second attempt failed:', secondError.message)
+            throw secondError
+          }
+        } else {
+          throw firstError
+        }
+      } else {
+        throw firstError
+      }
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      settings: result,
+      skippedFields: skippedFields.length > 0 ? skippedFields : undefined
+    })
   } catch (error: any) {
     console.error('Settings update CRITICAL error:', error)
     return NextResponse.json({ 

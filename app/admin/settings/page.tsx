@@ -110,10 +110,19 @@ export default function AdminSettingsPage() {
         if (data.settings) {
            setSettings(data.settings)
         } 
-        toast({
-          title: "Settings Saved",
-          description: "All changes have been successfully saved to the database.",
-        })
+        
+        if (data.skippedFields && data.skippedFields.length > 0) {
+          toast({
+            title: "Settings Partially Saved",
+            description: `Some fields were skipped due to database sync issues: ${data.skippedFields.join(', ')}. All other changes were saved.`,
+            className: "border-amber-500 bg-amber-50"
+          })
+        } else {
+          toast({
+            title: "Success",
+            description: "All changes have been successfully saved to the database.",
+          })
+        }
       } else {
         const errData = await res.json()
         toast({
