@@ -8,15 +8,21 @@ export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   try {
     // 1. Get current user (mock/session)
-    // In real app, get from session. For now, assuming request header or session util
-    const authRes = await fetch(new URL('/api/auth/me', req.url), { headers: req.headers })
-    const authData = await authRes.json()
-    
-    if (!authData.authenticated) {
+    const cookieHeader = req.headers.get('cookie')
+    const token = cookieHeader?.split(';').find(c => c.trim().startsWith('token='))?.split('=')[1]
+
+    if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const { verifyToken } = await import('@/lib/auth')
+    const user = await verifyToken(token)
     
-    const userId = authData.user.id
+    if (!user || !user.id) {
+       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    
+    const userId = user.id
 
     // 2. Find all unique users from sent and received messages
     // This is a bit complex in Prisma (group by). 

@@ -6,6 +6,12 @@ export async function POST(request: NextRequest) {
   try {
     let { message, context } = await request.json()
     
+    // Initialize context data object
+    const contextData: any = { 
+       orderStatus: context || '', 
+       previousMessages: [] 
+    }
+    
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
@@ -57,41 +63,30 @@ export async function POST(request: NextRequest) {
 
     // 3. Order Tracking Intent
     // Matches "Order #12345" or "Track 12345"
-    const orderMatch = message.match(/(?:order|track|tracking)\s*(?:#|no\.?|number)?\s*(\w+)/i)
+    const orderMatch = message.match(/(?:order|track|tracking)\s*(?:#|no\.?|number)?\s*([a-zA-Z0-9-]+)/i)
     if (orderMatch && orderMatch[1]) {
        const orderId = orderMatch[1]
        try {
-         // Try to find order by ID or OrderNumber
-         // Assuming id is uuid, maybe user types short ID? 
-         // For now, let's assume they might type the real ID or we simple search.
-         // If schema uses UUID, partial search might fail. 
-         // Let's check schema. User likely uses a short order number if you have one, or the full ID.
-         // Prisam schema check needed. For now assume ID.
+         // Check if it looks like a short order number or a UUID
+         const whereClause = orderId.length > 20 ? { id: orderId } : { orderNumber: orderId }
+         
          const order = await prisma.order.findFirst({
-           where: {
-             OR: [
-                { id: orderId },
-                { orderNumber: orderId }
-             ]
-           },
+           where: whereClause,
            include: { items: true }
          })
          
          if (order) {
-           context += `\n\nOrder Found: #${order.orderNumber}\nStatus: ${order.status}\nTotal: ৳${order.total}\nItems: ${order.items.length}\nDate: ${order.createdAt.toLocaleDateString()}`
+           contextData.orderStatus = `\n\nOrder Found: #${order.orderNumber}\nStatus: ${order.status}\nTotal: ৳${order.total}\nItems: ${order.items.length}\nDate: ${order.createdAt.toLocaleDateString()}`
          } else {
            // Provide context that order was not found so AI can apologize
-           context += `\n\nSystem: Customer asked for Order #${orderId} but it was not found in database.`
+           contextData.orderStatus = `\n\nSystem: Customer asked for Order #${orderId} but it was not found in database.`
          }
        } catch (e) {
          console.log("Order lookup error", e)
        }
     }
     
-    const contextData = { 
-       orderStatus: context, 
-       previousMessages: [] // Simplify for now
-    }
+
 
     const aiResponse = await generateChatResponse(message, contextData, settings)
 

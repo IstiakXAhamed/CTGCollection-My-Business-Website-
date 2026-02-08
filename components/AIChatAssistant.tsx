@@ -116,7 +116,7 @@ export function AIChatAssistant() {
     const recentHistory = messages.slice(-4).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n')
     
     // 2. Dispatch event with context
-    window.dispatchEvent(new CustomEvent('open-live-chat', { 
+    window.dispatchEvent(new CustomEvent('open-internal-chat', { 
       detail: { context: recentHistory } 
     }))
 

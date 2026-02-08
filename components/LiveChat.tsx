@@ -215,8 +215,8 @@ export function LiveChat() {
       }
     }
     
-    window.addEventListener('open-live-chat', handleOpenChat as EventListener)
-    return () => window.removeEventListener('open-live-chat', handleOpenChat as EventListener)
+    window.addEventListener('open-internal-chat', handleOpenChat as EventListener)
+    return () => window.removeEventListener('open-internal-chat', handleOpenChat as EventListener)
   }, [])
 
   // Poll for admin replies ONLY for this session

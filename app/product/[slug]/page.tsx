@@ -20,9 +20,9 @@ export async function generateMetadata(
       name: true,
       description: true,
       images: true,
-      metaTitle: true,
-      metaDescription: true,
-      metaKeywords: true,
+      // metaTitle: true,
+      // metaDescription: true,
+      // metaKeywords: true,
     } as any
   })
 

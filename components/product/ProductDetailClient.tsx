@@ -53,7 +53,18 @@ export default function ProductDetailClient() {
           const productData = data.products[0]
           setProduct(productData)
           // Track product view
-          const images = typeof productData.images === 'string' ? JSON.parse(productData.images) : productData.images
+          let images: string[] = []
+          try {
+            if (Array.isArray(productData.images)) {
+              images = productData.images
+            } else if (typeof productData.images === 'string') {
+              images = JSON.parse(productData.images)
+            }
+          } catch (e) {
+            console.error('Error parsing images for tracking:', e)
+            images = []
+          }
+
           trackView({
             id: productData.id,
             name: productData.name,
@@ -83,7 +94,17 @@ export default function ProductDetailClient() {
       return
     }
 
-    const images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images
+    let images: string[] = []
+    try {
+      if (Array.isArray(product.images)) {
+        images = product.images
+      } else if (typeof product.images === 'string') {
+        images = JSON.parse(product.images)
+      }
+    } catch (e) {
+      console.error('Error parsing images for cart:', e)
+      images = []
+    }
     
     useCartStore.getState().addItem({
       productId: product.id,
@@ -130,9 +151,17 @@ export default function ProductDetailClient() {
     )
   }
 
-  const images = typeof product.images === 'string' 
-    ? JSON.parse(product.images) 
-    : product.images || []
+  let images: string[] = []
+  try {
+    if (Array.isArray(product.images)) {
+      images = product.images
+    } else if (typeof product.images === 'string') {
+      images = JSON.parse(product.images)
+    }
+  } catch (e) {
+    console.error('Error parsing images for render:', e)
+    images = []
+  }
   const discount = product.basePrice && product.salePrice
     ? Math.round(((product.basePrice - product.salePrice) / product.basePrice) * 100)
     : 0
