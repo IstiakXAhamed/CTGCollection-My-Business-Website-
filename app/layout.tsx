@@ -3,18 +3,21 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { SpinWheel } from "@/components/SpinWheel";
-import { AIChatAssistant } from "@/components/AIChatAssistant";
 import UnifiedPromoBanner from "@/components/UnifiedPromoBanner";
 import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "@/components/Providers";
-import { WhatsAppChat } from "@/components/WhatsAppChat";
-import FloatingActions from "@/components/FloatingActions";
 import { CompareBar } from "@/components/ProductComparison";
 import { ExitIntentPopup } from "@/components/ExitIntentPopup";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import AnnouncementPopup from '@/components/AnnouncementPopup'
 import Analytics from '@/components/Analytics'
+import dynamic from 'next/dynamic'
+
+// Lazy load heavy client components
+const SpinWheel = dynamic(() => import('@/components/SpinWheel').then(mod => mod.SpinWheel), { ssr: false })
+const AIChatAssistant = dynamic(() => import('@/components/AIChatAssistant').then(mod => mod.AIChatAssistant), { ssr: false })
+const WhatsAppChat = dynamic(() => import('@/components/WhatsAppChat').then(mod => mod.WhatsAppChat), { ssr: false })
+const FloatingActions = dynamic(() => import('@/components/FloatingActions'), { ssr: false })
 
 const inter = Inter({ subsets: ["latin"] });
 

@@ -281,6 +281,8 @@ export default function HomePage() {
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-500"
                             unoptimized={isLocalImage}
+                            priority={idx < 4}
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
                           />
                           {/* Quick actions - hidden on mobile */}
                           <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 hidden sm:flex">
