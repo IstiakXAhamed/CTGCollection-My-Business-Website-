@@ -50,9 +50,20 @@ export async function generateMetadata(
 
   // Use meta tags if available (and successfully fetched), otherwise fall back to product data
   const p = product
-  const title = p.metaTitle || `${product.name} | Silk Mart`
-  const description = p.metaDescription || (product.description as unknown as string)?.substring(0, 160)
-  const keywords = p.metaKeywords ? (p.metaKeywords as string).split(',').map((k: string) => k.trim()) : []
+  // SEO Optimized Title: Product Name - Buy at Best Price in Bangladesh
+  // This is DYNAMIC and unique to EVERY product (won't be overwritten)
+  const title = p.metaTitle || `${product.name} - Buy at Best Price in Bangladesh | Silk Mart`
+  
+  // SEO Optimized Description
+  const description = p.metaDescription || 
+    `Buy authentic ${product.name} at the best price in Bangladesh. Discover the latest ${product.category?.name || 'products'} with fast delivery and quality assurance from Silk Mart.`
+
+  // Dynamic Keywords
+  const baseKeywords = ["Buy", "Price in BD", "Original", "Online Shopping", "Silk Mart"]
+  const productKeywords = [product.name, `${product.name} price`, `${product.name} BD`]
+  const keywords = p.metaKeywords 
+    ? (p.metaKeywords as string).split(',').map((k: string) => k.trim()) 
+    : [...baseKeywords, ...productKeywords]
   
   let images: string[] = []
   try {
@@ -71,10 +82,18 @@ export async function generateMetadata(
     title,
     description,
     keywords,
+    alternates: {
+      canonical: `/product/${slug}`,
+    },
     openGraph: {
       title,
       description,
-      images: [mainImage],
+      images: [{
+        url: mainImage,
+        width: 1200,
+        height: 630,
+        alt: title
+      }],
       type: 'website',
     },
     twitter: {

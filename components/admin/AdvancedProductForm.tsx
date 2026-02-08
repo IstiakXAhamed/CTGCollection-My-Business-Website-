@@ -57,7 +57,17 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
     metaKeywords: initialData?.metaKeywords || '',
   })
   
-  const [images, setImages] = useState<string[]>(initialData?.images || [])
+  let initialImages: string[] = []
+  if (initialData?.images) {
+    try {
+      initialImages = typeof initialData.images === 'string' ? JSON.parse(initialData.images) : initialData.images
+    } catch (e) {
+      console.error('Error parsing initial images:', e)
+      initialImages = []
+    }
+  }
+
+  const [images, setImages] = useState<string[]>(initialImages)
   const [variants, setVariants] = useState<any[]>(initialData?.variants || [])
   const [uploading, setUploading] = useState(false)
 
@@ -296,6 +306,9 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
                 category={categories.find(c => c.id === formData.categoryId)?.name}
                 onSuggestionAccept={(field, value) => {
                   if (field === 'description') setFormData(prev => ({ ...prev, description: value }))
+                  if (field === 'tags' || field === 'keywords') setFormData(prev => ({ ...prev, metaKeywords: value }))
+                  if (field === 'seo' || field === 'seoTitle' || field === 'metaTitle') setFormData(prev => ({ ...prev, metaTitle: value }))
+                  if (field === 'metaDescription') setFormData(prev => ({ ...prev, metaDescription: value }))
                 }}
               />
             </div>
@@ -454,7 +467,7 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
                value={formData.metaTitle}
                onChange={e => setFormData({ ...formData, metaTitle: e.target.value })}
              />
-             <p className="text-xs text-muted-foreground text-right">{formData.metaTitle.length}/60 chars</p>
+             <p className="text-xs text-muted-foreground text-right">{(formData.metaTitle || '').length}/60 chars</p>
            </div>
            
            <div className="space-y-2">
@@ -465,7 +478,7 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
                onChange={e => setFormData({ ...formData, metaDescription: e.target.value })}
                rows={3}
              />
-             <p className="text-xs text-muted-foreground text-right">{formData.metaDescription.length}/160 chars</p>
+             <p className="text-xs text-muted-foreground text-right">{(formData.metaDescription || '').length}/160 chars</p>
            </div>
            
            <div className="space-y-2">

@@ -92,8 +92,9 @@ export default function HomePage() {
   const categories = [
     { name: 'Fashion', gradient: 'from-pink-600 via-purple-600 to-indigo-600', icon: '👗' },
     { name: 'Electronics', gradient: 'from-blue-600 via-cyan-600 to-teal-600', icon: '📱' },
-    { name: 'Home & Living', gradient: 'from-orange-600 via-red-600 to-pink-600', icon: '🏠' },
-    { name: 'Beauty', gradient: 'from-rose-600 via-pink-600 to-fuchsia-600', icon: '💄' }
+    { name: 'Fragrance', gradient: 'from-amber-500 via-orange-600 to-red-600', icon: '✨' },
+    { name: 'Beauty', gradient: 'from-rose-400 via-pink-500 to-purple-500', icon: '💄' },
+    { name: 'Home & Living', gradient: 'from-orange-600 via-red-600 to-pink-600', icon: '🏠' }
   ]
 
   return (
@@ -351,7 +352,7 @@ export default function HomePage() {
           )}
 
           <div className="text-center mt-4 sm:mt-6 md:hidden">
-            <Link href="/shop?featured=true">
+            <Link href="/shop">
               <Button size="sm">View All Products</Button>
             </Link>
           </div>

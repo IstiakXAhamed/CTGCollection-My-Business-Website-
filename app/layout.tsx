@@ -23,12 +23,13 @@ const FloatingActions = dynamic(() => import('@/components/FloatingActions'), { 
 const inter = Inter({ subsets: ["latin"], display: 'swap' });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://silkmartbd.com'),
   title: {
-    default: "Silk Mart | Premium E-Commerce Store in Bangladesh",
+    default: "Silk Mart - Best Online Shopping in Bangladesh | Buy Fashion, Electronics & More",
     template: "%s | Silk Mart"
   },
-  description: "Silk Mart offers a wide range of fashion, electronics, and lifestyle products with the best prices and fastest delivery in Chittagong, Bangladesh. Silk Mart is your trusted destination for quality shopping.",
-  keywords: ["Silk Mart", "Silk Mart BD", "Silk Mart Bangladesh", "Online Shopping Bangladesh", "Fashion BD", "Electronics BD", "Chittagong E-commerce"],
+  description: "Silk Mart is Bangladesh's premium online shopping destination. Shop the latest fashion, electronics, and lifestyle products with the best prices and lightning-fast delivery. Trust Silk Mart for quality and authenticity.",
+  keywords: ["Silk Mart", "Silk Mart BD", "Silk Mart Bangladesh", "Online Shopping Bangladesh", "Fashion BD", "Electronics BD", "Chittagong E-commerce", "Authentic Products BD"],
   authors: [{ name: "Silk Mart" }],
   creator: "Silk Mart",
   publisher: "Silk Mart",
@@ -39,10 +40,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/logo.png' },
+      { url: '/favicon.ico' },
       { url: '/logo.png', sizes: '32x32', type: 'image/png' },
+      { url: '/logo.png', sizes: '192x192', type: 'image/png' },
     ],
-    shortcut: '/logo.png',
+    shortcut: '/favicon.ico',
     apple: [
       { url: '/logo.png', sizes: '180x180', type: 'image/png' },
     ],
@@ -51,22 +53,23 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_BD",
     url: "https://silkmartbd.com",
-    title: "Silk Mart | Premium E-Commerce Store",
-    description: "Discover the best fashion, electronics, and lifestyle products at Silk Mart. Fast delivery and best prices nationwide.",
+    title: "Silk Mart - Best Online Shopping in Bangladesh",
+    description: "Discover premium fashion, electronics, and lifestyle products at Silk Mart. Fast delivery and best prices nationwide.",
     siteName: "Silk Mart",
     images: [{
       url: "/logo.png",
-      width: 800,
-      height: 600,
-      alt: "Silk Mart Logo"
+      width: 1200,
+      height: 630,
+      alt: "Silk Mart - Premium E-Commerce"
     }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Silk Mart | Premium E-Commerce Store",
+    title: "Silk Mart - Your Trusted Shopping Partner",
     description: "Discover the best fashion, electronics, and lifestyle products at Silk Mart.",
     images: ["/logo.png"],
   },
+  manifest: '/manifest.json',
   robots: {
     index: true,
     follow: true,
@@ -83,8 +86,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5, // Allow zooming for accessibility
+  userScalable: true,
 };
 
 export default function RootLayout({

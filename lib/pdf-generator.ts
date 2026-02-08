@@ -3,7 +3,7 @@
 // Matches the HTML template design exactly
 
 import { PDFDocument, StandardFonts, rgb, PDFPage, PDFFont, RGB } from 'pdf-lib'
-import { getOrderForReceipt } from './receipt'
+import { getOrderForReceipt, getCurrentTemplate } from './receipt'
 
 // Format date for receipt
 const formatDate = (date: Date) => 
@@ -47,6 +47,10 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
       return null
     }
 
+    // Get current template ID to determine styles
+    const templateId = await getCurrentTemplate()
+    console.log('Using template ID for PDF:', templateId)
+
     // Create PDF document
     const pdfDoc = await PDFDocument.create()
     const page = pdfDoc.addPage([595, 842]) // A4 size
@@ -63,7 +67,24 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
     const lightGray = rgb(0.96, 0.96, 0.96) // #f5f5f5 - backgrounds
     const green = rgb(0.16, 0.65, 0.53)     // #2aa689 - paid badge
     const white = rgb(1, 1, 1)
+
+    // Base colors
+    let primaryColor = navy
+    let accentColor = navy
     
+    // Adjust colors based on templateId (Template 36 is Purple Gradient, Template 6 is Gold)
+    if (templateId === '36') {
+      primaryColor = rgb(0.4, 0.31, 0.64) // Purple #667eea
+      accentColor = rgb(0.46, 0.29, 0.64)  // #764ba2
+    } else if (templateId === '6' || templateId === '24') {
+      primaryColor = rgb(0.83, 0.69, 0.22) // Gold #d4af37
+      accentColor = rgb(0.1, 0.1, 0.1)     // Black
+    } else if (templateId === '5' || templateId === '14') {
+      primaryColor = rgb(0.93, 0.28, 0.6)  // Pink #ec4899
+    } else if (templateId === '1' || templateId === '13') {
+      primaryColor = rgb(0.1, 0.21, 0.36)  // Navy #1a365d
+    }
+
     const margin = 50
     let y = height - 50
     
@@ -78,13 +99,14 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
     })
     
     // Logo area (CTG text as placeholder)
-    drawText(page, 'CTG', margin, y - 5, { font: bold, size: 24, color: navy })
-    drawText(page, 'Collection', margin + 55, y - 5, { font: regular, size: 18, color: navy })
-    drawText(page, 'Premium Fashion & Lifestyle', margin, y - 22, { font: regular, size: 9, color: grayText })
+    // Logo area
+    drawText(page, 'SILK', margin, y - 5, { font: bold, size: 24, color: primaryColor })
+    drawText(page, 'MART', margin + 65, y - 5, { font: regular, size: 24, color: primaryColor })
+    drawText(page, 'Premium Fashion & Lifestyle', margin, y - 25, { font: regular, size: 9, color: grayText })
     
     // Invoice info (right side)
     drawText(page, 'INVOICE', width - margin - 130, y, { font: regular, size: 9, color: grayText })
-    drawText(page, order.orderNumber, width - margin - 130, y - 16, { font: bold, size: 14, color: navy })
+    drawText(page, order.orderNumber, width - margin - 130, y - 16, { font: bold, size: 14, color: primaryColor })
     drawText(page, formatDate(order.createdAt), width - margin - 130, y - 32, { font: regular, size: 10, color: grayText })
     
     y -= 70
@@ -94,7 +116,7 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
       start: { x: margin, y },
       end: { x: width - margin, y },
       thickness: 1.5,
-      color: navy
+      color: primaryColor
     })
     
     y -= 35
@@ -218,8 +240,8 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
       color: rgb(0.85, 0.85, 0.85)
     })
     y -= 8
-    drawText(page, 'Total', totalsLabelX, y, { font: bold, size: 12, color: navy })
-    drawText(page, `Tk${order.total.toLocaleString()}`, totalsValueX - 10, y, { font: bold, size: 14, color: navy })
+    drawText(page, 'Total', totalsLabelX, y, { font: bold, size: 12, color: primaryColor })
+    drawText(page, `Tk${order.total.toLocaleString()}`, totalsValueX - 10, y, { font: bold, size: 14, color: primaryColor })
     
     y -= 40
     
@@ -268,7 +290,7 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
       })
       
       drawText(page, 'Verification Code', margin + 15, y - 5, { font: regular, size: 9, color: grayText })
-      drawText(page, order.verificationCode, width - margin - 80, y - 5, { font: bold, size: 14, color: navy })
+      drawText(page, order.verificationCode, width - margin - 80, y - 5, { font: bold, size: 14, color: primaryColor })
     }
     
     // ========== FOOTER SECTION ==========
@@ -280,11 +302,11 @@ export async function generateReceiptPDF(orderId: string): Promise<Buffer | null
       y: 0,
       width: width,
       height: footerY + 10,
-      color: navy
+      color: primaryColor
     })
     
     // Footer text
-    drawText(page, 'Thank you for shopping with CTG Collection! * ctgcollection2@gmail.com', margin + 50, footerY - 18, { font: regular, size: 10, color: white })
+    drawText(page, 'Thank you for shopping with Silk Mart! * support@silkmartbd.com', margin + 50, footerY - 18, { font: regular, size: 10, color: white })
     
     // Generate PDF bytes
     const pdfBytes = await pdfDoc.save()

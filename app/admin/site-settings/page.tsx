@@ -409,6 +409,14 @@ export default function SiteSettingsPage() {
                 <Input value={settings.phone2 || ''} onChange={(e) => update('phone2', e.target.value)} placeholder="+880 9876 543210" />
               </div>
               <div className="space-y-2">
+                <Label className="text-blue-600 font-semibold">FAQ Support Email</Label>
+                <Input value={settings.supportEmail || ''} onChange={(e) => update('supportEmail', e.target.value)} placeholder="support@silkmartbd.com" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-blue-600 font-semibold">FAQ Support Phone</Label>
+                <Input value={settings.supportPhone || ''} onChange={(e) => update('supportPhone', e.target.value)} placeholder="+8801991523289" />
+              </div>
+              <div className="space-y-2">
                 <Label>Address Line 1</Label>
                 <Input value={settings.storeAddress || ''} onChange={(e) => update('storeAddress', e.target.value)} placeholder="Chittagong, Bangladesh" />
               </div>

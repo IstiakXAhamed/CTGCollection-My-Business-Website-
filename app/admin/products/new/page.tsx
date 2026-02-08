@@ -51,6 +51,8 @@ export default function NewProductPage() {
     isActive: true,
     hasWarranty: false,
     warrantyPeriod: '',
+    metaTitle: '',
+    metaKeywords: '',
   })
   const [images, setImages] = useState<string[]>([])
   const [variants, setVariants] = useState<Variant[]>([
@@ -218,7 +220,11 @@ export default function NewProductPage() {
                    <AIProductAssist 
                       productName={formData.name} 
                       category={categories.find(c => c.id === formData.categoryId)?.name} 
-                      onSuggestionAccept={(f, v) => f === 'description' && setFormData(p => ({...p, description: v}))}
+                       onSuggestionAccept={(f, v) => {
+                          if (f === 'description') setFormData(p => ({...p, description: v}))
+                          if (f === 'tags' || f === 'keywords') setFormData(p => ({...p, metaKeywords: v}))
+                          if (f === 'seoTitle') setFormData(p => ({...p, metaTitle: v}))
+                       }}
                     />
                  </div>
               </CardContent>

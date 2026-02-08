@@ -216,13 +216,13 @@ export default function FAQPage() {
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
             <a
-              href={`mailto:${settings?.supportEmail || settings?.storeEmail || 'support@ctgcollection.com'}`}
+              href={`mailto:${settings?.supportEmail || settings?.storeEmail || 'support@silkmartbd.com'}`}
               className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
               Email Support
             </a>
             <a
-              href={`tel:${settings?.supportPhone || settings?.storePhone || '+8801234567890'}`}
+              href={`tel:${settings?.supportPhone || settings?.storePhone || '+8801991523289'}`}
               className="inline-flex items-center gap-2 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
             >
               Call Us

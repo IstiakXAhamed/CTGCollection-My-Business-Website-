@@ -7,11 +7,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { ArrowLeft, Plus, X, Upload, Loader2 } from 'lucide-react'
+import { ArrowLeft, Plus, X, Upload, Loader2, Tag } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useToast } from '@/components/ui/use-toast'
 import AdvancedProductForm from '@/components/admin/AdvancedProductForm'
+import AIProductAssist from '@/components/AIProductAssist'
 
 type Variant = {
   id?: string
@@ -47,6 +48,8 @@ export default function EditProductPage() {
     isFeatured: false,
     isBestseller: false,
     isActive: true,
+    metaTitle: '',
+    metaKeywords: '',
   })
   
   const [images, setImages] = useState<string[]>([])
@@ -91,6 +94,8 @@ export default function EditProductPage() {
             isFeatured: p.isFeatured || false,
             isBestseller: p.isBestseller || false,
             isActive: p.isActive !== false,
+            metaTitle: p.metaTitle || '',
+            metaKeywords: p.metaKeywords || '',
           })
 
           let parsedImages: string[] = []
@@ -279,6 +284,15 @@ export default function EditProductPage() {
               <div className="space-y-2">
                 <Label>Description</Label>
                 <Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                <AIProductAssist 
+                  productName={formData.name}
+                  category={categories.find(c => c.id === formData.categoryId)?.name}
+                  onSuggestionAccept={(f, v) => {
+                    if (f === 'description') setFormData(prev => ({ ...prev, description: v }))
+                    if (f === 'tags' || f === 'keywords') setFormData(prev => ({ ...prev, metaKeywords: v }))
+                    if (f === 'seoTitle' || f === 'metaTitle') setFormData(prev => ({ ...prev, metaTitle: v }))
+                  }}
+                />
               </div>
             </CardContent>
           </Card>
