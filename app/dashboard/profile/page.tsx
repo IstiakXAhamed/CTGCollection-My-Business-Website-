@@ -5,7 +5,7 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { User, Mail, Phone, Edit2, Save, X } from 'lucide-react'
+import { User, Mail, Phone, Edit2, Save, X, Crown } from 'lucide-react'
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null)
@@ -54,109 +54,149 @@ export default function ProfilePage() {
   if (loading) return <div className="text-center py-12">Loading...</div>
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">My Profile</h1>
-        <p className="text-muted-foreground">Manage your personal information</p>
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 animate-fade-in-up">
+      {/* Page Header - Compact on Mobile */}
+      <div className="flex items-center justify-between px-1">
+        <div>
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight">My Profile</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">Manage your personal settings</p>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <h2 className="text-xl font-semibold">Personal Information</h2>
-          {!isEditing ? (
-            <Button onClick={() => setIsEditing(true)} variant="outline">
-              <Edit2 className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-          ) : (
-            <div className="flex gap-2">
-              <Button onClick={handleSave} size="sm">
-                <Save className="w-4 h-4 mr-2" />
-                Save
-              </Button>
-              <Button
-                onClick={() => {
-                  setIsEditing(false)
-                  setFormData({ name: profile.name, phone: profile.phone || '' })
-                }}
-                variant="outline"
-                size="sm"
-              >
-                <X className="w-4 h-4 mr-2" />
-                Cancel
-              </Button>
+      {/* Profile Hero Card - Premium feel */}
+      <Card className="overflow-hidden border-none shadow-md bg-gradient-to-r from-blue-600/5 to-purple-600/5 dark:from-blue-900/10 dark:to-purple-900/10">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+            <div className="relative group">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg transform transition group-hover:scale-105">
+                <span className="text-2xl sm:text-3xl font-bold">{profile?.name?.charAt(0).toUpperCase() || 'U'}</span>
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-green-500 border-2 border-white rounded-full" />
             </div>
-          )}
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Name */}
-          <div>
-            <Label className="flex items-center gap-2 mb-2">
-              <User className="w-4 h-4" />
-              Full Name
-            </Label>
-            {isEditing ? (
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            ) : (
-              <p className="text-lg">{profile?.name || 'Not set'}</p>
-            )}
-          </div>
-
-          {/* Email (readonly) */}
-          <div>
-            <Label className="flex items-center gap-2 mb-2">
-              <Mail className="w-4 h-4" />
-              Email Address
-            </Label>
-            <p className="text-lg text-muted-foreground">{profile?.email}</p>
-            <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
-          </div>
-
-          {/* Phone */}
-          <div>
-            <Label className="flex items-center gap-2 mb-2">
-              <Phone className="w-4 h-4" />
-              Phone Number
-            </Label>
-            {isEditing ? (
-              <Input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+880 1XXX-XXXXXX"
-              />
-            ) : (
-              <p className="text-lg">{profile?.phone || 'Not provided'}</p>
-            )}
-          </div>
-
-          {/* Account Stats */}
-          <div className="pt-6 border-t">
-            <h3 className="font-semibold mb-4">Account Information</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-muted-foreground">Member Since</p>
-                <p className="font-medium">
-                  {profile?.createdAt 
-                    ? new Date(profile.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })
-                    : 'Not available'}
-                </p>
+            
+            <div className="flex-1 space-y-1">
+              <div className="flex flex-col sm:flex-row items-center gap-2">
+                <h2 className="text-lg sm:text-2xl font-bold">{profile?.name}</h2>
+                <div className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+                  {profile?.role || 'Customer'}
+                </div>
               </div>
-              <div>
-                <p className="text-muted-foreground">Account Type</p>
-                <p className="font-medium capitalize">{profile?.role || 'Customer'}</p>
-              </div>
+              <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5 justify-center sm:justify-start">
+                <Mail className="w-3 h-3" /> {profile?.email}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 mt-2 sm:mt-0">
+               {!isEditing ? (
+                 <Button onClick={() => setIsEditing(true)} variant="outline" size="sm" className="h-8 sm:h-9 text-xs sm:text-sm font-medium border-blue-200 hover:bg-blue-50 dark:border-blue-800">
+                   <Edit2 className="w-3.5 h-3.5 mr-1.5" /> Edit Profile
+                 </Button>
+               ) : (
+                 <div className="flex gap-2">
+                   <Button onClick={handleSave} size="sm" className="h-8 sm:h-9 text-xs sm:text-sm font-medium bg-blue-600 hover:bg-blue-700">
+                     <Save className="w-3.5 h-3.5 mr-1.5" /> Save
+                   </Button>
+                   <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 sm:h-9 text-xs sm:text-sm font-medium text-gray-500 hover:bg-gray-100"
+                    onClick={() => {
+                       setIsEditing(false)
+                       setFormData({ name: profile.name, phone: profile.phone || '' })
+                    }}
+                   >
+                     Cancel
+                   </Button>
+                 </div>
+               )}
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Information Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Personal Details */}
+        <Card className="border-gray-100 dark:border-gray-800 shadow-sm">
+          <CardHeader className="p-4 sm:p-5 border-b border-gray-50 dark:border-gray-800/50">
+            <h3 className="text-sm sm:text-base font-bold flex items-center gap-2">
+              <User className="w-4 h-4 text-blue-600" /> Personal Details
+            </h3>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-5 space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-widest">Full Name</Label>
+              {isEditing ? (
+                <Input
+                  className="h-9 sm:h-10 text-sm focus-visible:ring-blue-600"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              ) : (
+                <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-gray-100">
+                  {profile?.name || 'Not set'}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-widest">Phone Number</Label>
+              {isEditing ? (
+                <Input
+                  className="h-9 sm:h-10 text-sm focus-visible:ring-blue-600"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="+880 1XXX-XXXXXX"
+                />
+              ) : (
+                <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-gray-100">
+                  {profile?.phone || 'Not provided'}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Account Metadata */}
+        <Card className="border-gray-100 dark:border-gray-800 shadow-sm">
+          <CardHeader className="p-4 sm:p-5 border-b border-gray-50 dark:border-gray-800/50">
+            <h3 className="text-sm sm:text-base font-bold flex items-center gap-2 text-purple-600">
+              < Crown className="w-4 h-4" /> Account Status
+            </h3>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-5">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6">
+              <div className="space-y-1">
+                <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-widest">Member Since</p>
+                <p className="text-sm font-bold">
+                  {profile?.createdAt 
+                    ? new Date(profile.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short'
+                      })
+                    : '---'}
+                </p>
+              </div>
+              <div className="space-y-1 text-right sm:text-left">
+                <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-widest">Account Type</p>
+                <p className="text-sm font-bold text-blue-600 capitalize">
+                  {profile?.role || 'Customer'}
+                </p>
+              </div>
+              <div className="col-span-2 pt-2">
+                <div className="bg-gray-50 dark:bg-gray-800/50 p-2.5 rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
+                   <p className="text-[10px] text-muted-foreground italic leading-relaxed">
+                     Your email <b>{profile?.email}</b> is currently verified and secure.
+                   </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
+
+// Add Crown to imports at the top (Line 8)
