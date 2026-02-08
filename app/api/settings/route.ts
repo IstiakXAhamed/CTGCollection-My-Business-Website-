@@ -53,66 +53,84 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json()
-    // Destructure to remove system fields and special JSON fields
-    const { id, createdAt, updatedAt, spinWheelConfig, ...otherSettings } = body
+    console.log('[Settings API] PUT received:', Object.keys(body))
 
-    // Ensure spinWheelConfig is valid JSON (not undefined or malformed)
-    // Only parse if it exists and is not null
-    const validSpinConfig = spinWheelConfig !== undefined ? spinWheelConfig : undefined
-    
-    // Check if settings exist
-    const currentSettings = await (prisma as any).siteSettings.findUnique({
-      where: { id: 'main' }
-    })
+    // Valid Prisma fields from schema.prisma
+    const whitelist = [
+      'storeName', 'storeTagline', 'storeDescription', 'logo',
+      'stat1Value', 'stat1Label', 'stat2Value', 'stat2Label', 'stat3Value', 'stat3Label', 'stat4Value', 'stat4Label',
+      'returnsEnabled', 'showFreeShipping', 'showEasyReturns', 'showCOD', 'showAuthentic',
+      'featureShippingTitle', 'featureShippingDesc', 'featureReturnTitle', 'featureReturnDesc', 'featureCODTitle', 'featureCODDesc', 'featureAuthenticTitle', 'featureAuthenticDesc',
+      'value1Title', 'value1Desc', 'value2Title', 'value2Desc', 'value3Title', 'value3Desc', 'value4Title', 'value4Desc',
+      'storeEmail', 'email2', 'storePhone', 'phone2', 'storeAddress', 'addressLine2',
+      'workingDays', 'workingHours', 'offDays',
+      'facebook', 'instagram', 'twitter', 'youtube', 'linkedin', 'whatsapp',
+      'aboutTitle', 'aboutContent', 'aboutMission', 'aboutVision',
+      'footerAbout', 'copyrightText',
+      'metaTitle', 'metaDescription', 'metaKeywords',
+      'googleMapsEmbed', 'chatStatus',
+      'aiContactEmail', 'aiContactPhone', 'supportEmail', 'supportPhone',
+      'promoEnabled', 'promoCode', 'promoMessage', 'promoEndTime',
+      'shippingCost', 'freeShippingMin',
+      'codEnabled', 'sslEnabled',
+      'bkashEnabled', 'bkashNumber', 'nagadEnabled', 'nagadNumber', 'rocketEnabled', 'rocketNumber',
+      'pointsPerTaka', 'pointsValue',
+      'unifiedLogin', 'multiVendorEnabled', 'defaultCommission', 'couponCostPolicy',
+      'adminProductMode'
+    ]
 
-    if (currentSettings) {
-      // Build update data
-      // We ONLY include fields that are present in the body to allow partial updates
-      const updateData: any = {
-        updatedAt: new Date()
-      }
-      
-      // Handle spinWheelConfig separately
-      if (validSpinConfig !== undefined) {
-        updateData.spinWheelConfig = validSpinConfig
-      }
-      
-      // Add other settings
-      Object.entries(otherSettings).forEach(([key, value]) => {
-        // filter out nulls or undefined if necessary, but usually we want to allow updating to null if schema allows
-        if (value !== undefined) {
-          updateData[key] = value
-        }
-      })
-
-      await (prisma as any).siteSettings.update({
-        where: { id: 'main' },
-        data: updateData
-      })
-    } else {
-      // Create new settings
-      await (prisma as any).siteSettings.create({
-        data: {
-          id: 'main',
-          ...otherSettings,
-          spinWheelConfig: validSpinConfig !== undefined ? validSpinConfig : undefined,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-      })
+    const data: any = {
+      updatedAt: new Date()
     }
-    
-    // Return the updated settings to the client to keep state in sync
-    const updatedSettings = await (prisma as any).siteSettings.findUnique({
-      where: { id: 'main' }
+
+    if (body.spinWheelConfig !== undefined) {
+      data.spinWheelConfig = body.spinWheelConfig
+    }
+
+    // Filter and sanitize body
+    Object.keys(body).forEach(key => {
+      if (!whitelist.includes(key)) return
+      
+      const value = body[key]
+      if (value === undefined) return
+
+      // Handle specific types
+      if (key === 'promoEndTime') {
+        if (!value) {
+          data[key] = null
+        } else {
+          const d = new Date(value)
+          data[key] = isNaN(d.getTime()) ? null : d
+        }
+      } else if (['shippingCost', 'freeShippingMin', 'pointsPerTaka', 'pointsValue', 'defaultCommission'].includes(key)) {
+        data[key] = parseFloat(value) || 0
+      } else if (typeof value === 'boolean' || [
+        'promoEnabled', 'codEnabled', 'sslEnabled', 'bkashEnabled', 'nagadEnabled', 'rocketEnabled', 
+        'unifiedLogin', 'multiVendorEnabled', 'returnsEnabled', 'showFreeShipping', 
+        'showEasyReturns', 'showCOD', 'showAuthentic'
+      ].includes(key)) {
+        data[key] = Boolean(value)
+      } else {
+        data[key] = value
+      }
     })
 
-    return NextResponse.json({ success: true, settings: updatedSettings })
+    const result = await (prisma as any).siteSettings.upsert({
+      where: { id: 'main' },
+      update: data,
+      create: {
+        id: 'main',
+        ...data,
+        createdAt: new Date()
+      }
+    })
+
+    return NextResponse.json({ success: true, settings: result })
   } catch (error: any) {
-    console.error('Settings update error:', error?.message || error)
+    console.error('Settings update CRITICAL error:', error)
     return NextResponse.json({ 
       error: 'Failed to update settings', 
-      details: error?.message || 'Unknown error' 
+      details: error?.message || 'Unknown database error' 
     }, { status: 500 })
   }
 }

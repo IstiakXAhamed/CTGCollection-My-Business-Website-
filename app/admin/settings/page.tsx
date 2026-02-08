@@ -118,7 +118,7 @@ export default function AdminSettingsPage() {
         const errData = await res.json()
         toast({
           title: "Save Failed",
-          description: errData.error || "Failed to update settings. Please try again.",
+          description: `${errData.error || "Failed to update settings"}${errData.details ? `: ${errData.details}` : ""}`,
           variant: "destructive"
         })
       }
