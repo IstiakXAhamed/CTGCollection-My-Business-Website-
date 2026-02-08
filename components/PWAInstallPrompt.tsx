@@ -15,7 +15,7 @@ export function PWAInstallPrompt() {
   const [isVisible, setIsVisible] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
-  const [settings, setSettings] = useState<{ pwaEnabled: boolean, pwaPromptDelay: number } | null>(null)
+  const [settings, setSettings] = useState<{ pwaEnabled: boolean, pwaPromptDelay: number, storeName?: string } | null>(null)
 
   useEffect(() => {
     // Fetch settings
@@ -30,12 +30,10 @@ export function PWAInstallPrompt() {
 
     // Check if already dismissed
     const dismissed = localStorage.getItem('pwa_prompt_dismissed')
-    if (dismissed) return
-
+    
     // Check if in standalone mode (already installed)
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true)
-      return
     }
 
     // Check for iOS
@@ -50,21 +48,28 @@ export function PWAInstallPrompt() {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 
-    // Listen for manual install requests
+    // Listen for manual install requests - ALWAYS active
     const handleManualRequest = () => {
+      console.log('PWA Install Requested Manually')
       setIsVisible(true)
     }
     window.addEventListener('pwa-install-requested', handleManualRequest)
+
+    // Automatic trigger logic
+    if (!dismissed && !isInstalled) {
+      // Handled by the secondary effect with delay
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
       window.removeEventListener('pwa-install-requested', handleManualRequest)
     }
-  }, [])
+  }, [isInstalled])
 
   // Secondary effect to handle visibility once settings are loaded
   useEffect(() => {
-    if (!settings || settings.pwaEnabled === false || isInstalled) return
+    const dismissed = localStorage.getItem('pwa_prompt_dismissed')
+    if (!settings || settings.pwaEnabled === false || isInstalled || dismissed) return
 
     const delay = (settings.pwaPromptDelay || 30) * 1000
     
@@ -135,7 +140,7 @@ export function PWAInstallPrompt() {
               // iOS Instructions
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Install CTG Collection app on your iPhone:
+                  Install {settings?.storeName || 'Silk Mart'} app on your iPhone:
                 </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">

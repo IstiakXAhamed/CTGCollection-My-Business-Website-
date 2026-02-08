@@ -13,6 +13,7 @@ import { formatPrice } from '@/lib/utils'
 import { TestimonialsCarousel } from '@/components/TestimonialsCarousel'
 import { SpinWheel } from '@/components/SpinWheel'
 import { useSiteSettings } from '@/hooks/useSiteSettings'
+import { PWAInstallBanner } from '@/components/PWAInstallBanner'
 
 interface Product {
   id: string
@@ -476,6 +477,9 @@ export default function HomePage() {
           </motion.div>
         </section>
       )}
+
+      {/* PWA Install Banner - Above Newsletter */}
+      <PWAInstallBanner />
 
       {/* Newsletter Section */}
       <section className="py-8 sm:py-12 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 relative overflow-hidden">
