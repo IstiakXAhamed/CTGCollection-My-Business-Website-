@@ -86,21 +86,34 @@ export default function AdminSettingsPage() {
     }
   }
 
-  const saveSettings = async (updates: Partial<SiteSettings>) => {
+  const saveSettings = async (updates?: Partial<SiteSettings>) => {
     setSaving(true)
     try {
+      // If updates provided, use them. Otherwise send current state.
+      // We merge with current settings to ensure we don't accidentally wipe other fields if API expects full object
+      const payload = updates ? { ...settings, ...updates } : settings
+
       const res = await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(updates)
+        body: JSON.stringify(payload)
       })
       
       if (res.ok) {
         const data = await res.json()
-        setSettings(data)
+        setSettings(prev => ({ ...prev, ...data })) // Update local state with server response if possible or just keep prev
+         // Ideally server returns the updated settings object. If not, we trust our local state if success.
+         if (data.settings) {
+            setSettings(data.settings)
+         } else {
+             // If server just says {success:true}, we keep our local updates
+             setSettings(payload as SiteSettings)
+         }
         setSaved(true)
         setTimeout(() => setSaved(false), 2000)
+      } else {
+        console.error("Save failed", res.status)
       }
     } catch (error) {
       console.error('Failed to save settings:', error)
@@ -110,7 +123,10 @@ export default function AdminSettingsPage() {
   }
 
   const handleChatStatusChange = (status: string) => {
-    setSettings(prev => ({ ...prev, chatStatus: status }))
+    const newSettings = { ...settings, chatStatus: status }
+    setSettings(newSettings)
+    // Optional: Auto-save for status? Or let user click save. 
+    // User interface has a save button for this section, so we just update state.
   }
 
   const handlePromoChange = (field: string, value: any) => {

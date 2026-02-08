@@ -201,13 +201,22 @@ export function LiveChat() {
     init()
 
     // Listen for custom event to open chat (e.g. from AI assistant)
-    const handleOpenChat = () => {
+    const handleOpenChat = (e: any) => {
       setIsOpen(true)
       setIsMinimized(false)
+      
+      // If context provided, populate input or auto-send
+      if (e.detail?.context) {
+        // Option 1: Populate input (user sees it and can send)
+        setInputValue(`[Context from AI Chat]\n${e.detail.context}`)
+        
+        // Option 2: Scroll to bottom
+        setTimeout(scrollToBottom, 100)
+      }
     }
     
-    window.addEventListener('open-live-chat', handleOpenChat)
-    return () => window.removeEventListener('open-live-chat', handleOpenChat)
+    window.addEventListener('open-live-chat', handleOpenChat as EventListener)
+    return () => window.removeEventListener('open-live-chat', handleOpenChat as EventListener)
   }, [])
 
   // Poll for admin replies ONLY for this session
@@ -436,29 +445,6 @@ export function LiveChat() {
 
   return (
     <>
-      {/* Floating Chat Button */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={handleOpen}
-            className="fixed bottom-[10.5rem] right-6 z-50 w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full shadow-lg flex items-center justify-center text-white hover:shadow-xl transition-shadow"
-          >
-            <MessageCircle className="w-7 h-7" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full text-xs flex items-center justify-center font-bold">
-                {unreadCount}
-              </span>
-            )}
-            <span className="absolute w-full h-full rounded-full bg-blue-600 animate-ping opacity-25" />
-          </motion.button>
-        )}
-      </AnimatePresence>
-
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (

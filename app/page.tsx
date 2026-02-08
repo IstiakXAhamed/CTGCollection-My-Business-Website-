@@ -231,7 +231,7 @@ export default function HomePage() {
               </h2>
               <p className="text-gray-500 text-xs sm:text-sm">Handpicked items for you</p>
             </div>
-            <Link href="/shop?featured=true">
+            <Link href="/shop">
               <Button variant="outline" size="sm" className="hidden md:flex items-center gap-2 hover:bg-blue-50">
                 View All
                 <ArrowRight className="w-4 h-4" />

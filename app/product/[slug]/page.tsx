@@ -40,7 +40,17 @@ export async function generateMetadata(
   const description = p.metaDescription || (product.description as unknown as string)?.substring(0, 160)
   const keywords = p.metaKeywords ? (p.metaKeywords as string).split(',').map(k => k.trim()) : []
   
-  const images = JSON.parse((product.images as unknown as string) || '[]')
+  let images: string[] = []
+  try {
+    if (Array.isArray(product.images)) {
+      images = product.images as string[]
+    } else if (typeof product.images === 'string') {
+      images = JSON.parse(product.images)
+    }
+  } catch (e) {
+    console.error('Error parsing product images for metadata:', e)
+  }
+
   const mainImage = images[0] || '/placeholder.png'
 
   return {
@@ -91,7 +101,19 @@ export default async function ProductPage({ params }: Props) {
   // --- Construct JSON-LD Schema ---
   const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://silkmartbd.com'
   const p = product as any
-  const imageUrls = JSON.parse(p.images as string || '[]')
+  
+  let imageUrls: string[] = []
+  try {
+    if (Array.isArray(p.images)) {
+      imageUrls = p.images
+    } else if (typeof p.images === 'string') {
+      imageUrls = JSON.parse(p.images)
+    }
+  } catch (e) {
+    console.error('Error parsing product images JSON-LD:', e)
+    imageUrls = []
+  }
+
   const mainImage = imageUrls[0] ? (imageUrls[0].startsWith('http') ? imageUrls[0] : `${baseUrl}${imageUrls[0]}`) : `${baseUrl}/placeholder.png`
   
   const currentPrice = p.salePrice || p.basePrice

@@ -17,6 +17,7 @@ import dynamic from 'next/dynamic'
 const SpinWheel = dynamic(() => import('@/components/SpinWheel').then(mod => mod.SpinWheel), { ssr: false })
 const AIChatAssistant = dynamic(() => import('@/components/AIChatAssistant').then(mod => mod.AIChatAssistant), { ssr: false })
 const WhatsAppChat = dynamic(() => import('@/components/WhatsAppChat').then(mod => mod.WhatsAppChat), { ssr: false })
+const LiveChat = dynamic(() => import('@/components/LiveChat').then(mod => mod.LiveChat), { ssr: false }) // Hidden by default
 const FloatingActions = dynamic(() => import('@/components/FloatingActions'), { ssr: false })
 
 const inter = Inter({ subsets: ["latin"], display: 'swap' });
@@ -122,6 +123,7 @@ export default function RootLayout({
           {/* Premium Global Features */}
           <Analytics />
           <WhatsAppChat phoneNumber="8801991523289" position="bottom-right" />
+          <LiveChat />
           <FloatingActions />
           <CompareBar />
           <ExitIntentPopup enabled={true} discountPercent={10} />
