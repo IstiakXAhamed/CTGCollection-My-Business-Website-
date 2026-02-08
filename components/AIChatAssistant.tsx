@@ -26,7 +26,7 @@ export function AIChatAssistant() {
     {
       id: '1',
       role: 'assistant',
-      content: 'Always a pleasure to see you. How can I assist you with our curated collection today?',
+      content: 'Hello! I\'m so happy to see you. How can I help you find something wonderful today? ❤️',
       timestamp: Date.now()
     }
   ])
@@ -140,7 +140,7 @@ export function AIChatAssistant() {
                 <div>
                   <h3 className="font-bold text-lg tracking-tight text-gray-900 dark:text-white leading-none">Silk Lite</h3>
                   <div className="mt-1 flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-blue-600/70 dark:text-blue-400/70 uppercase tracking-[0.1em]">Verified Concierge</span>
+                    <span className="text-[10px] font-bold text-blue-600/70 dark:text-blue-400/70 uppercase tracking-[0.1em]">Online & Ready</span>
                   </div>
                 </div>
               </div>
