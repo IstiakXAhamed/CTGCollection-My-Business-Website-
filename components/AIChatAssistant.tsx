@@ -214,6 +214,30 @@ export function AIChatAssistant() {
   const [isTyping, setIsTyping] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const chipScrollRef = useRef<HTMLDivElement>(null)
+  const [showLeftChipArrow, setShowLeftChipArrow] = useState(false)
+  const [showRightChipArrow, setShowRightChipArrow] = useState(true)
+
+  const checkChipScroll = () => {
+    if (chipScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = chipScrollRef.current
+      setShowLeftChipArrow(scrollLeft > 10)
+      setShowRightChipArrow(scrollLeft < scrollWidth - clientWidth - 10)
+    }
+  }
+
+  useEffect(() => {
+    checkChipScroll()
+    const el = chipScrollRef.current
+    if (el) {
+      el.addEventListener('scroll', checkChipScroll)
+      window.addEventListener('resize', checkChipScroll)
+      return () => {
+        el.removeEventListener('scroll', checkChipScroll)
+        window.removeEventListener('resize', checkChipScroll)
+      }
+    }
+  }, [isOpen])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -325,6 +349,13 @@ export function AIChatAssistant() {
     setIsOpen(false)
   }
 
+  const scrollChips = (direction: 'left' | 'right') => {
+    if (chipScrollRef.current) {
+      const amount = 200
+      chipScrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' })
+    }
+  }
+
   const addToCart = (product: any) => {
     window.location.href = `/product/${product.slug}`
   }
@@ -423,21 +454,56 @@ export function AIChatAssistant() {
             {/* Elegant Input Area */}
             <div className="p-6 pb-8 bg-gradient-to-t from-white via-white/95 to-transparent dark:from-gray-900 dark:via-gray-900/95 dark:to-transparent">
               {/* Quick Chips - Floating Style */}
-              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-5 -mx-2 px-2">
-                {[
-                  { label: '📦 Track', text: 'Where is my order?' },
-                  { label: '🔥 Deals', text: 'Show me active offers' },
-                  { label: '💎 Best Sellers', text: 'What are your top products?' },
-                  { label: '🌸 Fragrance', text: 'I want to see fragrances' }
-                ].map((chip) => (
-                  <button
-                    key={chip.label}
-                    onClick={() => { setInput(chip.text); handleSend(); }} 
-                    className="flex-shrink-0 text-[11px] font-bold px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-md border border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-2xl hover:bg-blue-600 hover:text-white hover:border-blue-600 dark:hover:bg-blue-600 transition-all shadow-sm active:scale-95 whitespace-nowrap"
-                  >
-                    {chip.label}
-                  </button>
-                ))}
+              <div className="relative group/chips">
+                <AnimatePresence>
+                  {showLeftChipArrow && (
+                    <motion.button
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      type="button"
+                      onClick={() => scrollChips('left')}
+                      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white/90 dark:bg-gray-800/90 shadow-md rounded-full hidden md:flex items-center justify-center border border-gray-100 dark:border-gray-700 hover:bg-blue-600 hover:text-white transition-all -ml-2"
+                    >
+                      <ArrowLeft className="w-3 h-3" />
+                    </motion.button>
+                  )}
+                  {showRightChipArrow && (
+                    <motion.button
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      type="button"
+                      onClick={() => scrollChips('right')}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white/90 dark:bg-gray-800/90 shadow-md rounded-full hidden md:flex items-center justify-center border border-gray-100 dark:border-gray-700 hover:bg-blue-600 hover:text-white transition-all -mr-2"
+                    >
+                      <div className="rotate-180"><ArrowLeft className="w-3 h-3" /></div>
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+
+                <div 
+                  ref={chipScrollRef}
+                  className="flex gap-2 overflow-x-auto no-scrollbar pb-5 -mx-2 px-2 snap-x scroll-smooth"
+                >
+                  {[
+                    { label: '📦 Track', text: 'Where is my order?' },
+                    { label: '🔥 Deals', text: 'Show me active offers' },
+                    { label: '💎 Best Sellers', text: 'What are your top products?' },
+                    { label: '🌸 Fragrance', text: 'I want to see fragrances' },
+                    { label: '✨ Luxury', text: 'What are your luxury items?' },
+                    { label: '👔 Men', text: 'Show me men collection' },
+                    { label: '👗 Women', text: 'Show me women collection' }
+                  ].map((chip) => (
+                    <button
+                      key={chip.label}
+                      onClick={() => { setInput(chip.text); handleSend(); }} 
+                      className="flex-shrink-0 snap-start text-[11px] font-bold px-4 py-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-md border border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-2xl hover:bg-blue-600 hover:text-white hover:border-blue-600 dark:hover:bg-blue-600 transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <form 
