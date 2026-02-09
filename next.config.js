@@ -15,7 +15,6 @@ const nextConfig = {
   // Output standalone for Vercel deployment
   output: 'standalone',
 
-  // Experimental optimizations
   experimental: {
     // Optimize package imports for smaller bundles
     optimizePackageImports: ['lucide-react', 'framer-motion', '@radix-ui/react-icons'],
@@ -23,6 +22,8 @@ const nextConfig = {
     cpus: 1,
     // Disable worker threads to reduce concurrent context-switching during build
     workerThreads: false,
+    // Aggressive memory management for builds
+    memoryLimit: 512, // 512MB limit for build workers
   },
   // Increase timeout for static page generation to survive shared hosting limits
   staticPageGenerationTimeout: 300,
