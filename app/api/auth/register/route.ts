@@ -14,7 +14,6 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { referralCode } = body
     
-    
     // Validate input
     const validatedData = registerSchema.parse(body)
     const normalizedEmail = validatedData.email.toLowerCase().trim()
@@ -40,175 +39,56 @@ export async function POST(request: Request) {
 
     // Generate own referral code
     const ownReferralCode = crypto.randomBytes(4).toString('hex').toUpperCase()
-    
-    // Check referral code if provided
-    let referrerId = null
-    let referredBonus = 0
-    let referrerBonus = 0
 
-    if (referralCode && !isFirstUser) {
-      const referrer = await prisma.user.findUnique({
-        where: { referralCode: referralCode.toString() }
+    // For first user, create immediately (auto-verified)
+    if (isFirstUser) {
+      const user = await prisma.user.create({
+        data: {
+          name: validatedData.name,
+          email: normalizedEmail,
+          password: hashedPassword,
+          phone: validatedData.phone || null,
+          role: 'superadmin',
+          emailVerified: true,
+          referralCode: ownReferralCode,
+        },
+        select: { id: true, name: true, email: true, role: true, emailVerified: true }
       })
-      
-      if (referrer) {
-        referrerId = referrer.id
-        // Fetch loyalty settings
-        const settings = await prisma.loyaltySettings.findFirst() as any
-        if (settings && settings.isEnabled) {
-          referredBonus = settings.referralBonusReferred
-          referrerBonus = settings.referralBonusReferrer
-        }
-      }
-    }
-    
-    // Create user with emailVerified = false (except for first user/superadmin)
-    const user = await prisma.user.create({
-      data: {
-        name: validatedData.name,
-        email: normalizedEmail, // Store lowercase email
-        password: hashedPassword,
-        phone: validatedData.phone || null,
-        role: isFirstUser ? 'superadmin' : 'customer',
-        emailVerified: isFirstUser, // First user (superadmin) is auto-verified
-        referralCode: ownReferralCode,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        emailVerified: true,
-      }
-    })
 
-    // Handle Referral Logic
-    if (referrerId && (referredBonus > 0 || referrerBonus > 0)) {
-       try {
-         // Create Referral Record
-         const referral = await prisma.referral.create({
-           data: {
-             referrerId,
-             referredId: user.id,
-             referralCode: referralCode.toString(),
-             status: 'completed', // Instant bonus
-             referrerBonus,
-             referredBonus
-           } as any
-         })
+      // Send welcome notification
+      try {
+        await notifyWelcome(user.id, user.name)
+        await notifyNewRegistration(user.name, user.email)
+      } catch (e) {}
 
-         // Credit new user (Referred)
-         if (referredBonus > 0) {
-           await prisma.loyaltyPoints.upsert({
-             where: { userId: user.id },
-             create: {
-               userId: user.id,
-               totalPoints: referredBonus,
-               lifetimePoints: referredBonus,
-             } as any,
-             update: {
-               totalPoints: { increment: referredBonus },
-               lifetimePoints: { increment: referredBonus }
-             } as any
-           })
-
-           // Transaction Record
-           await prisma.pointsTransaction.create({
-             data: {
-               userId: user.id,
-               loyaltyId: (await prisma.loyaltyPoints.findUnique({ where: { userId: user.id } }))!.id,
-               type: 'referral',
-               points: referredBonus,
-               description: 'Welcome bonus for using referral code'
-             } as any
-           })
-
-           // Email New User
-           await sendLoyaltyUpdateEmail(user.email, {
-             customerName: user.name,
-             type: 'Referral Bonus',
-             points: referredBonus,
-             message: 'Welcome bonus added to your wallet!'
-           })
-         }
-         
-         // Note: Referrer bonus might be delayed or instant. For now, we skip crediting referrer to avoid exploitation without purchase. 
-         // Or if 'status' is completed, maybe we should? User said "Instant". 
-         // Let's credit referrer too for "Instant" satisfaction as per request.
-         
-         if (referrerBonus > 0) {
-            // Credit Referrer
-            await prisma.loyaltyPoints.upsert({
-             where: { userId: referrerId },
-             create: {
-               userId: referrerId,
-               totalPoints: referrerBonus,
-               lifetimePoints: referrerBonus,
-             },
-             update: {
-               totalPoints: { increment: referrerBonus },
-               lifetimePoints: { increment: referrerBonus }
-             }
-           })
-           
-           // Transaction for Referrer
-           const referrerLoyalty = await prisma.loyaltyPoints.findUnique({ where: { userId: referrerId } })
-           if (referrerLoyalty) {
-              await prisma.pointsTransaction.create({
-                data: {
-                  userId: referrerId,
-                  loyaltyId: referrerLoyalty.id,
-                  type: 'referral',
-                  points: referrerBonus,
-                  description: `Bonus for referring ${user.name}`
-                }
-              })
-              
-              // Email Referrer
-              const referrer = await prisma.user.findUnique({ where: { id: referrerId } })
-              if (referrer) {
-                await sendLoyaltyUpdateEmail(referrer.email, {
-                  customerName: referrer.name,
-                  type: 'Referral Bonus',
-                  points: referrerBonus,
-                  message: `You referred ${user.name}!`
-                })
-              }
-           }
-         }
-
-       } catch (refError) {
-         console.error('Referral processing error:', refError)
-       }
-    }
-    
-    // Send verification email (unless first user/superadmin)
-    if (!isFirstUser) {
-      const code = await createVerificationCode(user.email, 'email_verify', user.id)
-      await sendVerificationEmail(user.email, code, 'email_verify')
-    }
-    
-    // Send notifications
-    try {
-      // Welcome notification for new user
-      await notifyWelcome(user.id, user.name)
-      // Notify admins about new registration
-      await notifyNewRegistration(user.name, user.email)
-    } catch (e) {
-      console.log('Notification error (non-blocking):', e)
-    }
-    
-    return NextResponse.json(
-      { 
-        message: isFirstUser 
-          ? 'Superadmin account created successfully! You are the main administrator.'
-          : 'Registration successful! Please check your email for verification code.',
+      return NextResponse.json({ 
+        message: 'Superadmin account created successfully! You are the main administrator.',
         user,
-        isFirstUser,
-        requiresVerification: !isFirstUser
-      },
-      { status: 201 }
-    )
+        isFirstUser: true,
+        requiresVerification: false
+      }, { status: 201 })
+    }
+
+    // For regular users, don't create User record yet.
+    // Store data in verification payload.
+    const payload = {
+      name: validatedData.name,
+      email: normalizedEmail,
+      password: hashedPassword,
+      phone: validatedData.phone || null,
+      referralCode: referralCode?.toString() || null,
+      ownReferralCode
+    }
+
+    const code = await createVerificationCode(normalizedEmail, 'email_verify', undefined, payload)
+    await sendVerificationEmail(normalizedEmail, code, 'email_verify')
+
+    return NextResponse.json({ 
+      message: 'Registration successful! Please check your email for verification code.',
+      requiresVerification: true,
+      email: normalizedEmail
+    }, { status: 201 })
+
   } catch (error: any) {
     console.error('Registration error:', error)
     
@@ -225,4 +105,3 @@ export async function POST(request: Request) {
     )
   }
 }
-

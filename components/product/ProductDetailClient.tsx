@@ -106,10 +106,14 @@ export default function ProductDetailClient() {
       images = []
     }
     
+    const effectivePrice = product.variantPricing && (selectedVariant?.salePrice || selectedVariant?.price)
+      ? (selectedVariant.salePrice || selectedVariant.price)
+      : (product.salePrice || product.basePrice)
+    
     useCartStore.getState().addItem({
       productId: product.id,
       name: product.name,
-      price: product.salePrice || product.basePrice,
+      price: effectivePrice,
       quantity,
       image: images?.[0] || '/placeholder.png',
       variantId: selectedVariant.id,
@@ -162,8 +166,16 @@ export default function ProductDetailClient() {
     console.error('Error parsing images for render:', e)
     images = []
   }
-  const discount = product.basePrice && product.salePrice
-    ? Math.round(((product.basePrice - product.salePrice) / product.basePrice) * 100)
+  const displayPrice = product.variantPricing && selectedVariant && (selectedVariant.price || selectedVariant.salePrice)
+    ? (selectedVariant.salePrice || selectedVariant.price)
+    : (product.salePrice || product.basePrice)
+  
+  const displayBasePrice = product.variantPricing && selectedVariant && selectedVariant.price
+    ? selectedVariant.price
+    : product.basePrice
+
+  const discount = displayBasePrice && displayPrice && displayPrice < displayBasePrice
+    ? Math.round(((displayBasePrice - displayPrice) / displayBasePrice) * 100)
     : 0
   const specifications = generateSpecifications(product)
 
@@ -234,12 +246,12 @@ export default function ProductDetailClient() {
                 <div className="mb-4 sm:mb-6">
                   <div className="flex items-center gap-2 sm:gap-3 flex-wrap mb-1 sm:mb-2">
                     <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600">
-                      {formatPrice(product.salePrice || product.basePrice)}
+                      {formatPrice(displayPrice)}
                     </span>
-                    {product.salePrice && (
+                    {discount > 0 && (
                       <>
                         <span className="text-base sm:text-lg lg:text-xl text-gray-500 line-through">
-                          {formatPrice(product.basePrice)}
+                          {formatPrice(displayBasePrice)}
                         </span>
                         <span className="bg-red-500 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
                           Save {discount}%
@@ -247,9 +259,11 @@ export default function ProductDetailClient() {
                       </>
                     )}
                   </div>
-                  <p className="text-xs sm:text-sm text-green-600 font-semibold">
-                    You save BDT {product.basePrice - (product.salePrice || product.basePrice)}
-                  </p>
+                  {discount > 0 && (
+                    <p className="text-xs sm:text-sm text-green-600 font-semibold">
+                      You save BDT {displayBasePrice - displayPrice}
+                    </p>
+                  )}
                 </div>
 
                 {/* Short Description */}
@@ -329,7 +343,7 @@ export default function ProductDetailClient() {
                     </div>
                     <span className="text-xs sm:text-sm text-muted-foreground">
                       Total: <span className="font-bold text-blue-600 text-base sm:text-lg">
-                        {formatPrice((product.salePrice || product.basePrice) * quantity)}
+                        {formatPrice(displayPrice * quantity)}
                       </span>
                     </span>
                   </div>
@@ -365,7 +379,7 @@ export default function ProductDetailClient() {
                 )}
 
                 {/* Price Drop Alert */}
-                <PriceDropAlert productId={product.id} productName={product.name} currentPrice={product.salePrice || product.basePrice} />
+                <PriceDropAlert productId={product.id} productName={product.name} currentPrice={displayPrice} />
 
                 {/* Social Share */}
                 <SocialShare 
@@ -388,7 +402,7 @@ export default function ProductDetailClient() {
           <AISmartBundles currentProduct={{
             id: product.id,
             name: product.name,
-            price: product.salePrice || product.basePrice,
+            price: displayPrice,
             image: images[0] || '/placeholder.png'
           }} category={product.category?.name || 'General'} />
         </motion.div>
@@ -460,8 +474,8 @@ export default function ProductDetailClient() {
 
       <StickyMobileCart 
         product={product} 
-        price={product.salePrice || product.basePrice} 
-        originalPrice={product.basePrice}
+        price={displayPrice} 
+        originalPrice={displayBasePrice}
         onAddToCart={handleAddToCart}
         disabled={!selectedVariant || selectedVariant.stock === 0}
       />

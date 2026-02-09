@@ -117,11 +117,12 @@ export default async function ProductPage({ params }: Props) {
       images: true,
       basePrice: true,
       salePrice: true,
+      variantPricing: true,
       isActive: true,
       updatedAt: true,
       category: { select: { name: true } },
       variants: {
-        select: { sku: true, stock: true }
+        select: { sku: true, stock: true, size: true, color: true, price: true, salePrice: true }
       },
       reviews: {
         select: { rating: true }

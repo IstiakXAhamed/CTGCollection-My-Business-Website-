@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
         include: {
           category: { select: { id: true, name: true, slug: true } },
           shop: { select: { id: true, name: true, slug: true, logo: true } },
-          variants: { select: { id: true, size: true, color: true, stock: true, sku: true } },
+          variants: { select: { id: true, size: true, color: true, stock: true, sku: true, price: true, salePrice: true } },
           reviews: {
             where: { isApproved: true },
             include: { user: { select: { name: true } } },

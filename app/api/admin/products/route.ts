@@ -101,7 +101,8 @@ export async function POST(request: NextRequest) {
       productType,
       metaTitle,
       metaDescription,
-      metaKeywords
+      metaKeywords,
+      variantPricing
     } = body
 
     const product = await prisma.product.create({
@@ -122,12 +123,15 @@ export async function POST(request: NextRequest) {
         metaTitle,
         metaDescription,
         metaKeywords,
+        variantPricing: variantPricing || false,
         variants: {
           create: variants?.map((v: any) => ({
             size: v.size,
             color: v.color,
             sku: v.sku || `${slug}-${v.size}-${v.color}`,
-            stock: parseInt(v.stock) || 0
+            stock: parseInt(v.stock) || 0,
+            price: v.price ? parseFloat(v.price.toString()) : null,
+            salePrice: v.salePrice ? parseFloat(v.salePrice.toString()) : null
           })) || []
         }
       },

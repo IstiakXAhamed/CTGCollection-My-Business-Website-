@@ -12,6 +12,8 @@ interface Variant {
   color: string
   stock: number
   sku: string
+  price?: number
+  salePrice?: number
 }
 
 const TYPE_PRESETS: Record<string, { sizes: string[] }> = {
@@ -32,6 +34,7 @@ interface VariantManagerProps {
   productType?: string
   sizeLabel?: string
   colorLabel?: string
+  variantPricing?: boolean
 }
 
 // Preset sizes moved to TYPE_PRESETS
@@ -47,7 +50,8 @@ const PRESET_COLORS = [
   { name: 'Orange', hex: '#F97316' },
   { name: 'Gray', hex: '#6B7280' },
   { name: 'Navy', hex: '#1E3A8A' },
-  { name: 'Maroon', hex: '#800000' }
+  { name: 'Maroon', hex: '#800000' },
+  { name: 'Multicolor', hex: 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)' }
 ]
 
 export default function VariantManager({ 
@@ -57,7 +61,8 @@ export default function VariantManager({
   hasColor = true,
   productType = 'clothing',
   sizeLabel = 'Size',
-  colorLabel = 'Color'
+  colorLabel = 'Color',
+  variantPricing = false
 }: VariantManagerProps) {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([])
   const [selectedColors, setSelectedColors] = useState<string[]>([])
@@ -211,7 +216,7 @@ export default function VariantManager({
               >
                 <div 
                   className={cn("w-4 h-4 rounded-full shadow-sm", color.border && "border border-gray-200")} 
-                  style={{ backgroundColor: color.hex }} 
+                  style={{ background: color.hex.includes('gradient') ? color.hex : undefined, backgroundColor: color.hex.includes('gradient') ? undefined : color.hex }} 
                 />
                 <span className="font-semibold text-gray-700 dark:text-gray-300">{color.name}</span>
               </button>
@@ -263,32 +268,69 @@ export default function VariantManager({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-           {variants.map((v, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 bg-white border rounded-xl shadow-sm hover:shadow-md transition-shadow group">
-                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                       <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold uppercase">{v.size || 'No Size'}</span>
-                       {hasColor && <span className="text-gray-400 text-xs">×</span>}
-                       {hasColor && <span className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[10px] font-bold uppercase">{v.color || 'No Color'}</span>}
+            {variants.map((v, i) => (
+              <div key={i} className="flex flex-col p-3 bg-white border rounded-xl shadow-sm hover:shadow-md transition-shadow group space-y-3">
+                 <div className="flex items-center justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                       <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold uppercase">{v.size || 'No Size'}</span>
+                          {hasColor && <span className="text-gray-400 text-xs">×</span>}
+                          {hasColor && <span className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[10px] font-bold uppercase">{v.color || 'No Color'}</span>}
+                       </div>
                     </div>
-                 </div>
-                 <div className="flex items-center gap-2">
-                    <Input 
-                      type="number" 
-                      className="w-20 h-9 text-center bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-blue-500"
-                      value={v.stock}
-                      onChange={e => updateVariantStock(i, parseInt(e.target.value) || 0)}
-                    />
                     <button 
-                      type="button" 
-                      onClick={() => removeVariant(i)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                       type="button" 
+                       onClick={() => removeVariant(i)}
+                       className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                     >
-                      <X className="w-4 h-4" />
+                       <X className="w-4 h-4" />
                     </button>
                  </div>
+
+                 <div className="grid grid-cols-2 gap-2 mt-2">
+                    <div className="space-y-1">
+                       <Label className="text-[10px] text-slate-500 uppercase font-bold">Stock</Label>
+                       <Input 
+                          type="number" 
+                          className="h-8 text-xs bg-gray-50 border-none px-2"
+                          value={v.stock}
+                          onChange={e => updateVariantStock(i, parseInt(e.target.value) || 0)}
+                       />
+                    </div>
+                    {variantPricing && (
+                       <div className="space-y-1">
+                          <Label className="text-[10px] text-slate-500 uppercase font-bold">Price (BDT)</Label>
+                          <Input 
+                             type="number" 
+                             className="h-8 text-xs bg-gray-50 border-none px-2"
+                             value={v.price || ''}
+                             placeholder="Standard"
+                             onChange={e => {
+                                const next = [...variants]
+                                next[i].price = parseFloat(e.target.value) || undefined
+                                onChange(next)
+                             }}
+                          />
+                       </div>
+                    )}
+                 </div>
+                 {variantPricing && (
+                    <div className="space-y-1">
+                       <Label className="text-[10px] text-slate-500 uppercase font-bold">Sale Price (Optional)</Label>
+                       <Input 
+                          type="number" 
+                          className="h-8 text-xs bg-slate-50 border-none px-2 text-red-600 font-bold"
+                          value={v.salePrice || ''}
+                          onChange={e => {
+                             const next = [...variants]
+                             next[i].salePrice = parseFloat(e.target.value) || undefined
+                             onChange(next)
+                          }}
+                       />
+                    </div>
+                 )}
               </div>
-           ))}
+            ))}
         </div>
         
         {variants.length === 0 && (

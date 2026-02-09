@@ -11,7 +11,8 @@ export function generateVerificationCode(): string {
 export async function createVerificationCode(
   email: string,
   type: 'email_verify' | 'login_2fa' | 'password_reset',
-  userId?: string
+  userId?: string,
+  payload?: any
 ): Promise<string> {
   // Delete any existing codes of same type for this email
   await prisma.verificationCode.deleteMany({
@@ -19,7 +20,7 @@ export async function createVerificationCode(
   })
 
   const code = generateVerificationCode()
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
 
   await prisma.verificationCode.create({
     data: {
@@ -27,6 +28,7 @@ export async function createVerificationCode(
       type,
       email,
       userId,
+      payload,
       expiresAt
     }
   })
@@ -39,7 +41,7 @@ export async function verifyCode(
   email: string,
   code: string,
   type: 'email_verify' | 'login_2fa' | 'password_reset'
-): Promise<{ success: boolean; message: string; userId?: string }> {
+): Promise<{ success: boolean; message: string; userId?: string; payload?: any }> {
   const verificationCode = await prisma.verificationCode.findFirst({
     where: {
       email,
@@ -80,7 +82,7 @@ export async function verifyCode(
     data: { used: true }
   })
 
-  return { success: true, message: 'Code verified successfully', userId: verificationCode.userId || undefined }
+  return { success: true, message: 'Code verified successfully', userId: verificationCode.userId || undefined, payload: verificationCode.payload }
 }
 
 // Send verification email

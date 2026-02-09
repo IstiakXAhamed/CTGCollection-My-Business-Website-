@@ -138,6 +138,7 @@ model Product {
   metaTitle     String?
   metaDescription String? @db.Text
   metaKeywords  String?   // Comma separated
+  variantPricing Boolean @default(false)
   
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -170,6 +171,8 @@ model ProductVariant {
   size          String?
   color         String?
   stock         Int      @default(0)
+  price         Float?
+  salePrice     Float?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   
@@ -493,6 +496,7 @@ model VerificationCode {
   expiresAt DateTime
   used      Boolean  @default(false)
   attempts  Int      @default(0) // Track failed attempts
+  payload   Json?    // Optional payload for storing registration data until verified
   createdAt DateTime @default(now())
   
   @@index([email, type])

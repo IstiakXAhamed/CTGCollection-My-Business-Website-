@@ -5,6 +5,8 @@ import { motion } from 'framer-motion'
 import { Bell, BellRing, Loader2, Check, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 
 interface PriceDropAlertProps {
   productId: string
@@ -19,21 +21,19 @@ export function PriceDropAlert({
   currentPrice,
   variant = 'button'
 }: PriceDropAlertProps) {
+  const { data: session } = useSession()
   const [isOpen, setIsOpen] = useState(false)
-  const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [subscribed, setSubscribed] = useState(false)
   const [error, setError] = useState('')
 
   const handleSubscribe = async () => {
-    setError('')
-
-    // Validate email
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email address')
+    if (!session?.user?.email) {
+      setError('Please login to subscribe to price alerts')
       return
     }
 
+    setError('')
     setLoading(true)
 
     try {
@@ -42,7 +42,7 @@ export function PriceDropAlert({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productId,
-          email,
+          email: session.user.email,
           currentPrice
         })
       })
@@ -100,22 +100,22 @@ export function PriceDropAlert({
               <p className="text-red-500 text-sm mb-2">{error}</p>
             )}
 
-            <div className="flex gap-2">
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="flex-1"
-              />
-              <Button onClick={handleSubscribe} disabled={loading}>
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  'Notify Me'
-                )}
-              </Button>
-            </div>
+            {!session ? (
+              <Link href="/login">
+                <Button className="w-full bg-amber-500 hover:bg-amber-600">
+                  Login to set alert
+                </Button>
+              </Link>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <p className="text-xs text-gray-500 mb-1">
+                  We'll notify you at <strong>{session.user?.email}</strong>
+                </p>
+                <Button onClick={handleSubscribe} disabled={loading}>
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Notify Me'}
+                </Button>
+              </div>
+            )}
           </motion.div>
         )}
       </>
@@ -139,29 +139,33 @@ export function PriceDropAlert({
           <p className="text-red-500 text-sm mb-3">{error}</p>
         )}
 
-        <div className="flex gap-2">
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            className="flex-1 bg-white dark:bg-gray-800"
-          />
-          <Button 
-            onClick={handleSubscribe} 
-            disabled={loading}
-            className="bg-amber-500 hover:bg-amber-600"
-          >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <>
-                <Mail className="w-4 h-4 mr-2" />
-                Subscribe
-              </>
-            )}
-          </Button>
-        </div>
+        {!session ? (
+          <Link href="/login">
+            <Button className="w-full bg-amber-500 hover:bg-amber-600 py-6 text-base">
+              Login to get notified
+            </Button>
+          </Link>
+        ) : (
+          <div className="flex flex-col gap-3">
+             <p className="text-sm text-gray-500">
+               Notify at: <strong>{session.user?.email}</strong>
+             </p>
+             <Button 
+              onClick={handleSubscribe} 
+              disabled={loading}
+              className="bg-amber-500 hover:bg-amber-600 w-full"
+            >
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Bell className="w-4 h-4 mr-2" />
+                  Enable Price Alert
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
     )
   }
@@ -169,21 +173,22 @@ export function PriceDropAlert({
   // Inline variant
   return (
     <div className="flex items-center gap-2">
-      <Input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email for price alerts"
-        className="flex-1 h-9 text-sm"
-      />
-      <Button 
-        size="sm" 
-        onClick={handleSubscribe} 
-        disabled={loading}
-        variant="outline"
-      >
-        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
-      </Button>
+      {!session ? (
+        <Link href="/login" className="text-xs text-blue-600 hover:underline">
+          Login for alerts
+        </Link>
+      ) : (
+        <Button 
+          size="sm" 
+          onClick={handleSubscribe} 
+          disabled={loading}
+          variant="outline"
+          className="h-9 px-3"
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4 mr-2" />}
+          {loading ? 'Subscribing...' : 'Price Alert'}
+        </Button>
+      )}
     </div>
   )
 }

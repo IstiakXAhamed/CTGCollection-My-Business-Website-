@@ -58,6 +58,7 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
     metaTitle: initialData?.metaTitle || '',
     metaDescription: initialData?.metaDescription || '',
     metaKeywords: initialData?.metaKeywords || '',
+    variantPricing: initialData?.variantPricing || false,
   })
   
   let initialImages: string[] = []
@@ -201,7 +202,9 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
         images,
         variants: variants.map(v => ({
           ...v,
-          stock: parseInt(v.stock?.toString() || '0')
+          stock: parseInt(v.stock?.toString() || '0'),
+          price: v.price ? parseFloat(v.price.toString()) : null,
+          salePrice: v.salePrice ? parseFloat(v.salePrice.toString()) : null
         }))
       }
 
@@ -339,6 +342,7 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
               productType={formData.productType}
               sizeLabel={typeConfig.sizeLabel}
               colorLabel={typeConfig.colorLabel}
+              variantPricing={formData.variantPricing}
            />
         </CardContent>
       </Card>
@@ -369,6 +373,10 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
                  <label className="flex items-center gap-2 border p-2 rounded cursor-pointer hover:bg-slate-50">
                     <input type="checkbox" checked={formData.isActive} onChange={e => setFormData({ ...formData, isActive: e.target.checked })} />
                     <span className="text-sm font-medium">🟢 Active</span>
+                 </label>
+                 <label className="flex items-center gap-2 border p-2 rounded cursor-pointer bg-purple-50 border-purple-200">
+                    <input type="checkbox" checked={formData.variantPricing} onChange={e => setFormData({ ...formData, variantPricing: e.target.checked })} />
+                    <span className="text-sm font-medium text-purple-700">💰 Multi Price Option</span>
                  </label>
               </div>
            </CardContent>

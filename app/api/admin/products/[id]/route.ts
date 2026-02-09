@@ -98,7 +98,8 @@ export async function PUT(
       productType,
       metaTitle,
       metaDescription,
-      metaKeywords
+      metaKeywords,
+      variantPricing
     } = body
 
     const product = await prisma.product.update({
@@ -117,13 +118,16 @@ export async function PUT(
         metaTitle,
         metaDescription,
         metaKeywords,
+        variantPricing: variantPricing || false,
         variants: {
           deleteMany: {}, // Delete existing variants
           create: variants?.map((v: any) => ({
             size: v.size,
             color: v.color,
             sku: v.sku || `${params.id.slice(0, 8)}-${v.size}-${v.color}-${Date.now()}`,
-            stock: parseInt(v.stock) || 0
+            stock: parseInt(v.stock) || 0,
+            price: v.price ? parseFloat(v.price.toString()) : null,
+            salePrice: v.salePrice ? parseFloat(v.salePrice.toString()) : null
           })) || []
         }
       },
