@@ -48,11 +48,19 @@ export async function POST(request: NextRequest) {
     if (useCloudinary) {
       const { v2: cloudinary } = await import('cloudinary')
       
-      cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET,
+      const config = {
+        cloud_name: (process.env.CLOUDINARY_CLOUD_NAME || '').trim(),
+        api_key: (process.env.CLOUDINARY_API_KEY || '').trim(),
+        api_secret: (process.env.CLOUDINARY_API_SECRET || '').trim(),
+      }
+
+      console.log('[Upload API] Using Cloudinary Config:', {
+        cloud_name: config.cloud_name,
+        api_key: config.api_key ? `${config.api_key.substring(0, 4)}...` : 'MISSING',
+        api_secret: config.api_secret ? 'PRESENT' : 'MISSING'
       })
+      
+      cloudinary.config(config)
 
       // Upload to Cloudinary
       const arrayBuffer = await file.arrayBuffer()
