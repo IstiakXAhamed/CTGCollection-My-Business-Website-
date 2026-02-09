@@ -15,39 +15,31 @@ const handler = NextAuth({
   ],
   
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === 'google' && user.email) {
         try {
-          // Check if user exists with this email
-          let dbUser = await prisma.user.findUnique({
-            where: { email: user.email }
+          // Use upsert to combine check and create/update in ONE database hit
+          const dbUser = await prisma.user.upsert({
+            where: { email: user.email },
+            update: { 
+              googleId: account.providerAccountId,
+              emailVerified: true // Ensure verified if logging in via Google
+            },
+            create: {
+              email: user.email,
+              name: user.name || 'Google User',
+              googleId: account.providerAccountId,
+              emailVerified: true,
+              role: 'customer',
+            }
           })
 
-          if (dbUser) {
-            // Link Google ID if not already linked
-            if (!dbUser.googleId && account.providerAccountId) {
-              await prisma.user.update({
-                where: { id: dbUser.id },
-                data: { googleId: account.providerAccountId }
-              })
-            }
-          } else {
-            // Create new user - Google users are auto-verified
-            dbUser = await prisma.user.create({
-              data: {
-                email: user.email,
-                name: user.name || 'Google User',
-                googleId: account.providerAccountId,
-                emailVerified: true, // Google already verified their email
-                role: 'customer',
-              }
-            })
-          }
+          if (dbUser.isActive === false) return false
 
-          // Check if account is deactivated
-          if (dbUser.isActive === false) {
-            return false // Block login
-          }
+          // Attach DB user details to the user object so subsequent callbacks can use them
+          (user as any).dbId = dbUser.id;
+          (user as any).dbRole = dbUser.role;
+          (user as any).dbName = dbUser.name;
 
           return true
         } catch (error) {
@@ -59,21 +51,20 @@ const handler = NextAuth({
     },
 
     async jwt({ token, user, account }) {
-      if (account?.provider === 'google' && user?.email) {
-        // Get the database user
-        const dbUser = await prisma.user.findUnique({
-          where: { email: user.email }
-        })
-        
-        if (dbUser) {
-          token.userId = dbUser.id
-          token.role = dbUser.role
-          token.dbUser = {
-            id: dbUser.id,
-            name: dbUser.name,
-            email: dbUser.email,
-            role: dbUser.role,
-          }
+      // During initial sign-in, account and user are available
+      if (account?.provider === 'google' && user) {
+        const u = user as any;
+        const userId = u.dbId || u.id;
+        const role = u.dbRole || 'customer';
+        const name = u.dbName || u.name;
+
+        token.userId = userId
+        token.role = role
+        token.dbUser = {
+          id: userId,
+          name: name,
+          email: token.email,
+          role: role,
         }
       }
       return token
@@ -86,8 +77,8 @@ const handler = NextAuth({
       return session
     },
 
-    async redirect({ url, baseUrl }) {
-      // Redirect to home after successful login
+    async redirect({ baseUrl }) {
+      // Direct redirect to base URL is faster
       return baseUrl
     }
   },
@@ -95,19 +86,17 @@ const handler = NextAuth({
   events: {
     async signIn({ user, account }) {
       if (account?.provider === 'google' && user.email) {
-        // Create our own JWT token and set cookie for compatibility with existing auth
-        const dbUser = await prisma.user.findUnique({
-          where: { email: user.email }
-        })
-        
-        if (dbUser) {
+        try {
+          const u = user as any;
+          const userId = u.dbId || u.id;
+          const role = u.dbRole || 'customer';
+
           const token = await createToken({
-            userId: dbUser.id,
-            email: dbUser.email,
-            role: dbUser.role,
+            userId: userId,
+            email: user.email,
+            role: role,
           })
           
-          // Set our auth cookie
           const cookieStore = await cookies()
           cookieStore.set('token', token, {
             httpOnly: true,
@@ -116,6 +105,8 @@ const handler = NextAuth({
             maxAge: 60 * 60 * 24 * 7, // 7 days
             path: '/',
           })
+        } catch (error) {
+          console.error('Event signIn error:', error)
         }
       }
     }
