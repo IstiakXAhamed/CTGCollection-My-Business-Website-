@@ -16,6 +16,21 @@ export function useSiteSettings() {
   const [settings, setSettings] = useState<SiteSettings | null>(globalSettings)
   const [loading, setLoading] = useState(!globalSettings)
 
+  const refreshSettings = async () => {
+    fetchPromise = fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        globalSettings = data.settings
+        setSettings(data.settings)
+        return data.settings
+      })
+      .catch(err => {
+        console.error('Failed to load settings', err)
+        return null
+      })
+    return fetchPromise
+  }
+
   useEffect(() => {
     if (globalSettings) {
       setSettings(globalSettings)
@@ -23,30 +38,8 @@ export function useSiteSettings() {
       return
     }
 
-    if (!fetchPromise) {
-      fetchPromise = fetch('/api/settings')
-        .then(res => res.json())
-        .then(data => {
-          // data.settings contains the actual object
-          globalSettings = data.settings
-          return data.settings
-        })
-        .catch(err => {
-          console.error('Failed to load settings', err)
-          return null
-        })
-        .finally(() => {
-          fetchPromise = null
-        })
-    }
-
-    fetchPromise.then(data => {
-      if (data) {
-        setSettings(data)
-      }
-      setLoading(false)
-    })
+    refreshSettings().finally(() => setLoading(false))
   }, [])
 
-  return { settings, loading }
+  return { settings, loading, refreshSettings }
 }

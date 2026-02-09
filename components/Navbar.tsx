@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/Logo'
 import { useState, useEffect } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useSiteSettings } from '@/hooks/useSiteSettings'
 import NotificationBell from '@/components/NotificationBell'
 import { useCartStore } from '@/store/cart'
 import RoleBadge from '@/components/RoleBadge'
@@ -28,23 +29,7 @@ export default function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [settings, setSettings] = useState<any>(null)
-  
-  useEffect(() => {
-    fetchSettings()
-  }, [])
-
-  const fetchSettings = async () => {
-    try {
-      const res = await fetch('/api/settings')
-      if (res.ok) {
-        const data = await res.json()
-        setSettings(data.settings)
-      }
-    } catch (err) {
-      console.error('Navbar settings fetch failed:', err)
-    }
-  }
+  const { settings } = useSiteSettings()
 
   const handleManualInstall = () => {
     window.dispatchEvent(new CustomEvent('pwa-install-requested'))

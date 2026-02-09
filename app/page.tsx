@@ -165,9 +165,15 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* Wave divider */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
+        {/* Wave divider - Fixed with bottom-[-1px] to prevent sub-pixel leak */}
+        <div className="absolute -bottom-[1px] left-0 right-0 w-full overflow-hidden leading-[0]">
+          <svg 
+            viewBox="0 0 1440 80" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg" 
+            className="relative block w-full h-auto"
+            preserveAspectRatio="none"
+          >
             <path d="M0 80L60 73C120 67 240 53 360 47C480 40 600 40 720 43C840 47 960 53 1080 53C1200 53 1320 47 1380 43L1440 40V80H1380C1320 80 1200 80 1080 80C960 80 840 80 720 80C600 80 480 80 360 80C240 80 120 80 60 80H0Z" fill="white"/>
           </svg>
         </div>
@@ -564,7 +570,6 @@ export default function HomePage() {
           </Card>
         </motion.div>
         {/* Testimonials Section */}
-        <TestimonialsCarousel />
         <TestimonialsCarousel />
       </section>
     </div>

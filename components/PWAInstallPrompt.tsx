@@ -51,7 +51,11 @@ export function PWAInstallPrompt() {
     // Listen for manual install requests - ALWAYS active
     const handleManualRequest = () => {
       console.log('PWA Install Requested Manually')
-      setIsVisible(true)
+      if (deferredPrompt) {
+        handleInstall() // Trigger native prompt directly
+      } else {
+        setIsVisible(true) // Fallback to instructions (e.g., iOS)
+      }
     }
     window.addEventListener('pwa-install-requested', handleManualRequest)
 

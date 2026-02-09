@@ -4,34 +4,24 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Smartphone, Download, Sparkles, ArrowRight, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useSiteSettings } from '@/hooks/useSiteSettings'
 
 export function PWAInstallBanner() {
-  const [isVisible, setIsVisible] = useState(false)
-  const [settings, setSettings] = useState<any>(null)
+  const { settings, loading } = useSiteSettings()
+  const [isStandalone, setIsStandalone] = useState(false)
 
   useEffect(() => {
-    // Check if in standalone mode (already installed)
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      return
+    if (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) {
+      setIsStandalone(true)
     }
-
-    // Fetch settings to check if link should be shown
-    fetch('/api/settings')
-      .then(res => res.json())
-      .then(data => {
-        setSettings(data.settings)
-        if (data.settings?.pwaShowInstallLink) {
-          setIsVisible(true)
-        }
-      })
-      .catch(err => console.error('PWA Banner settings fetch error:', err))
   }, [])
 
   const handleInstallClick = () => {
     window.dispatchEvent(new CustomEvent('pwa-install-requested'))
   }
 
-  if (!isVisible) return null
+  // Render nothing if site settings haven't loaded, or if already installed, or if disabled in admin
+  if (loading || isStandalone || !settings?.pwaShowInstallLink) return null
 
   return (
     <section className="py-12 bg-white">
