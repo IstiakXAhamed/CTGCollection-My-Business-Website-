@@ -78,10 +78,7 @@ export async function POST(request: NextRequest) {
             clearTimeout(timeout)
             if (error) {
               console.error('Cloudinary Error:', error)
-              const secretEnd = config.api_secret ? config.api_secret.slice(-4) : 'NONE'
-              resolve(NextResponse.json({ 
-                error: `${error.message || 'Cloudinary upload failed'} (Using secret ending in: ${secretEnd})` 
-              }, { status: 500 }))
+              resolve(NextResponse.json({ error: error.message || 'Cloudinary upload failed' }, { status: 500 }))
             } else {
               resolve(NextResponse.json({
                 success: true,
