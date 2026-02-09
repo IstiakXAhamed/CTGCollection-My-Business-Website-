@@ -73,7 +73,10 @@ export function PWAInstallPrompt() {
   // Secondary effect to handle visibility once settings are loaded
   useEffect(() => {
     const dismissed = localStorage.getItem('pwa_prompt_dismissed')
-    if (!settings || settings.pwaEnabled === false || isInstalled || dismissed) return
+    // STRICT MOBILE ONLY CHECK
+    const isMobile = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    
+    if (!settings || settings.pwaEnabled === false || isInstalled || dismissed || !isMobile) return
 
     const delay = (settings.pwaPromptDelay || 30) * 1000
     
@@ -111,10 +114,10 @@ export function PWAInstallPrompt() {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: 100 }}
+        initial={{ opacity: 0, y: -100 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 100 }}
-        className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-50"
+        exit={{ opacity: 0, y: -100 }}
+        className="fixed top-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-[200]"
       >
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
           {/* Header */}

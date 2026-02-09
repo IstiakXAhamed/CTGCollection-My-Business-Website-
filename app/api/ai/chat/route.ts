@@ -335,7 +335,10 @@ export async function POST(request: NextRequest) {
 // Helper for Admin Notifications
 async function notifyAdmin(type: string, title: string, message: string, subject: string, customer?: any) {
   try {
-    const admin = await prisma.user.findFirst({ where: { role: 'admin' }, select: { id: true } });
+    const admin = await prisma.user.findFirst({ 
+      where: { role: { in: ['admin', 'superadmin'] } }, 
+      select: { id: true } 
+    });
     if (admin) {
       await prisma.notification.create({
         data: { userId: admin.id, type, title, message: `${message}\nCustomer: ${customer?.email || 'Guest'}`, link: '/admin/messages' }

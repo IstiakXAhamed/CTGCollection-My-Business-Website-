@@ -59,12 +59,12 @@ export async function PUT(req: NextRequest) {
           const d = new Date(value)
           data[key] = isNaN(d.getTime()) ? null : d
         }
-      } else if (['shippingCost', 'freeShippingMin', 'pointsPerTaka', 'pointsValue', 'defaultCommission'].includes(key)) {
+      } else if (['shippingCost', 'freeShippingMin', 'pointsPerTaka', 'pointsValue', 'defaultCommission', 'pwaPromptDelay'].includes(key)) {
         data[key] = parseFloat(value) || 0
       } else if (typeof value === 'boolean' || [
         'promoEnabled', 'codEnabled', 'sslEnabled', 'bkashEnabled', 'nagadEnabled', 'rocketEnabled', 
         'unifiedLogin', 'multiVendorEnabled', 'returnsEnabled', 'showFreeShipping', 
-        'showEasyReturns', 'showCOD', 'showAuthentic'
+        'showEasyReturns', 'showCOD', 'showAuthentic', 'pwaEnabled', 'pwaShowInstallLink'
       ].includes(key)) {
         data[key] = Boolean(value)
       } else {

@@ -311,7 +311,7 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
                 value={formData.description} 
                 onChange={e => setFormData({ ...formData, description: e.target.value })} 
                 required 
-                rows={5}
+                className="min-h-[400px]"
               />
               <AIProductAssist 
                 productName={formData.name}

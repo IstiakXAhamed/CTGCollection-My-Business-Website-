@@ -207,10 +207,15 @@ export function LiveChat() {
       
       // If context provided, populate input or auto-send
       if (e.detail?.context) {
-        // Option 1: Populate input (user sees it and can send)
-        setInputValue(`[Context from AI Chat]\n${e.detail.context}`)
-        
-        // Option 2: Scroll to bottom
+        setHasChatStarted(true)
+        setLastActivityTime(Date.now())
+        setMessages(prev => [...prev, {
+          id: `ai_context_${Date.now()}`,
+          message: e.detail.context,
+          senderType: 'system',
+          senderName: 'Assistant',
+          createdAt: new Date().toISOString()
+        }])
         setTimeout(scrollToBottom, 100)
       }
     }
@@ -452,7 +457,7 @@ export function LiveChat() {
             initial={{ opacity: 0, y: 100, scale: 0.8 }}
             animate={{ opacity: 1, y: 0, scale: 1, height: isMinimized ? 'auto' : '500px' }}
             exit={{ opacity: 0, y: 100, scale: 0.8 }}
-            className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-2rem)] h-[80vh] max-h-[92svh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 flex items-center justify-between">

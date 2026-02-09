@@ -210,6 +210,31 @@ export function AIChatAssistant() {
       timestamp: Date.now()
     }
   ])
+
+  const isLoaded = useRef(false)
+
+  // Load persistence
+  useEffect(() => {
+    const saved = sessionStorage.getItem('ai_chat_messages')
+    const savedOpen = sessionStorage.getItem('ai_chat_is_open')
+    if (saved) {
+      try {
+        setMessages(JSON.parse(saved))
+      } catch (e) {
+        console.error('Failed to parse saved AI messages')
+      }
+    }
+    if (savedOpen === 'true') setIsOpen(true)
+    isLoaded.current = true
+  }, [])
+
+  // Save persistence
+  useEffect(() => {
+    if (!isLoaded.current) return
+    
+    sessionStorage.setItem('ai_chat_messages', JSON.stringify(messages))
+    sessionStorage.setItem('ai_chat_is_open', isOpen.toString())
+  }, [messages, isOpen])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [isListening, setIsListening] = useState(false)
@@ -342,9 +367,14 @@ export function AIChatAssistant() {
   }
 
   const openLiveChat = () => {
-    const recentHistory = messages.slice(-4).map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`).join('\n')
+    const transcript = messages
+      .map(m => `${m.role === 'user' ? 'Customer' : 'AI Shopper'}: ${m.content}`)
+      .join('\n')
+    
+    const fullContext = `--- AI SESSION TRANSCRIPT ---\n${transcript}`
+    
     window.dispatchEvent(new CustomEvent('open-internal-chat', { 
-      detail: { context: recentHistory } 
+      detail: { context: fullContext } 
     }))
     setIsOpen(false)
   }
@@ -361,14 +391,14 @@ export function AIChatAssistant() {
   }
 
   return (
-    <div className="fixed bottom-32 md:bottom-36 right-4 md:right-6 z-[110] flex flex-col items-end font-sans">
+    <div className="fixed bottom-22 md:bottom-28 right-4 md:right-6 z-[110] flex flex-col items-end font-sans">
       <AnimatePresence>
         {isOpen && !isMinimized && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20, filter: 'blur(10px)' }}
             animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.95, y: 20, filter: 'blur(10px)' }}
-            className="pointer-events-auto w-[calc(100vw-2rem)] sm:w-[380px] h-[min(650px,85vh)] max-h-[85vh] rounded-[2.5rem] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)] bg-white/70 dark:bg-gray-900/70 backdrop-blur-3xl border border-white/30 dark:border-gray-800/30 overflow-hidden flex flex-col mb-4 ring-1 ring-black/5"
+            className="pointer-events-auto w-[calc(100vw-2rem)] sm:w-[380px] h-[80vh] max-h-[92svh] rounded-[2.5rem] shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)] bg-white/70 dark:bg-gray-900/70 backdrop-blur-3xl border border-white/30 dark:border-gray-800/30 overflow-hidden flex flex-col mb-4 ring-1 ring-black/5"
           >
             {/* Elite Header */}
             <div className="pt-7 px-6 pb-5 flex items-center justify-between bg-white/10 relative">

@@ -190,18 +190,7 @@ export default function Navbar() {
               </Link>
             </Button>
 
-            {/* Desktop PWA Install - Minimal & Sleek */}
-            {settings?.pwaShowInstallLink && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="hidden lg:flex text-gray-500 hover:text-blue-600 hover:bg-blue-50/50" 
-                onClick={handleManualInstall}
-                title="Install App"
-              >
-                <Download className="h-4 w-4" />
-              </Button>
-            )}
+            {/* Desktop PWA Install - Removed for Phone-Only Requirement */}
             
             {/* Cart */}
             <Link href="/cart">
