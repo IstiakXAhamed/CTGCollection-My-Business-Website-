@@ -8,7 +8,7 @@ if (typeof process !== 'undefined') {
   // Next.js static generation often needs threads for parallel DB/API calls
   const isBuild = process.env.NEXT_PHASE === 'phase-production-build' || 
                   process.env.NODE_PHASE === 'test' ||
-                  process.argv.includes('build');
+                  (process.argv && process.argv.includes('build'));
 
   if (!isBuild) {
     // Lock Libuv threadpool to 1 before any native code is loaded
