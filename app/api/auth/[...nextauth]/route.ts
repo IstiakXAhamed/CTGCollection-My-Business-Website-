@@ -34,7 +34,7 @@ const handler = NextAuth({
             }
           })
 
-          if (dbUser.isActive === false) return false
+          if (dbUser.isActive === false) return false;
 
           // Attach DB user details to the user object so subsequent callbacks can use them
           (user as any).dbId = dbUser.id;
