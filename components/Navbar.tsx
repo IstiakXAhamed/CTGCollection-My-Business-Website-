@@ -11,6 +11,7 @@ import { useSiteSettings } from '@/hooks/useSiteSettings'
 import NotificationBell from '@/components/NotificationBell'
 import { useCartStore } from '@/store/cart'
 import RoleBadge from '@/components/RoleBadge'
+import { useAppStandalone } from '@/hooks/useAppStandalone'
 
 interface UserData {
   id: string
@@ -30,6 +31,7 @@ export default function Navbar() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const { settings } = useSiteSettings()
+  const isStandalone = useAppStandalone()
 
   const handleManualInstall = () => {
     window.dispatchEvent(new CustomEvent('pwa-install-requested'))
@@ -291,15 +293,17 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
+            {/* Mobile Menu Button - Hidden in Silk Elite App Mode */}
+            {!isStandalone && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            )}
           </div>
         </div>
 

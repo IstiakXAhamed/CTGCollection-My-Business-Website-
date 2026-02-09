@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import { haptics } from '@/lib/haptics'
 
 interface CartItem {
   id: string
@@ -55,6 +56,7 @@ export const useCartStore = create<CartStore>()(
         )
 
         if (existingItem) {
+          haptics.medium()
           set({
             items: items.map((i) =>
               i.id === existingItem.id
@@ -63,6 +65,7 @@ export const useCartStore = create<CartStore>()(
             ),
           })
         } else {
+          haptics.medium()
           set({
             items: [
               ...items,
@@ -76,10 +79,12 @@ export const useCartStore = create<CartStore>()(
       },
 
       removeItem: (id) => {
+        haptics.light()
         set({ items: get().items.filter((item) => item.id !== id) })
       },
 
       updateQuantity: (id, quantity) => {
+        haptics.light()
         if (quantity <= 0) {
           get().removeItem(id)
         } else {

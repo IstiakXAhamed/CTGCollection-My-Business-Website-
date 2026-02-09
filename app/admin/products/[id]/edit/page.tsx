@@ -14,6 +14,7 @@ import { useToast } from '@/components/ui/use-toast'
 import AdvancedProductForm from '@/components/admin/AdvancedProductForm'
 import VariantManager from '@/components/admin/VariantManager'
 import AIProductAssist from '@/components/AIProductAssist'
+import { haptics } from '@/lib/haptics'
 
 type Variant = {
   id?: string
@@ -207,12 +208,15 @@ export default function EditProductPage() {
       })
 
       if (res.ok) {
+        haptics.rigid()
         toast({ title: 'Success!', description: 'Product updated successfully' })
         router.push('/admin/products')
       } else {
+        haptics.heavy()
         throw new Error('Failed to update')
       }
     } catch (error) {
+      haptics.heavy()
       toast({ title: 'Error', description: 'Failed to update product', variant: 'destructive' })
     } finally {
       setLoading(false)

@@ -40,6 +40,7 @@ import AdminNotificationBell from '@/components/AdminNotificationBell'
 import RoleBadge from '@/components/RoleBadge'
 import RoleSwitcher from '@/components/RoleSwitcher'
 import { getDefaultPermissionsForRole } from '@/lib/permissions-config'
+import { haptics } from '@/lib/haptics'
 
 // Menu items - filtered by role and permissions
 const getMenuItems = (role: string, permissions: string[] = []) => {
@@ -222,16 +223,19 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const menuItems = getMenuItems(user?.role || 'admin', effectivePermissions)
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Top Header */}
-      <header className="bg-white border-b sticky top-0 z-40">
+    <div className="min-h-screen bg-gray-50/50">
+      {/* Top Header - Ultra-Luxury Glassmorphism */}
+      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-white/20 dark:border-white/10 sticky top-0 z-40 shadow-sm">
         <div className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           {/* Left side - Menu toggle + Logo */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Mobile Menu Toggle */}
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition"
+              onClick={() => {
+                haptics.soft()
+                setSidebarOpen(!sidebarOpen)
+              }}
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-200/50 transition active:scale-90"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -269,8 +273,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <Button
               variant="ghost"
               size="sm"
-              className="text-red-600"
-              onClick={handleLogout}
+              className="text-red-600 hover:bg-red-50"
+              onClick={() => {
+                haptics.heavy()
+                handleLogout()
+              }}
             >
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline ml-2">Logout</span>
@@ -291,47 +298,49 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         {/* Sidebar - Hidden on mobile, toggle with overlay */}
         <aside className={`
           fixed lg:sticky top-0 lg:top-[65px] left-0 z-40 lg:z-0
-          w-64 bg-white border-r h-screen lg:h-[calc(100vh-65px)]
+          w-64 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-r border-white/20 dark:border-white/10 h-screen lg:h-[calc(100vh-65px)]
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           overflow-y-auto
         `}>
           {/* Mobile Header in Sidebar */}
-          <div className="lg:hidden p-4 border-b flex items-center justify-between">
+          <div className="lg:hidden p-4 border-b border-white/20 flex items-center justify-between">
             <span className="font-bold">Menu</span>
-            <button onClick={() => setSidebarOpen(false)} className="p-1 hover:bg-gray-100 rounded">
+            <button 
+              onClick={() => {
+                haptics.soft()
+                setSidebarOpen(false)
+              }} 
+              className="p-1 hover:bg-gray-100 rounded"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
-
+ 
           <nav className="p-3 sm:p-4 space-y-1">
             {menuItems.map((item) => {
               const Icon = item.icon
               
-              // Smart Active Logic:
-              // 1. Exact match always wins
-              // 2. Prefix match wins ONLY if no other menu item has a longer prefix match
-              // This prevents "Inventory History" (/admin/inventory) from lighting up when we are on "Forecast" (/admin/inventory/forecast)
               const isExactMatch = pathname === item.href
               const isPrefixMatch = item.href !== '/admin' && pathname?.startsWith(item.href)
-              
               const isBestMatch = isExactMatch || (isPrefixMatch && !menuItems.some(other => 
                 other !== item && 
                 other.href.length > item.href.length && 
                 pathname?.startsWith(other.href)
               ))
-
+ 
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition text-sm sm:text-base ${
+                  onClick={() => haptics.rigid()}
+                  className={`flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition-all duration-300 active:scale-95 group text-sm sm:text-base ${
                     isBestMatch
-                      ? 'bg-blue-600 text-white'
-                      : 'hover:bg-gray-100'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                      : 'hover:bg-blue-50/50 dark:hover:bg-blue-900/20 text-gray-600 dark:text-gray-400 hover:text-blue-600'
                   }`}
                 >
-                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                  <Icon className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 transition-transform duration-300 ${isBestMatch ? 'scale-110' : 'group-hover:scale-110'}`} />
                   <span className="font-medium truncate">{item.label}</span>
                 </Link>
               )
@@ -350,7 +359,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </aside>
 
         {/* Main Content - Full width on mobile */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0 min-h-screen bg-transparent pb-32 lg:pb-8">
           {children}
         </main>
       </div>

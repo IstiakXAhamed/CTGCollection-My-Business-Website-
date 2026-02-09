@@ -9,6 +9,7 @@ import { Search, Eye, Package, RefreshCw, ChevronDown, CheckCircle, Clock, Credi
 import { formatPrice } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
+import { haptics } from '@/lib/haptics'
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -77,9 +78,12 @@ export default function AdminOrdersPage() {
         body: JSON.stringify({ status: newStatus })
       })
       if (res.ok) {
+        haptics.rigid()
         setOrders(orders.map(o => 
           o.id === orderId ? { ...o, status: newStatus } : o
         ))
+      } else {
+        haptics.heavy()
       }
     } catch (error) {
       console.error('Failed to update status:', error)
@@ -107,6 +111,7 @@ export default function AdminOrdersPage() {
       const data = await res.json()
       
       if (res.ok) {
+        haptics.rigid()
         setOrders(orders.map(o => 
           o.id === orderId ? { ...o, paymentStatus: 'paid', status: 'confirmed' } : o
         ))
@@ -131,6 +136,7 @@ export default function AdminOrdersPage() {
       })
       const data = await res.json()
       if (res.ok) {
+        haptics.soft()
         toast({
           title: '✅ Receipt Sent!',
           description: data.message || 'Receipt with attachment sent to customer email.',

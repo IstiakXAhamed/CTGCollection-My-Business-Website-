@@ -14,6 +14,7 @@ import Image from 'next/image'
 import { useToast } from '@/components/ui/use-toast'
 import AIProductAssist from '@/components/AIProductAssist'
 import VariantManager from './VariantManager'
+import { haptics } from '@/lib/haptics'
 
 // Product Types definition
 const PRODUCT_TYPES = [
@@ -158,6 +159,7 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
     }
 
     setGeneratingSEO(true)
+    haptics.soft()
     try {
       const res = await fetch('/api/ai/generate-seo', {
         method: 'POST',
@@ -213,12 +215,15 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
       })
 
       if (res.ok) {
+        haptics.rigid()
         toast({ title: 'Success!', description: 'Product saved successfully' })
         router.push('/admin/products')
       } else {
+        haptics.heavy()
         throw new Error('Failed to save')
       }
     } catch (error) {
+      haptics.heavy()
       toast({ title: 'Error', description: 'Could not save product', variant: 'destructive' })
     } finally {
       setLoading(false)

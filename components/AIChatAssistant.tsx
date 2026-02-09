@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useCartStore } from '@/store/cart'
+import { haptics } from '@/lib/haptics'
+import { useAppStandalone } from '@/hooks/useAppStandalone'
 
 interface Message {
   id: string
@@ -23,6 +25,7 @@ interface Message {
 export function AIChatAssistant() {
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
+  const isStandalone = useAppStandalone()
   const cart = useCartStore()
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -83,6 +86,11 @@ export function AIChatAssistant() {
 
         if (data.actions?.some((a: any) => a.type === 'open_live_chat')) {
            setTimeout(() => openLiveChat(), 3000); 
+        }
+
+        // Trigger Haptic Pulse for proactive suggestions in Elite App
+        if (isStandalone && data.actions && data.actions.length > 0) {
+          haptics.pulse()
         }
 
         setMessages(prev => [...prev, aiMsg])
@@ -170,7 +178,13 @@ export function AIChatAssistant() {
                 <div>
                   <h3 className="font-bold text-lg tracking-tight text-gray-900 dark:text-white leading-none">Silk Lite</h3>
                   <div className="mt-1 flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-blue-600/70 dark:text-blue-400/70 uppercase tracking-[0.1em]">Online & Ready</span>
+                    {isStandalone ? (
+                      <span className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest flex items-center gap-1 shadow-sm">
+                        <Sparkles className="w-2.5 h-2.5" /> Silk Elite
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-blue-600/70 dark:text-blue-400/70 uppercase tracking-[0.1em]">Online & Ready</span>
+                    )}
                   </div>
                 </div>
               </div>

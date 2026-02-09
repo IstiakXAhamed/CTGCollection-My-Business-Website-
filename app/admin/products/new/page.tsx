@@ -14,6 +14,7 @@ import { useToast } from '@/components/ui/use-toast'
 import AIProductAssist from '@/components/AIProductAssist'
 import AdvancedProductForm from '@/components/admin/AdvancedProductForm'
 import VariantManager from '@/components/admin/VariantManager'
+import { haptics } from '@/lib/haptics'
 
 // Original "Simple" Form Logic (Inline)
 // ... (Keeping the original simple form mainly as fallback or for "simple" mode users)
@@ -143,12 +144,15 @@ export default function NewProductPage() {
         body: JSON.stringify(payload)
       })
       if (res.ok) {
+        haptics.rigid()
         toast({ title: 'Success!', description: 'Product created successfully' })
         router.push('/admin/products')
       } else {
+        haptics.heavy()
         throw new Error('Failed to create')
       }
     } catch {
+      haptics.heavy()
       toast({ title: 'Error', description: 'Failed to create product', variant: 'destructive' })
     } finally {
       setLoading(false)

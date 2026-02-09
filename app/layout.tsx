@@ -12,6 +12,10 @@ import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import AnnouncementPopup from '@/components/AnnouncementPopup'
 import Analytics from '@/components/Analytics'
 import dynamic from 'next/dynamic'
+import BottomNav from "@/components/BottomNav";
+import AppSplashScreen from "@/components/AppSplashScreen";
+import PageTransitionProvider from "@/components/PageTransitionProvider";
+import PullToRefresh from "@/components/PullToRefresh";
 
 // Lazy load heavy client components
 const SpinWheel = dynamic(() => import('@/components/SpinWheel').then(mod => mod.SpinWheel), { ssr: false })
@@ -80,8 +84,9 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 5, // Allow zooming for accessibility
+  maximumScale: 5,
   userScalable: true,
+  themeColor: '#2563eb', // Blue-600 to match branding
 };
 
 export default function RootLayout({
@@ -164,12 +169,16 @@ export default function RootLayout({
           }}
         />
         <Providers>
+          <AppSplashScreen />
+          <PullToRefresh />
           <Navbar />
           {/* Unified Promo Banner - After Navbar */}
           <UnifiedPromoBanner />
-          <main className="min-h-screen">
-            {children}
-          </main>
+          <PageTransitionProvider>
+            <main className="min-h-screen">
+              {children}
+            </main>
+          </PageTransitionProvider>
           <Footer />
 
           <AIChatAssistant />
@@ -185,6 +194,7 @@ export default function RootLayout({
           <PWAInstallPrompt />
           <AnnouncementPopup />
           
+          <BottomNav />
           <Toaster />
         </Providers>
       </body>
