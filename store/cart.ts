@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { haptics } from '@/lib/haptics'
+import { nativeApi } from '@/lib/native-api'
 
 interface CartItem {
   id: string
@@ -139,7 +140,18 @@ export const useCartStore = create<CartStore>()(
       storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true)
+        // Update badge on hydration
+        if (state) {
+          nativeApi.setBadge(state.getTotalItems())
+        }
       },
     }
   )
 )
+
+// Global sync for badge updates outside of the store methods if needed
+useCartStore.subscribe((state) => {
+  if (state._hasHydrated) {
+    nativeApi.setBadge(state.getTotalItems())
+  }
+})

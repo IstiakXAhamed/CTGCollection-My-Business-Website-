@@ -5,11 +5,18 @@ import Link from 'next/link'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Eye, Package, RefreshCw, ChevronDown, CheckCircle, Clock, CreditCard, FileText, Mail, Loader2, Download } from 'lucide-react'
+import { Search, Eye, Package, RefreshCw, ChevronDown, CheckCircle, Clock, CreditCard, FileText, Mail, Loader2, Download, Send, Share2 } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { haptics } from '@/lib/haptics'
+import { nativeApi } from '@/lib/native-api'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -84,9 +91,19 @@ export default function AdminOrdersPage() {
         ))
       } else {
         haptics.heavy()
+        toast({
+          title: '❌ Failed to Update Status',
+          description: 'Could not update order status.',
+          variant: 'destructive',
+        })
       }
     } catch (error) {
       console.error('Failed to update status:', error)
+      toast({
+        title: '❌ Error',
+        description: 'Failed to update status. Please try again.',
+        variant: 'destructive',
+      })
     } finally {
       setUpdating(null)
     }
@@ -127,7 +144,7 @@ export default function AdminOrdersPage() {
     }
   }
 
-  const sendReceipt = async (orderId: string) => {
+  const handleSendReceipt = async (orderId: string) => {
     setSendingReceipt(orderId)
     try {
       const res = await fetch(`/api/orders/${orderId}/receipt`, {
@@ -157,6 +174,15 @@ export default function AdminOrdersPage() {
     } finally {
       setSendingReceipt(null)
     }
+  }
+
+  const handleShareOrder = (order: any) => {
+    const text = `Order #${order.orderNumber}\nStatus: ${order.status}\nTotal: ${formatPrice(order.total)}\nItems: ${order.items.map((i: any) => `${i.quantity}x ${i.product.name}`).join(', ')}`
+    nativeApi.share({
+      title: `Silk Mart - Order #${order.orderNumber}`,
+      text: text,
+      url: `${window.location.origin}/profile?tab=orders`
+    })
   }
 
   const filteredOrders = orders.filter(o =>
@@ -317,33 +343,13 @@ export default function AdminOrdersPage() {
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex justify-end gap-2">
-                          {/* Confirm Payment Button */}
-                          {order.paymentStatus !== 'paid' && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="text-green-600 border-green-200 hover:bg-green-50"
-                              onClick={() => confirmPayment(order.id)}
-                              disabled={confirmingPayment === order.id}
-                            >
-                              {confirmingPayment === order.id ? (
-                                <RefreshCw className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <>
-                                  <CheckCircle className="w-4 h-4 mr-1" />
-                                  Confirm Pay
-                                </>
-                              )}
-                            </Button>
-                          )}
-                          
                           {/* Send Receipt Button */}
                           {order.paymentStatus === 'paid' && (
                             <Button 
                               size="sm" 
                               variant="outline"
                               className="text-blue-600"
-                              onClick={() => sendReceipt(order.id)}
+                              onClick={() => handleSendReceipt(order.id)}
                               disabled={sendingReceipt === order.id}
                             >
                               {sendingReceipt === order.id ? (
@@ -359,6 +365,17 @@ export default function AdminOrdersPage() {
                               )}
                             </Button>
                           )}
+
+                          {/* Native Share Button */}
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                            onClick={() => handleShareOrder(order)}
+                          >
+                            <Share2 className="w-4 h-4 mr-1" />
+                            Share
+                          </Button>
                           
                           <Link href={`/admin/orders/${order.id}`}>
                             <Button size="sm" variant="outline">

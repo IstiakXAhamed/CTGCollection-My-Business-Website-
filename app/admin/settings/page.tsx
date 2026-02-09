@@ -10,10 +10,13 @@ import {
   MessageCircle, Gift, Settings, Save, 
   CheckCircle2, Wifi, WifiOff, Clock, Loader2,
   Store, Truck, CreditCard, RotateCcw,
-  Smartphone, Monitor, Zap
+  Smartphone, Monitor, Zap, ShieldCheck, Fingerprint, Lock
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Switch } from '@/components/ui/switch'
+import { useSilkGuard } from '@/hooks/useSilkGuard'
+import { motion } from 'framer-motion'
+import { haptics } from '@/lib/haptics'
 
 interface SiteSettings {
   chatStatus: string
@@ -77,6 +80,7 @@ export default function AdminSettingsPage() {
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const guard = useSilkGuard('admin') // Using 'admin' as base since it's admin/settings
 
   useEffect(() => {
     fetchSettings()
@@ -705,7 +709,6 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
             </div>
-
             <div className="pt-4 border-t">
               <Button onClick={() => saveSettings({ 
                 codEnabled: settings.codEnabled, 
@@ -720,6 +723,90 @@ export default function AdminSettingsPage() {
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                 Save Payment Settings
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Silk Guard - Mobile App Security (Admin/Seller Only) */}
+        <Card className="border-2 border-indigo-100 mb-20">
+          <CardHeader className="bg-indigo-50">
+            <CardTitle className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-indigo-600" />
+              Silk Guard (Elite Mobile Security)
+            </CardTitle>
+            <CardDescription>Secure this device with Biometrics or a PIN (Admin/Seller Only)</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6 pt-6">
+            <div className="flex items-center justify-between p-4 border rounded-xl bg-white shadow-sm">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <Smartphone className="w-4 h-4 text-indigo-600" />
+                  <Label className="text-base font-semibold">Enable App Lock</Label>
+                </div>
+                <p className="text-sm text-muted-foreground">Require verification whenever you open Silk Mart on this phone.</p>
+              </div>
+              <Switch 
+                checked={guard.isEnabled}
+                onCheckedChange={(val) => {
+                  haptics.soft()
+                  guard.setSecurity(val, guard.biometricsActive, guard.passcode)
+                }}
+              />
+            </div>
+
+            {guard.isEnabled && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
+              >
+                <div className="flex items-center justify-between p-4 border rounded-xl bg-white shadow-sm">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <Fingerprint className="w-4 h-4 text-indigo-600" />
+                      <Label className="text-base font-semibold">Biometrics (FaceID/TouchID)</Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Use your phone's built-in sensors to unlock.</p>
+                  </div>
+                  <Switch 
+                    checked={guard.biometricsActive}
+                    onCheckedChange={(val) => {
+                      haptics.soft()
+                      guard.setSecurity(guard.isEnabled, val, guard.passcode)
+                    }}
+                  />
+                </div>
+
+                <div className="p-4 border rounded-xl bg-white shadow-sm">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Lock className="w-4 h-4 text-indigo-600" />
+                    <Label className="text-base font-semibold">Security PIN (6 Digits)</Label>
+                  </div>
+                  <div className="flex gap-2">
+                    <Input 
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={6}
+                      placeholder="Enter 6-digit PIN"
+                      value={guard.passcode || ''}
+                      onChange={(e) => {
+                         const val = e.target.value.replace(/\D/g, '').slice(0, 6)
+                         guard.setSecurity(guard.isEnabled, guard.biometricsActive, val)
+                      }}
+                      className="max-w-[200px]"
+                    />
+                    <Badge variant="outline" className="border-indigo-200 text-indigo-600">
+                      Mobile Fallback
+                    </Badge>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            <div className="bg-amber-50 p-4 rounded-xl border border-amber-100">
+              <p className="text-xs text-amber-800 leading-relaxed">
+                <span className="font-bold">Note:</span> These settings are stored <span className="underline italic">only on this device</span>. Your login password remains unchanged. Enabling this ensures that even if your phone is unlocked, your Silk Mart Admin Dashboard stays safe.
+              </p>
             </div>
           </CardContent>
         </Card>

@@ -41,6 +41,7 @@ import RoleBadge from '@/components/RoleBadge'
 import RoleSwitcher from '@/components/RoleSwitcher'
 import { getDefaultPermissionsForRole } from '@/lib/permissions-config'
 import { haptics } from '@/lib/haptics'
+import { SilkGuardOverlay } from '@/components/admin/SilkGuardOverlay'
 
 // Menu items - filtered by role and permissions
 const getMenuItems = (role: string, permissions: string[] = []) => {
@@ -224,6 +225,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gray-50/50">
+      <SilkGuardOverlay user={user} />
       {/* Top Header - Ultra-Luxury Glassmorphism */}
       <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-white/20 dark:border-white/10 sticky top-0 z-40 shadow-sm">
         <div className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">

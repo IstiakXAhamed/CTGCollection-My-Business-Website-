@@ -11,6 +11,7 @@ import {
   MessageCircle
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { nativeApi } from '@/lib/native-api'
 
 interface SocialShareProps {
   url: string
@@ -64,18 +65,13 @@ export function SocialShare({ url, title, description, image, className }: Socia
   }
 
   const handleNativeShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title,
-          text: description,
-          url: fullUrl,
-        })
-      } catch (error) {
-        // User cancelled or error occurred
-        console.log('Share cancelled')
-      }
-    } else {
+    const success = await nativeApi.share({
+      title,
+      text: description,
+      url: fullUrl,
+    })
+    
+    if (!success) {
       setIsOpen(!isOpen)
     }
   }
