@@ -19,10 +19,10 @@ const nextConfig = {
   experimental: {
     // Optimize package imports for smaller bundles
     optimizePackageImports: ['lucide-react', 'framer-motion', '@radix-ui/react-icons'],
-    // Force Next.js to use a single CPU core during build to prevent EAGAIN
+    // Force Next.js to use a single CPU core during build to stay within NPROC limits
     cpus: 1,
-    // Disable worker threads to keep everything in the main process
-    workerThreads: false,
+    // Use worker threads instead of processes (lighter on resources)
+    workerThreads: true,
   },
 
   // Image optimization
