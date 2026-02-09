@@ -13,6 +13,7 @@ export const useSilkGuard = (userRole?: string) => {
   const [isEnabled, setIsEnabled] = useState(false)
   const [biometricsActive, setBiometricsActive] = useState(false)
   const [passcode, setPasscode] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
 
   const isInternal = userRole === 'admin' || userRole === 'superadmin' || userRole === 'seller'
@@ -24,12 +25,18 @@ export const useSilkGuard = (userRole?: string) => {
       const savedBio = localStorage.getItem('silk_guard_biometric') === 'true'
       const savedPass = localStorage.getItem('silk_guard_passcode')
       
+      // Detect mobile device (screen size or touch capability)
+      const mobileCheck = window.matchMedia("(max-width: 768px)").matches || 
+                          ('ontouchstart' in window) ||
+                          (navigator.maxTouchPoints > 0);
+      setIsMobile(mobileCheck)
+      
       setIsEnabled(savedEnabled)
       setBiometricsActive(savedBio)
       setPasscode(savedPass)
       
-      // Auto-lock if enabled
-      if (savedEnabled) {
+      // Auto-lock if enabled AND on mobile
+      if (savedEnabled && mobileCheck) {
         setIsLocked(true)
       }
       
@@ -91,6 +98,7 @@ export const useSilkGuard = (userRole?: string) => {
     isEnabled,
     biometricsActive,
     passcode,
+    isMobile,
     isHydrated,
     isInternal,
     unlock,

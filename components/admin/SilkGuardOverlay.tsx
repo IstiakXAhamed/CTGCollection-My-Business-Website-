@@ -12,7 +12,7 @@ import { useSilkGuard } from '@/hooks/useSilkGuard'
  * A premium security gate for Admin/Sellers on mobile.
  */
 export const SilkGuardOverlay = ({ user }: { user: any }) => {
-  const { isLocked, passcode, biometricsActive, unlock, triggerBiometrics, isHydrated, isInternal } = useSilkGuard(user?.role)
+  const { isLocked, passcode, biometricsActive, unlock, triggerBiometrics, isHydrated, isInternal, isMobile } = useSilkGuard(user?.role)
   const [pinInput, setPinInput] = useState('')
   const [error, setError] = useState(false)
 
@@ -77,7 +77,7 @@ export const SilkGuardOverlay = ({ user }: { user: any }) => {
     setPinInput(pinInput.slice(0, -1))
   }
 
-  if (!isHydrated || !isLocked || !isInternal) return null
+  if (!isHydrated || !isLocked || !isInternal || !isMobile) return null
 
   return (
     <AnimatePresence>

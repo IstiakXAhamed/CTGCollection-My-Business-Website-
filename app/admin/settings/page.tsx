@@ -737,7 +737,16 @@ export default function AdminSettingsPage() {
             <CardDescription>Secure this device with Biometrics or a PIN (Admin/Seller Only)</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
-            <div className="flex items-center justify-between p-4 border rounded-xl bg-white shadow-sm">
+            {!guard.isMobile && (
+              <div className="p-4 border border-amber-200 bg-amber-50 rounded-xl mb-4">
+                <p className="text-amber-700 text-sm font-medium flex items-center gap-2">
+                  <Monitor className="w-4 h-4" />
+                  Silk Guard is a mobile-only feature. Open this page on your smartphone to configure app security.
+                </p>
+              </div>
+            )}
+            
+            <div className={`flex items-center justify-between p-4 border rounded-xl bg-white shadow-sm ${!guard.isMobile ? 'opacity-50 pointer-events-none' : ''}`}>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
                   <Smartphone className="w-4 h-4 text-indigo-600" />
@@ -747,14 +756,16 @@ export default function AdminSettingsPage() {
               </div>
               <Switch 
                 checked={guard.isEnabled}
+                disabled={!guard.isMobile}
                 onCheckedChange={(val) => {
                   haptics.soft()
+                  // Update local UI state - will be persisted on 'Save'
                   guard.setSecurity(val, guard.biometricsActive, guard.passcode)
                 }}
               />
             </div>
 
-            {guard.isEnabled && (
+            {guard.isEnabled && guard.isMobile && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -795,18 +806,33 @@ export default function AdminSettingsPage() {
                       }}
                       className="max-w-[200px]"
                     />
-                    <Badge variant="outline" className="border-indigo-200 text-indigo-600">
-                      Mobile Fallback
-                    </Badge>
                   </div>
                 </div>
               </motion.div>
             )}
 
-            <div className="bg-amber-50 p-4 rounded-xl border border-amber-100">
-              <p className="text-xs text-amber-800 leading-relaxed">
-                <span className="font-bold">Note:</span> These settings are stored <span className="underline italic">only on this device</span>. Your login password remains unchanged. Enabling this ensures that even if your phone is unlocked, your Silk Mart Admin Dashboard stays safe.
-              </p>
+            <div className="pt-4 border-t flex justify-end">
+              <Button 
+                onClick={() => {
+                  guard.setSecurity(guard.isEnabled, guard.biometricsActive, guard.passcode)
+                  toast({
+                    title: "Security Configured",
+                    description: "Your local device security settings have been updated.",
+                  })
+                }} 
+                className="bg-indigo-600 hover:bg-indigo-700"
+                disabled={!guard.isMobile}
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save Security Settings
+              </Button>
+            </div>
+
+            <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+               <p className="text-xs text-muted-foreground leading-relaxed">
+                 <ShieldCheck className="w-3 h-3 inline mr-1 text-indigo-500" />
+                 <strong>Elite Security Note:</strong> These settings are stored <em>only on this device</em>. Enabling this ensures that even if your phone is unlocked, your Silk Mart Admin Dashboard remains protected. Biometrics will use your phone's native Face ID or Fingerprint scanner.
+               </p>
             </div>
           </CardContent>
         </Card>

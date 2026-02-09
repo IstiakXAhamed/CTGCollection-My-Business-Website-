@@ -28,9 +28,12 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'createdAt'
     const order = searchParams.get('order') || 'desc'
 
-    // Build where clause - simplified to fix display issue
-    const where: any = { 
-      isActive: true
+    // Build where clause
+    const where: any = {}
+    
+    // Default: only show active products for public
+    if (searchParams.get('debug') !== 'true') {
+      where.isActive = true
     }
 
     // If slug is provided, fetch only that specific product
@@ -39,16 +42,19 @@ export async function GET(request: NextRequest) {
     }
 
     if (category && category !== 'All') {
-      where.OR = [
-        { category: { slug: category } },
-        { category: { name: { contains: category, mode: 'insensitive' } } }
-      ]
+      where.category = {
+        OR: [
+          { slug: category },
+          { name: { contains: category, mode: 'insensitive' } }
+        ]
+      }
     }
 
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
+        { description: { contains: search, mode: 'insensitive' } },
+        { category: { name: { contains: search, mode: 'insensitive' } } }
       ]
     }
 
@@ -71,8 +77,10 @@ export async function GET(request: NextRequest) {
       orderBy.createdAt = order
     }
 
-    // Fetch products, total count, AND settings in parallel for speed
-    const [products, total, settings] = await Promise.all([
+    console.log('[Products API] Fetching with where:', JSON.stringify(where))
+
+    // Fetch products and total count
+    const [products, total] = await Promise.all([
       db.product.findMany({
         where,
         include: {
@@ -89,15 +97,19 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit
       }),
-      db.product.count({ where }),
-      db.siteSettings.findFirst()
-    ]).catch(err => {
-      console.error('Database query failed:', err)
-      return [[], 0, null]
-    })
+      db.product.count({ where })
+    ])
     
-    console.log(`Found ${products.length} products (total: ${total})`)
-    const isMultiVendor = settings ? settings.multiVendorEnabled : true
+    // Fetch settings separately so it doesn't break products if SiteSettings table is problematic
+    let settings = null
+    try {
+      settings = await db.siteSettings.findFirst()
+    } catch (e) {
+      console.warn('[Products API] SiteSettings fetch failed, using defaults')
+    }
+
+    console.log(`[Products API] Found ${products?.length || 0} products (total in DB for this query: ${total})`)
+    const isMultiVendor = settings?.multiVendorEnabled ?? true
 
     // Parse images JSON safely and handle Multi-Vendor logic
     const productsWithImages = (products || []).map((p: any) => {

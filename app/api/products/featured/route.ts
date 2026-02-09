@@ -20,10 +20,19 @@ export async function GET(request: NextRequest) {
       take: limit
     })
 
-    const productsWithImages = featuredProducts.map(p => ({
-      ...p,
-      images: JSON.parse(p.images as string)
-    }))
+    const productsWithImages = featuredProducts.map(p => {
+      let images: string[] = []
+      try {
+        if (Array.isArray(p.images)) {
+          images = p.images
+        } else {
+          images = JSON.parse(p.images as string || '[]')
+        }
+      } catch (err) {
+        console.warn(`Parse error for product ${p.id}:`, err)
+      }
+      return { ...p, images }
+    })
 
     return NextResponse.json({ products: productsWithImages })
   } catch (error: any) {
