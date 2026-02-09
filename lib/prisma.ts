@@ -15,9 +15,6 @@ export const prisma =
         url: `${process.env.DATABASE_URL}${process.env.DATABASE_URL?.includes('?') ? '&' : '?'}connection_limit=1&pool_timeout=5`,
       },
     },
-    // Prevent separate binary processes; use the built-in library instead
-    // @ts-ignore - engineType is valid for Prisma binary selection
-    engineType: 'library',
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
   })
 
