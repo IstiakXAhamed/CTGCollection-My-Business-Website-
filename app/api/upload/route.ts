@@ -53,12 +53,6 @@ export async function POST(request: NextRequest) {
         api_key: (process.env.CLOUDINARY_API_KEY || '').trim(),
         api_secret: (process.env.CLOUDINARY_API_SECRET || '').trim(),
       }
-
-      console.log('[Upload API] Using Cloudinary Config:', {
-        cloud_name: config.cloud_name,
-        api_key: config.api_key ? `${config.api_key.substring(0, 4)}...` : 'MISSING',
-        api_secret: config.api_secret ? 'PRESENT' : 'MISSING'
-      })
       
       cloudinary.config(config)
 
