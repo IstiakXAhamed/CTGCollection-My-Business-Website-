@@ -104,13 +104,17 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
         const res = await fetch('/api/upload', {
           method: 'POST',
           body: formData,
+          credentials: 'include' // Send auth cookies!
         })
 
-        if (res.ok) {
-          const data = await res.json()
-          if (data.success && data.url) {
-            newImages.push(data.url)
-          }
+        if (!res.ok) {
+          const errorData = await res.json()
+          throw new Error(errorData.error || 'Upload failed')
+        }
+
+        const data = await res.json()
+        if (data.success && data.url) {
+          newImages.push(data.url)
         }
       }
       setImages(prev => [...prev, ...newImages])

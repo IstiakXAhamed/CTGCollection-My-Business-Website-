@@ -36,11 +36,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Enforce Security & Integrity via Sandboxing
-    // Regular users are confined to their own folder: `users/{USER_ID}/{FOLDER}`
     const safeFolder = folder.replace(/[^a-zA-Z0-9-_/]/g, '') // Sanitize input
     const isSuper = user.role === 'superadmin'
-    
-    // Integrity: Ensure User A cannot overwrite User B's files by namespacing.
     const finalFolder = isSuper ? safeFolder : `users/${user.id}/${safeFolder}`
 
     // 4. Cloudinary Configuration
@@ -49,7 +46,6 @@ export async function POST(request: NextRequest) {
                          process.env.CLOUDINARY_API_SECRET
 
     if (useCloudinary) {
-      // @ts-ignore
       const { v2: cloudinary } = await import('cloudinary')
       
       cloudinary.config({
@@ -63,15 +59,22 @@ export async function POST(request: NextRequest) {
       const buffer = Buffer.from(arrayBuffer)
       
       return new Promise<NextResponse>((resolve) => {
+        // Set a 30-second timeout to prevent permanent hanging
+        const timeout = setTimeout(() => {
+          console.error('Upload timeout: Cloudinary did not respond in time')
+          resolve(NextResponse.json({ error: 'Upload timeout. Please try again or check Cloudinary settings.' }, { status: 504 }))
+        }, 30000)
+
         const uploadStream = cloudinary.uploader.upload_stream(
           { 
             folder: `ctg-collection/${finalFolder}`, 
             resource_type: 'auto' 
           },
           (error: any, result: any) => {
+            clearTimeout(timeout)
             if (error) {
               console.error('Cloudinary Error:', error)
-              resolve(NextResponse.json({ error: 'Upload failed' }, { status: 500 }))
+              resolve(NextResponse.json({ error: error.message || 'Cloudinary upload failed' }, { status: 500 }))
             } else {
               resolve(NextResponse.json({
                 success: true,
@@ -89,7 +92,6 @@ export async function POST(request: NextRequest) {
 
     } else {
       // 5. Local Fallback (Dev/No-Cloud)
-      // Still imposes the same folder structure for consistency
       const timestamp = Date.now()
       const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
       const fileName = `${timestamp}_${originalName}`
@@ -121,8 +123,6 @@ export async function POST(request: NextRequest) {
 // GET - List files in a folder (Secure & Scoped)
 export async function GET(request: NextRequest) {
   try {
-    // 1. Verify Auth
-    // @ts-ignore
     const user = await verifyAuth(request)
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -130,35 +130,24 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const folder = searchParams.get('folder') || '' 
-    // folder param here is relative to their sandbox unless super admin
 
-    // 2. Determine Secure Path
     let targetFolder = ''
-    
-    // Permission check for viewing OTHER people's files
     const canViewAll = user.role === 'superadmin' || user.permissions?.includes('manage_storage')
     
     if (canViewAll) {
-      // Super admin can browse raw structure if they want, or user folders
-      targetFolder = folder // Trust admin input (sanitized needed?)
+      targetFolder = folder 
     } else {
-      // Regular user: strictly sandbox to their own folder
-      // Even if they request "users/other-id", we ignore/error or just prepend their own.
-      // We prepend their own path to guarantee isolation.
       const sanitizedReq = folder.replace(/[^a-zA-Z0-9-_/]/g, '')
       targetFolder = `users/${user.id}/${sanitizedReq}`
     }
 
-    // Remove leading slashes/dots to prevent traversal
     targetFolder = targetFolder.replace(/^\/+|\.+/g, '')
 
-    // 3. List Files (Cloudinary or Local)
     const useCloudinary = process.env.CLOUDINARY_CLOUD_NAME && 
                          process.env.CLOUDINARY_API_KEY && 
                          process.env.CLOUDINARY_API_SECRET
 
     if (useCloudinary) {
-      // @ts-ignore
       const { v2: cloudinary } = await import('cloudinary')
       cloudinary.config({
         cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -182,7 +171,6 @@ export async function GET(request: NextRequest) {
       })
 
     } else {
-      // Local listing
       const uploadDir = path.join(process.cwd(), 'public', 'uploads', targetFolder)
       if (!existsSync(uploadDir)) {
         return NextResponse.json({ files: [] })
