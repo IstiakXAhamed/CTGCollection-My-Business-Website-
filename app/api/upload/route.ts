@@ -53,6 +53,8 @@ export async function POST(request: NextRequest) {
         api_key: (process.env.CLOUDINARY_API_KEY || '').trim(),
         api_secret: (process.env.CLOUDINARY_API_SECRET || '').trim(),
       }
+
+      console.log('[Cloudinary Debug] Secret ends with:', config.api_secret.slice(-4))
       
       cloudinary.config(config)
 
@@ -76,7 +78,10 @@ export async function POST(request: NextRequest) {
             clearTimeout(timeout)
             if (error) {
               console.error('Cloudinary Error:', error)
-              resolve(NextResponse.json({ error: error.message || 'Cloudinary upload failed' }, { status: 500 }))
+              const secretEnd = config.api_secret ? config.api_secret.slice(-4) : 'NONE'
+              resolve(NextResponse.json({ 
+                error: `${error.message || 'Cloudinary upload failed'} (Using secret ending in: ${secretEnd})` 
+              }, { status: 500 }))
             } else {
               resolve(NextResponse.json({
                 success: true,
