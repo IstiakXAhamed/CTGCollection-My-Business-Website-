@@ -24,6 +24,8 @@ const nextConfig = {
     // Use worker threads instead of processes (lighter on resources)
     workerThreads: true,
   },
+  // Increase timeout for static page generation to survive shared hosting limits
+  staticPageGenerationTimeout: 300,
 
   // Image optimization
   images: {

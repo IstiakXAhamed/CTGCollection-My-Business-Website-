@@ -4,12 +4,10 @@
  * It forces the Node.js process into a single-threaded mode to satisfy CloudLinux NPROC limits.
  */
 if (typeof process !== 'undefined' && process.env) {
-  // Use a heuristic to detect build phase that works in both main and worker processes
-  const isBuild = 
-    process.env.NEXT_PHASE === 'phase-production-build' || 
-    process.env.NODE_PHASE === 'test' ||
-    (process.env.NODE_ENV === 'production' && !process.env.UV_THREADPOOL_SIZE && !process.env.NEXT_RUNTIME) ||
-    (process.argv && process.argv.some(arg => arg.includes('next-build') || arg === 'build'));
+  // Simpler, more robust build check
+  const isBuild = process.env.NEXT_PHASE === 'phase-production-build' || 
+                  process.env.NODE_PHASE === 'test' ||
+                  process.env.CI === 'true';
 
   if (!isBuild && !process.env.NEXT_RUNTIME) {
     // Lock Libuv threadpool to 1 before any native code is loaded
