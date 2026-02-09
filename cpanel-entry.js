@@ -10,17 +10,15 @@
  */
 
 // 1. HARD LOCK: Threadpool Size = 1
-// This must happen before ANY 'fs', 'crypto', or 'dns' modules are required.
-process.env.UV_THREADPOOL_SIZE = '1';
-
-// 2. PRISMA: Force In-Process Library Engine
-process.env.PRISMA_CLIENT_ENGINE_TYPE = 'library';
-
-// 3. NEXT: Disable Telemetry
-process.env.NEXT_TELEMETRY_DISABLED = '1';
+// Only apply in production runtime, not during build/static-gen
+if (!process.env.NEXT_PHASE?.includes('build')) {
+    process.env.UV_THREADPOOL_SIZE = '1';
+    process.env.PRISMA_CLIENT_ENGINE_TYPE = 'library';
+    process.env.NEXT_TELEMETRY_DISABLED = '1';
+    console.log('🛡️  NPROC Shield Active: Forced Single-Thread Mode');
+}
 
 // 4. OS LOGGING
-console.log('🛡️  NPROC Shield Active: Forced Single-Thread Mode');
 console.log('🚀 Initializing Next.js Standalone Server...');
 
 /**

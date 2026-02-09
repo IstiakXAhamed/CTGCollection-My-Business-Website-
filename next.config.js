@@ -19,9 +19,10 @@ const nextConfig = {
   experimental: {
     // Optimize package imports for smaller bundles
     optimizePackageImports: ['lucide-react', 'framer-motion', '@radix-ui/react-icons'],
-    // Limit worker threads to prevent process limit exhaustion
-    workerThreads: false,
-    cpus: 1
+    // Let Next.js manage build workers naturally. 
+    // We only cap them at runtime via the entry guard or .htaccess.
+    // workerThreads: false,
+    // cpus: 1
   },
 
   // Image optimization
