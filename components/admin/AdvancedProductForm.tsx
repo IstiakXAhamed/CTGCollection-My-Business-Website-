@@ -289,7 +289,7 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
           <div className="space-y-2">
             <Label>Category *</Label>
             <Select 
-              key={categories.length}
+              key={categories.length + (formData.categoryId || 'none')}
               value={formData.categoryId} 
               onValueChange={v => setFormData({ ...formData, categoryId: v })}
             >

@@ -22,6 +22,181 @@ interface Message {
   }[]
 }
 
+const ActionCarousel = ({ actions }: { actions: Message['actions'] }) => {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [showLeftArrow, setShowLeftArrow] = useState(false)
+  const [showRightArrow, setShowRightArrow] = useState(true)
+
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
+      setShowLeftArrow(scrollLeft > 10)
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10)
+    }
+  }
+
+  useEffect(() => {
+    checkScroll()
+    const el = scrollRef.current
+    if (el) {
+      el.addEventListener('scroll', checkScroll)
+      return () => el.removeEventListener('scroll', checkScroll)
+    }
+  }, [actions])
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const amount = 280
+      scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' })
+    }
+  }
+
+  if (!actions) return null
+
+  return (
+    <div className="relative group/carousel w-full mt-4">
+      {/* Arrows (PC only) */}
+      <AnimatePresence>
+        {showLeftArrow && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            onClick={() => scroll('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white/90 dark:bg-gray-800/90 shadow-xl rounded-full hidden md:flex items-center justify-center border border-gray-100 dark:border-gray-700 hover:bg-blue-600 hover:text-white transition-all -ml-3"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </motion.button>
+        )}
+        {showRightArrow && actions.length > 1 && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            onClick={() => scroll('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white/90 dark:bg-gray-800/90 shadow-xl rounded-full hidden md:flex items-center justify-center border border-gray-100 dark:border-gray-700 hover:bg-blue-600 hover:text-white transition-all -mr-3"
+          >
+            <div className="rotate-180"><ArrowLeft className="w-4 h-4" /></div>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      <div 
+        ref={scrollRef}
+        className="w-full overflow-x-auto no-scrollbar flex gap-4 pb-2 -mx-2 px-2 snap-x scroll-smooth"
+      >
+        {actions.map((act, i) => (
+          <motion.div 
+            key={i}
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="snap-center shrink-0"
+          >
+            {act.type === 'show_product' && (
+              <div className="p-4 bg-white/90 dark:bg-gray-800/90 border border-white dark:border-gray-700 rounded-[2rem] shadow-xl w-[260px] group transition-all hover:shadow-2xl">
+                 {act.payload.images && (
+                   <div className="w-full h-36 bg-gray-50 dark:bg-gray-900 rounded-2xl mb-4 overflow-hidden relative shadow-inner">
+                      <img 
+                        src={typeof act.payload.images === 'string' ? JSON.parse(act.payload.images)[0] : act.payload.images[0] || '/placeholder.png'} 
+                        alt={act.payload.name} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
+                      />
+                       <div className="absolute top-3 right-3 bg-white/90 dark:bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full text-[11px] font-black shadow-sm text-blue-600 dark:text-blue-400">
+                        ৳{act.payload.salePrice || act.payload.basePrice}
+                      </div>
+                   </div>
+                 )}
+                 <div className="px-1">
+                   <h4 className="font-bold text-sm truncate dark:text-white">{act.payload.name}</h4>
+                   <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-bold uppercase tracking-widest">
+                     Luxury Piece • In Stock
+                   </p>
+                   <Button 
+                      variant="default"
+                      size="sm" 
+                      className="w-full mt-4 text-[12px] font-black h-10 rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all active:scale-95" 
+                      onClick={() => window.location.href = `/product/${act.payload.slug}`}
+                   >
+                     Experience Details
+                   </Button>
+                 </div>
+              </div>
+            )}
+
+            {act.type === 'show_category' && (
+              <div className="p-2 bg-white/90 dark:bg-gray-800/90 border border-white dark:border-gray-700 rounded-[2rem] shadow-xl w-[240px] overflow-hidden group hover:shadow-2xl transition-all">
+                 {act.payload.image && (
+                   <div className="w-full h-32 bg-gray-100 dark:bg-gray-900 rounded-[1.5rem] mb-2 overflow-hidden relative shadow-inner">
+                      <img src={act.payload.image} alt={act.payload.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4">
+                        <span className="text-white font-black text-base drop-shadow-lg tracking-tight">{act.payload.name}</span>
+                      </div>
+                   </div>
+                 )}
+                 <div className="p-2">
+                   <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="w-full text-[11px] font-black h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 transition-all active:scale-95" 
+                      onClick={() => window.location.href = `/shop?category=${act.payload.slug}`}
+                   >
+                     Explore Collection
+                   </Button>
+                 </div>
+              </div>
+            )}
+
+            {act.type === 'compare_products' && (
+              <div className="p-5 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-[2.5rem] shadow-2xl w-[280px] text-white overflow-hidden relative group">
+                  <Sparkles className="absolute top-4 right-4 w-12 h-12 opacity-10 group-hover:rotate-12 transition-transform duration-700" />
+                  <h4 className="font-black text-sm uppercase tracking-widest opacity-80 mb-4">Smart Comparison</h4>
+                  <div className="grid grid-cols-2 gap-3 items-center relative">
+                    {act.payload.map((p: any, idx: number) => (
+                      <div key={idx} className="flex flex-col items-center gap-2">
+                        <div className="w-full aspect-square bg-white/20 rounded-2xl overflow-hidden border border-white/30 backdrop-blur-md">
+                          <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                        </div>
+                        <span className="text-[10px] font-black truncate w-full text-center">{p.name}</span>
+                      </div>
+                    ))}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-6 w-8 h-8 bg-white text-blue-600 rounded-full flex items-center justify-center font-black text-xs shadow-xl ring-2 ring-blue-400">VS</div>
+                  </div>
+                  <Button 
+                    className="w-full mt-5 bg-white text-blue-600 hover:bg-gray-100 font-black rounded-2xl h-11"
+                    onClick={() => window.location.href = `/product/${act.payload[0].slug}`}
+                  >
+                    Decide Now
+                  </Button>
+              </div>
+            )}
+
+            {act.type === 'order_progress' && (
+              <div className="p-5 bg-white/95 dark:bg-gray-800/95 border border-white dark:border-gray-700 rounded-[2.5rem] shadow-xl w-[280px]">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Order Progress</span>
+                  <span className="text-[10px] font-bold text-gray-400">#{act.payload.number}</span>
+                </div>
+                <div className="relative h-2 bg-gray-100 dark:bg-gray-900 rounded-full mb-3 overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${act.payload.progress}%` }}
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-400 to-indigo-600 rounded-full"
+                  />
+                </div>
+                <div className="flex justify-between text-[11px] font-black text-gray-800 dark:text-gray-200">
+                  <span>{act.payload.status}</span>
+                  <span className="text-blue-600">{act.payload.progress}%</span>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function AIChatAssistant() {
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
@@ -221,115 +396,7 @@ export function AIChatAssistant() {
                   
                   {/* Actions (Carousel / Multi-Card) */}
                   {msg.actions && msg.actions.length > 0 && (
-                    <div className="w-full mt-4 overflow-x-auto no-scrollbar flex gap-4 pb-2 -mx-2 px-2 snap-x">
-                      {msg.actions.map((act, i) => (
-                        <motion.div 
-                          key={i}
-                          initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          className="snap-center shrink-0"
-                        >
-                          {act.type === 'show_product' && (
-                            <div className="p-4 bg-white/90 dark:bg-gray-800/90 border border-white dark:border-gray-700 rounded-[2rem] shadow-xl w-[260px] group transition-all hover:shadow-2xl">
-                               {act.payload.images && (
-                                 <div className="w-full h-36 bg-gray-50 dark:bg-gray-900 rounded-2xl mb-4 overflow-hidden relative shadow-inner">
-                                    <img 
-                                      src={typeof act.payload.images === 'string' ? JSON.parse(act.payload.images)[0] : act.payload.images[0] || '/placeholder.png'} 
-                                      alt={act.payload.name} 
-                                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
-                                    />
-                                     <div className="absolute top-3 right-3 bg-white/90 dark:bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full text-[11px] font-black shadow-sm text-blue-600 dark:text-blue-400">
-                                      ৳{act.payload.salePrice || act.payload.basePrice}
-                                    </div>
-                                 </div>
-                               )}
-                               <div className="px-1">
-                                 <h4 className="font-bold text-sm truncate dark:text-white">{act.payload.name}</h4>
-                                 <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 font-bold uppercase tracking-widest">
-                                   Luxury Piece • In Stock
-                                 </p>
-                                 <Button 
-                                    variant="default"
-                                    size="sm" 
-                                    className="w-full mt-4 text-[12px] font-black h-10 rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all active:scale-95" 
-                                    onClick={() => window.location.href = `/product/${act.payload.slug}`}
-                                 >
-                                   Experience Details
-                                 </Button>
-                               </div>
-                            </div>
-                          )}
-
-                          {act.type === 'show_category' && (
-                            <div className="p-2 bg-white/90 dark:bg-gray-800/90 border border-white dark:border-gray-700 rounded-[2rem] shadow-xl w-[240px] overflow-hidden group hover:shadow-2xl transition-all">
-                               {act.payload.image && (
-                                 <div className="w-full h-32 bg-gray-100 dark:bg-gray-900 rounded-[1.5rem] mb-2 overflow-hidden relative shadow-inner">
-                                    <img src={act.payload.image} alt={act.payload.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4">
-                                      <span className="text-white font-black text-base drop-shadow-lg tracking-tight">{act.payload.name}</span>
-                                    </div>
-                                 </div>
-                               )}
-                               <div className="p-2">
-                                 <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="w-full text-[11px] font-black h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 transition-all active:scale-95" 
-                                    onClick={() => window.location.href = `/shop?category=${act.payload.slug}`}
-                                 >
-                                   Explore Collection
-                                 </Button>
-                               </div>
-                            </div>
-                          )}
-
-                          {act.type === 'compare_products' && (
-                            <div className="p-5 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-[2.5rem] shadow-2xl w-[280px] text-white overflow-hidden relative group">
-                                <Sparkles className="absolute top-4 right-4 w-12 h-12 opacity-10 group-hover:rotate-12 transition-transform duration-700" />
-                                <h4 className="font-black text-sm uppercase tracking-widest opacity-80 mb-4">Smart Comparison</h4>
-                                <div className="grid grid-cols-2 gap-3 items-center relative">
-                                  {act.payload.map((p: any, idx: number) => (
-                                    <div key={idx} className="flex flex-col items-center gap-2">
-                                      <div className="w-full aspect-square bg-white/20 rounded-2xl overflow-hidden border border-white/30 backdrop-blur-md">
-                                        <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
-                                      </div>
-                                      <span className="text-[10px] font-black truncate w-full text-center">{p.name}</span>
-                                    </div>
-                                  ))}
-                                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-6 w-8 h-8 bg-white text-blue-600 rounded-full flex items-center justify-center font-black text-xs shadow-xl ring-2 ring-blue-400">VS</div>
-                                </div>
-                                <Button 
-                                  className="w-full mt-5 bg-white text-blue-600 hover:bg-gray-100 font-black rounded-2xl h-11"
-                                  onClick={() => window.location.href = `/product/${act.payload[0].slug}`}
-                                >
-                                  Decide Now
-                                </Button>
-                            </div>
-                          )}
-
-                          {act.type === 'order_progress' && (
-                            <div className="p-5 bg-white/95 dark:bg-gray-800/95 border border-white dark:border-gray-700 rounded-[2.5rem] shadow-xl w-[280px]">
-                              <div className="flex justify-between items-center mb-4">
-                                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Order Progress</span>
-                                <span className="text-[10px] font-bold text-gray-400">#{act.payload.number}</span>
-                              </div>
-                              <div className="relative h-2 bg-gray-100 dark:bg-gray-900 rounded-full mb-3 overflow-hidden">
-                                <motion.div 
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${act.payload.progress}%` }}
-                                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-400 to-indigo-600 rounded-full"
-                                />
-                              </div>
-                              <div className="flex justify-between text-[11px] font-black text-gray-800 dark:text-gray-200">
-                                <span>{act.payload.status}</span>
-                                <span className="text-blue-600">{act.payload.progress}%</span>
-                              </div>
-                            </div>
-                          )}
-                        </motion.div>
-                      ))}
-                    </div>
+                    <ActionCarousel actions={msg.actions} />
                   )}
                 </motion.div>
               ))}
