@@ -11,13 +11,17 @@ export default function AppSplashScreen() {
   const [isDismissed, setIsDismissed] = useState(false)
 
   useEffect(() => {
-    // Only show if in standalone mode and not yet dismissed in this session
-    if (isStandalone && !isDismissed) {
+    // Check if already shown in this session
+    const hasShown = sessionStorage.getItem('splash-shown')
+    
+    // Only show if in standalone mode and not yet shown in this session
+    if (isStandalone && !hasShown && !isDismissed) {
       setShow(true)
       const timer = setTimeout(() => {
         setShow(false)
         setIsDismissed(true)
-      }, 2000) // Show for 2 seconds
+        sessionStorage.setItem('splash-shown', 'true')
+      }, 2200) // Show for 2.2 seconds for luxury feel
 
       return () => clearTimeout(timer)
     }

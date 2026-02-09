@@ -280,15 +280,15 @@ export default function AdminAnnouncementsPage() {
       </AnimatePresence>
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Megaphone className="w-8 h-8 text-blue-600" />
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
+            <Megaphone className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
             Announcements
           </h1>
-          <p className="text-gray-600 mt-1">Create announcements that show once per user login</p>
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">Create announcements that show once per user login</p>
         </div>
-        <Button onClick={() => setShowModal(true)} className="gap-2">
+        <Button onClick={() => setShowModal(true)} className="gap-2 w-full sm:w-auto">
           <Plus className="w-4 h-4" />
           New Announcement
         </Button>
@@ -311,21 +311,21 @@ export default function AdminAnnouncementsPage() {
                 <CardContent className="p-5">
                   <div className="flex flex-col items-start gap-4 md:flex-row md:justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${typeInfo.color}`}>
+                      <div className="flex items-center gap-2 flex-wrap mb-2">
+                        <span className={`px-2 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 uppercase tracking-tight ${typeInfo.color}`}>
                           <TypeIcon className="w-3 h-3" />
                           {typeInfo.label}
                         </span>
-                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                        <span className="text-[10px] text-gray-500 font-medium bg-gray-100 px-2 py-1 rounded-full flex items-center gap-1 uppercase">
                           <Users className="w-3 h-3" />
                           {audienceOptions.find(a => a.value === ann.targetAudience)?.label}
                         </span>
-                        <span className="text-xs text-gray-500">
-                          Priority: {ann.priority}
+                        <span className="text-[10px] text-gray-500 font-medium bg-gray-100 px-2 py-1 rounded-full uppercase">
+                          P: {ann.priority}
                         </span>
                       </div>
-                      <h3 className="font-bold text-lg">{ann.title}</h3>
-                      <p className="text-gray-600 mt-1">{ann.content}</p>
+                      <h3 className="font-bold text-base sm:text-lg break-words">{ann.title}</h3>
+                      <p className="text-sm text-gray-600 mt-1 break-words">{ann.content}</p>
                       <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />

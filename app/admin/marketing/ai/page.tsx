@@ -152,14 +152,14 @@ export default function MarketingAIPage() {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-pink-500">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+        <div className="p-3 w-fit rounded-xl bg-gradient-to-br from-orange-500 to-pink-500">
           <Megaphone className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Marketing AI Command Center</h1>
-          <p className="text-gray-500">Generate Facebook posts, emails, ads & more with AI</p>
+          <h1 className="text-xl sm:text-2xl font-bold">Marketing AI Command Center</h1>
+          <p className="text-xs sm:text-sm text-gray-500">Generate Facebook posts, emails, ads & more with AI</p>
         </div>
       </div>
 
@@ -205,12 +205,12 @@ export default function MarketingAIPage() {
                 <Globe className="w-4 h-4" />
                 Language
               </Label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   type="button"
                   onClick={() => setLanguage('en')}
-                  className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
-                    language === 'en' ? 'border-purple-500 bg-purple-50' : 'border-gray-200'
+                  className={`flex-1 py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg border-2 transition-all text-sm ${
+                    language === 'en' ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-gray-200'
                   }`}
                 >
                   🇺🇸 English
@@ -218,8 +218,8 @@ export default function MarketingAIPage() {
                 <button
                   type="button"
                   onClick={() => setLanguage('bn')}
-                  className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
-                    language === 'bn' ? 'border-purple-500 bg-purple-50' : 'border-gray-200'
+                  className={`flex-1 py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg border-2 transition-all text-sm ${
+                    language === 'bn' ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-gray-200'
                   }`}
                 >
                   🇧🇩 বাংলা

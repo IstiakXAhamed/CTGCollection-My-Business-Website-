@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const contextData: any = { 
        orderStatus: context || '', 
        previousMessages: [],
-       user: user ? { name: user.name, id: user.id, email: user.email } : null,
+       user: user ? { name: user.name, role: user.role } : null, // SCRUBBED: No ID, Email, or Password
        cart: cartItems || []
     }
     
@@ -86,10 +86,30 @@ export async function POST(request: NextRequest) {
       }
     }
  
+    // C. Active Coupons (V6 Fixed)
+    const fetchCoupons = async () => {
+      try {
+        const now = new Date();
+        const activeCoupons = await prisma.coupon.findMany({
+          where: {
+            isActive: true,
+            validFrom: { lte: now },
+            validUntil: { gte: now }
+          },
+          select: { code: true, description: true, discountValue: true, discountType: true, minOrderValue: true },
+          take: 5
+        });
+        return activeCoupons.map(c => `- ${c.code}: ${c.description} (${c.discountValue}${c.discountType === 'percentage' ? '%' : ' BDT'} off on orders over ৳${c.minOrderValue})`).join('\n');
+      } catch (e) {
+        return 'No active coupons currently.';
+      }
+    };
+ 
     // Execute Parallel Context Fetching
-    const [fetchedSettings, globalData, pastOrders] = await Promise.all([
+    const [fetchedSettings, globalData, activeCoupons, pastOrders] = await Promise.all([
       fetchSettings(),
       fetchGlobalContext(),
+      fetchCoupons(),
       user ? prisma.order.findMany({
         where: { userId: user.id },
         take: 3,
@@ -102,6 +122,12 @@ export async function POST(request: NextRequest) {
     let settings = fetchedSettings
     contextData.trending = globalData.trending
     contextData.categories = globalData.categories
+    contextData.coupons = activeCoupons || 'None.'
+    
+    // Add site-wide promo code if available
+    if (settings?.promoCode) {
+      contextData.coupons = `Universal Code: ${settings.promoCode}\n${contextData.coupons}`;
+    }
     
     if (user && pastOrders.length > 0) {
       contextData.pastOrders = (pastOrders as any[]).map(o => 

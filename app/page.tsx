@@ -279,7 +279,7 @@ export default function HomePage() {
                     viewport={{ once: true }}
                     transition={{ delay: idx * 0.05 }}
                   >
-                    <Link href={`/product/${product.slug}`}>
+                    <Link href={`/product/${product.slug}`} prefetch={false}>
                       <Card className="group overflow-hidden border-0 shadow-sm hover:shadow-xl transition-all duration-300 bg-white">
                         <div className="relative aspect-square overflow-hidden bg-gray-100">
                           <Image

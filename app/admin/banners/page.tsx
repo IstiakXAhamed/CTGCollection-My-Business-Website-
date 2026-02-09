@@ -148,27 +148,28 @@ export default function AdminBannersPage() {
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <Link href="/admin" className="text-blue-600 hover:underline text-sm mb-2 inline-flex items-center gap-1">
+            <Link href="/admin" className="text-blue-600 hover:underline text-xs mb-2 inline-flex items-center gap-1">
               <ArrowLeft className="w-4 h-4" /> Back to Admin
             </Link>
-            <h1 className="text-3xl font-bold text-gray-900">🎨 Banner Control Panel</h1>
-            <p className="text-gray-600">Full control over your promotional banners</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">🎨 Banner Control Panel</h1>
+            <p className="text-xs sm:text-sm text-gray-600">Full control over your promotional banners</p>
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={resetToDefaults}>
+          <div className="flex flex-wrap gap-2 sm:gap-3">
+            <Button variant="outline" size="sm" onClick={resetToDefaults} className="flex-1 sm:flex-none">
               <RefreshCw className="w-4 h-4 mr-2" />
               Reset
             </Button>
-            <Button onClick={addNewBanner}>
+            <Button size="sm" onClick={addNewBanner} className="flex-1 sm:flex-none">
               <Plus className="w-4 h-4 mr-2" />
-              Add Banner
+              Add
             </Button>
             <Button 
+              size="sm"
               onClick={saveBanners} 
               disabled={saving}
-              className={saved ? 'bg-green-600 hover:bg-green-700' : ''}
+              className={`flex-1 sm:flex-none ${saved ? 'bg-green-600 hover:bg-green-700' : ''}`}
             >
               {saving ? (
                 <>
@@ -183,7 +184,7 @@ export default function AdminBannersPage() {
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  Save All
+                  Save
                 </>
               )}
             </Button>
@@ -208,50 +209,52 @@ export default function AdminBannersPage() {
                     >
                       <motion.div
                         whileHover={{ scale: 1.01 }}
-                        className={`p-4 rounded-lg border-2 transition ${
+                        className={`p-3 sm:p-4 rounded-xl border-2 transition ${
                           editingBanner?.id === banner.id 
                             ? 'border-blue-500 bg-blue-50' 
                             : 'border-gray-200 bg-white hover:border-gray-300'
                         } ${!banner.enabled ? 'opacity-50' : ''}`}
                         onClick={() => setEditingBanner(banner)}
                       >
-                        <div className="flex items-center gap-3">
-                          <GripVertical className="w-5 h-5 text-gray-400" />
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <GripVertical className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
                           
                           <div 
-                            className={`w-10 h-10 rounded-full bg-gradient-to-r ${
+                            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex-shrink-0 bg-gradient-to-r ${
                               GRADIENT_PRESETS[banner.preset as keyof typeof GRADIENT_PRESETS]
-                            } flex items-center justify-center text-white`}
+                            } flex items-center justify-center text-white scale-90 sm:scale-100`}
                           >
                             {getIconComponent(banner.icon)}
                           </div>
                           
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{banner.message}</p>
+                            <p className="font-bold text-sm sm:text-base truncate">{banner.message}</p>
                             {banner.code && (
-                              <p className="text-sm text-gray-500">
-                                Code: <span className="font-mono font-bold">{banner.code}</span>
+                              <p className="text-[10px] sm:text-xs text-muted-foreground">
+                                Code: <span className="font-mono font-bold text-blue-600">{banner.code}</span>
                               </p>
                             )}
                           </div>
                           
-                          <Switch
-                            checked={banner.enabled}
-                            onCheckedChange={() => toggleBanner(banner.id)}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                          
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              deleteBanner(banner.id)
-                            }}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            <Switch
+                              checked={banner.enabled}
+                              onCheckedChange={() => toggleBanner(banner.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="scale-75 sm:scale-100"
+                            />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                deleteBanner(banner.id)
+                              }}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       </motion.div>
                     </Reorder.Item>
@@ -339,13 +342,13 @@ export default function AdminBannersPage() {
 
                   {/* Design Preset */}
                   <div className="space-y-2">
-                    <Label>Design Preset</Label>
-                    <div className="grid grid-cols-3 gap-2 md:grid-cols-5">
+                    <Label className="text-sm">Design Preset</Label>
+                    <div className="grid grid-cols-5 gap-2 sm:grid-cols-5">
                       {Object.entries(GRADIENT_PRESETS).map(([name, gradient]) => (
                         <button
                           key={name}
                           onClick={() => updateBanner(editingBanner.id, { preset: name })}
-                          className={`h-12 rounded-lg bg-gradient-to-r ${gradient} relative ${
+                          className={`h-10 sm:h-12 rounded-lg bg-gradient-to-r ${gradient} relative ${
                             editingBanner.preset === name ? 'ring-2 ring-offset-2 ring-blue-500' : ''
                           }`}
                           title={name}
@@ -356,13 +359,13 @@ export default function AdminBannersPage() {
                         </button>
                       ))}
                     </div>
-                    <p className="text-xs text-gray-500 capitalize">{editingBanner.preset}</p>
+                    <p className="text-[10px] text-gray-500 capitalize">Active: {editingBanner.preset}</p>
                   </div>
 
                   {/* Icon */}
                   <div className="space-y-2">
-                    <Label>Icon</Label>
-                    <div className="grid grid-cols-4 gap-2 md:grid-cols-8">
+                    <Label className="text-sm">Icon</Label>
+                    <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
                       {ICON_OPTIONS.map((opt) => (
                         <button
                           key={opt.value}
@@ -370,11 +373,11 @@ export default function AdminBannersPage() {
                           className={`h-10 rounded-lg flex items-center justify-center border-2 transition ${
                             editingBanner.icon === opt.value 
                               ? 'border-blue-500 bg-blue-50 text-blue-600' 
-                              : 'border-gray-200 hover:border-gray-300'
+                              : 'border-gray-200 hover:border-gray-300 shadow-sm'
                           }`}
                           title={opt.label}
                         >
-                          <opt.icon className="w-5 h-5" />
+                          <opt.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                       ))}
                     </div>

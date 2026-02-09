@@ -183,13 +183,13 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-            <Settings className="w-8 h-8 text-blue-600" />
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1 flex items-center gap-2">
+            <Settings className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
             Settings
           </h1>
-          <p className="text-muted-foreground">Manage your store settings (saved to database)</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">Manage your store settings (saved to database)</p>
         </div>
       </div>
 
@@ -238,7 +238,7 @@ export default function AdminSettingsPage() {
             </div>
             
             <div className="flex justify-end pt-4 border-t">
-              <Button onClick={() => saveSettings({ adminProductMode: settings.adminProductMode })} disabled={saving}>
+              <Button onClick={() => saveSettings({ adminProductMode: settings.adminProductMode })} disabled={saving} className="w-full sm:w-auto">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                 Save General Settings
               </Button>
@@ -305,7 +305,7 @@ export default function AdminSettingsPage() {
                   pwaPromptDelay: settings.pwaPromptDelay,
                   pwaShowInstallLink: settings.pwaShowInstallLink
                 })} 
-                className="bg-amber-600 hover:bg-amber-700"
+                className="bg-amber-600 hover:bg-amber-700 w-full sm:w-auto"
                 disabled={saving}
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
@@ -389,7 +389,7 @@ export default function AdminSettingsPage() {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between mt-6 pt-4 border-t">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-6 pt-4 border-t">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">Current Status:</span>
                   <Badge variant={settings.chatStatus === 'online' ? 'default' : settings.chatStatus === 'away' ? 'secondary' : 'destructive'}>
@@ -397,7 +397,7 @@ export default function AdminSettingsPage() {
                     <span className="ml-1 capitalize">{settings.chatStatus}</span>
                   </Badge>
                 </div>
-                <Button onClick={() => saveSettings({ chatStatus: settings.chatStatus })} disabled={saving}>
+                <Button onClick={() => saveSettings({ chatStatus: settings.chatStatus })} disabled={saving} className="w-full sm:w-auto">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                   Save Chat Settings
                 </Button>
@@ -503,7 +503,7 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className="flex justify-end pt-4 border-t">
-              <Button onClick={() => saveSettings(settings)} disabled={saving}>
+              <Button onClick={() => saveSettings(settings)} disabled={saving} className="w-full sm:w-auto">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                 Save Interaction Settings
               </Button>
@@ -556,7 +556,7 @@ export default function AdminSettingsPage() {
               </div>
             </div>
             <div className="pt-4 border-t">
-              <Button onClick={() => saveSettings({ storeName: settings.storeName, storeEmail: settings.storeEmail, storePhone: settings.storePhone, storeAddress: settings.storeAddress })} disabled={saving}>
+              <Button onClick={() => saveSettings({ storeName: settings.storeName, storeEmail: settings.storeEmail, storePhone: settings.storePhone, storeAddress: settings.storeAddress })} disabled={saving} className="w-full sm:w-auto">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                 Save Store Info
               </Button>
@@ -596,7 +596,7 @@ export default function AdminSettingsPage() {
               </div>
             </div>
             <div className="pt-4 border-t">
-              <Button onClick={() => saveSettings({ shippingCost: settings.shippingCost, freeShippingMin: settings.freeShippingMin })} disabled={saving}>
+              <Button onClick={() => saveSettings({ shippingCost: settings.shippingCost, freeShippingMin: settings.freeShippingMin })} disabled={saving} className="w-full sm:w-auto">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                 Save Shipping Settings
               </Button>
@@ -719,7 +719,7 @@ export default function AdminSettingsPage() {
                 nagadNumber: settings.nagadNumber,
                 rocketEnabled: settings.rocketEnabled,
                 rocketNumber: settings.rocketNumber
-              })} disabled={saving}>
+              })} disabled={saving} className="w-full sm:w-auto">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                 Save Payment Settings
               </Button>

@@ -75,28 +75,28 @@ export default function SiteSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Globe className="w-8 h-8 text-blue-600" />
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
+            <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
             Site Settings
           </h1>
-          <p className="text-gray-600 mt-1">Manage your website content and information</p>
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">Manage your website content and information</p>
         </div>
-        <Button onClick={saveSettings} disabled={saving} className="gap-2">
+        <Button onClick={saveSettings} disabled={saving} className="gap-2 w-full sm:w-auto">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save All Changes
         </Button>
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 mb-8 h-auto">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="contact">Contact</TabsTrigger>
-          <TabsTrigger value="stats">Stats & Values</TabsTrigger>
-          <TabsTrigger value="features">Product Features</TabsTrigger>
-          <TabsTrigger value="social">Social</TabsTrigger>
-          <TabsTrigger value="content">Content</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 mb-8 h-auto gap-1 bg-gray-100 p-1">
+          <TabsTrigger value="general" className="text-xs sm:text-sm px-1 py-1.5">General</TabsTrigger>
+          <TabsTrigger value="contact" className="text-xs sm:text-sm px-1 py-1.5">Contact</TabsTrigger>
+          <TabsTrigger value="stats" className="text-xs sm:text-sm px-1 py-1.5">Stats</TabsTrigger>
+          <TabsTrigger value="features" className="text-xs sm:text-sm px-1 py-1.5">Badges</TabsTrigger>
+          <TabsTrigger value="social" className="text-xs sm:text-sm px-1 py-1.5">Social</TabsTrigger>
+          <TabsTrigger value="content" className="text-xs sm:text-sm px-1 py-1.5">Content</TabsTrigger>
         </TabsList>
 
         <TabsContent value="features" className="space-y-6">
@@ -300,9 +300,9 @@ export default function SiteSettingsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Store Logo</Label>
-                <div className="flex items-start gap-4">
+                <div className="flex flex-col sm:flex-row items-start gap-4">
                    {settings.logo && (
-                    <div className="relative w-24 h-24 border rounded-lg p-2 bg-gray-50">
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 border rounded-lg p-2 bg-gray-50 flex-shrink-0">
                       <img 
                         src={settings.logo} 
                         alt="Logo preview" 
@@ -318,13 +318,13 @@ export default function SiteSettingsPage() {
                       </Button>
                     </div>
                    )}
-                   <div className="flex-1 max-w-sm">
+                   <div className="w-full max-w-sm">
                      <FileUpload 
                        folder="settings" 
                        onUpload={(url) => update('logo', url)} 
-                       className={settings.logo ? 'h-24 py-2' : ''}
+                       className={settings.logo ? 'h-20 sm:h-24 py-2' : ''}
                      />
-                     <p className="text-xs text-muted-foreground mt-1">
+                     <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 text-center sm:text-left">
                        Recommended: PNG or SVG, transparent background.
                      </p>
                    </div>

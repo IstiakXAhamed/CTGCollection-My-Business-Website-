@@ -17,12 +17,14 @@ export function useSiteSettings() {
   const [loading, setLoading] = useState(!globalSettings)
 
   const refreshSettings = async () => {
-    fetchPromise = fetch('/api/settings')
+    fetchPromise = fetch('/api/settings/public')
       .then(res => res.json())
       .then(data => {
-        globalSettings = data.settings
-        setSettings(data.settings)
-        return data.settings
+        // Map public response to the internal hook format
+        const settingsData = data.settings || data
+        globalSettings = settingsData
+        setSettings(settingsData)
+        return settingsData
       })
       .catch(err => {
         console.error('Failed to load settings', err)

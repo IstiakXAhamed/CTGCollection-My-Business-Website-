@@ -30,14 +30,14 @@ export default function AIDiagnosticsPage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-8 max-w-4xl mx-auto space-y-6 sm:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">AI System Diagnostics</h1>
-          <p className="text-gray-500 mt-2">Verify internal systems, API keys, and model connectivity.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">AI System Diagnostics</h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">Verify internal systems, API keys, and model connectivity.</p>
         </div>
-        <Button onClick={runDiagnostics} disabled={loading} size="lg" className="bg-indigo-600 hover:bg-indigo-700">
-          {loading ? <RefreshCw className="w-5 h-5 mr-2 animate-spin" /> : <Activity className="w-5 h-5 mr-2" />}
+        <Button onClick={runDiagnostics} disabled={loading} size="default" className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto">
+          {loading ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Activity className="w-4 h-4 mr-2" />}
           Run Complete Check
         </Button>
       </div>

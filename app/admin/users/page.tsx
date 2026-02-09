@@ -158,17 +158,17 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-            <UserCog className="w-8 h-8" />
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1 flex items-center gap-2">
+            <UserCog className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
             User Management
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {isSuperAdmin ? 'Manage user roles and permissions' : 'View registered users'}
           </p>
         </div>
-        <Button onClick={fetchUsers} variant="outline">
+        <Button onClick={fetchUsers} variant="outline" size="sm" className="w-fit">
           <RefreshCw className="w-4 h-4 mr-2" />
           Refresh
         </Button>
@@ -199,13 +199,15 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Role Legend */}
-      <div className="flex gap-4 text-sm flex-wrap">
-        <div className="flex items-center gap-2">
-           <span className="text-muted-foreground">Badges:</span>
-           <RoleBadge role="superadmin" size="sm" />
-           <RoleBadge role="admin" size="sm" />
-           <RoleBadge role="seller" size="sm" />
-           <RoleBadge role="customer" size="sm" />
+      <div className="bg-white/50 p-3 rounded-lg border border-dashed text-xs sm:text-sm">
+        <div className="flex items-center gap-2 flex-wrap">
+           <span className="text-muted-foreground font-medium">Badges:</span>
+           <div className="flex gap-2 flex-wrap">
+             <RoleBadge role="superadmin" size="sm" />
+             <RoleBadge role="admin" size="sm" />
+             <RoleBadge role="seller" size="sm" />
+             <RoleBadge role="customer" size="sm" />
+           </div>
         </div>
       </div>
 
@@ -214,78 +216,80 @@ export default function AdminUsersPage() {
         <CardContent className="p-0">
           
           {/* Mobile Card View */}
-          <div className="grid grid-cols-1 gap-4 md:hidden">
+          <div className="grid grid-cols-1 gap-3 md:hidden p-3">
             {filteredUsers.map((user) => (
-              <div key={user.id} className="bg-white p-4 rounded-lg border shadow-sm space-y-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold">{user.name}</h3>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
+              <div key={user.id} className="bg-white p-4 rounded-xl border shadow-sm space-y-3">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-gray-900 truncate">{user.name}</h3>
+                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                   </div>
                   <RoleBadge role={user.role} tier={user.loyaltyPoints?.tier?.name} size="sm" />
                 </div>
                 
-                <div className="flex justify-between items-center text-sm border-t pt-3 border-gray-100">
+                <div className="flex justify-between items-center text-xs border-t pt-3 border-gray-100">
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground">Status:</span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                      user.isActive !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      user.isActive !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                     }`}>
                       {user.isActive !== false ? 'Active' : 'Inactive'}
                     </span>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">Orders:</span> {user._count?.orders || 0}
+                  <div className="text-gray-600">
+                    <span className="text-muted-foreground">Orders:</span> <span className="font-bold">{user._count?.orders || 0}</span>
                   </div>
                 </div>
 
                 {isSuperAdmin && user.role !== 'superadmin' && (
                   <div className="pt-3 flex flex-wrap gap-2 border-t border-gray-100 justify-end">
                     {user.role === 'customer' ? (
-                      <>
+                      <div className="flex gap-2 w-full sm:w-auto">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => openDialog(user, 'promote_admin')}
-                          className="h-8 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                          className="h-8 text-[10px] sm:text-xs flex-1 sm:flex-none text-indigo-600 border-indigo-200 hover:bg-indigo-50"
                         >
-                          <Shield className="w-4 h-4 mr-1" /> Admin
+                          <Shield className="w-3.5 h-3.5 mr-1" /> Admin
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => openDialog(user, 'promote_seller')}
-                          className="h-8 text-blue-600 border-blue-200 hover:bg-blue-50"
+                          className="h-8 text-[10px] sm:text-xs flex-1 sm:flex-none text-blue-600 border-blue-200 hover:bg-blue-50"
                         >
-                          <BadgeCheck className="w-4 h-4 mr-1" /> Seller
+                          <BadgeCheck className="w-3.5 h-3.5 mr-1" /> Seller
                         </Button>
-                      </>
+                      </div>
                     ) : (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => openDialog(user, 'demote')}
-                        className="h-8 text-orange-600 border-orange-200 hover:bg-orange-50"
+                        className="h-8 text-xs text-orange-600 border-orange-200 hover:bg-orange-50"
                       >
-                        <UserIcon className="w-4 h-4 mr-1" /> Demote
+                        <UserIcon className="w-3.5 h-3.5 mr-1" /> Demote
                       </Button>
                     )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => openDialog(user, 'toggle')}
-                      className={`h-8 w-8 p-0 ${user.isActive !== false ? 'text-orange-600 border-orange-200' : 'text-green-600 border-green-200'}`}
-                    >
-                      {user.isActive !== false ? <Ban className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => openDialog(user, 'delete')}
-                      className="h-8 w-8 p-0 text-red-600 border-red-200 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openDialog(user, 'toggle')}
+                        className={`h-8 w-8 p-0 ${user.isActive !== false ? 'text-orange-600 border-orange-200' : 'text-green-600 border-green-200'}`}
+                      >
+                        {user.isActive !== false ? <Ban className="w-3.5 h-3.5" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openDialog(user, 'delete')}
+                        className="h-8 w-8 p-0 text-red-600 border-red-200 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>

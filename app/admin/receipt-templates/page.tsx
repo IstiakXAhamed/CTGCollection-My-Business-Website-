@@ -215,20 +215,20 @@ export default function ReceiptTemplatesPage() {
         </div>
       )}
 
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Receipt Templates</h1>
-          <p className="text-muted-foreground mt-1">Choose a receipt design. Hover to hide templates you don&apos;t like.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Receipt Templates</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Choose a receipt design. Hover/Tap to manage templates.</p>
         </div>
         {hiddenCount > 0 && (
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setShowHidden(!showHidden)}>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowHidden(!showHidden)} className="flex-1 sm:flex-none">
               <EyeOff className="w-4 h-4 mr-1" />
-              {showHidden ? 'Hide' : 'Show'} Hidden ({hiddenCount})
+              {showHidden ? 'Hide' : 'Show'} ({hiddenCount})
             </Button>
-            <Button variant="ghost" size="sm" onClick={unhideAll}>
+            <Button variant="ghost" size="sm" onClick={unhideAll} className="flex-1 sm:flex-none">
               <RotateCcw className="w-4 h-4 mr-1" />
-              Restore All
+              Restore
             </Button>
           </div>
         )}
@@ -538,12 +538,14 @@ export default function ReceiptTemplatesPage() {
                 </Button>
               </div>
             </div>
-            <div className="p-4 bg-gray-100 overflow-auto max-h-[calc(90vh-80px)]">
-              <iframe
-                src={`/api/admin/preview-receipt?template=${previewTemplate}`}
-                className="h-[400px] w-full rounded-lg border bg-white shadow-lg md:h-[600px]"
-                title="Receipt Preview"
-              />
+            <div className="p-2 sm:p-4 bg-gray-100 overflow-hidden flex items-center justify-center min-h-[400px]">
+              <div className="relative w-full max-w-[380px] origin-top scale-[0.7] sm:scale-95 md:scale-100 transition-transform">
+                <iframe
+                  src={`/api/admin/preview-receipt?template=${previewTemplate}`}
+                  className="w-full h-[600px] rounded-lg border bg-white shadow-2xl"
+                  title="Receipt Preview"
+                />
+              </div>
             </div>
           </div>
         </div>

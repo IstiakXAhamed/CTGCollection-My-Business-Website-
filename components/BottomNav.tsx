@@ -19,7 +19,7 @@ export default function BottomNav() {
 
   const navItems = [
     { name: 'Home', href: '/', icon: Home },
-    { name: 'Shop', href: '/products', icon: ShoppingBag },
+    { name: 'Shop', href: '/shop', icon: ShoppingBag },
     { name: 'AI Chat', href: '#', icon: MessageSquareText, isAI: true },
     { name: 'Cart', href: '/cart', icon: ShoppingCart, count: cartCount },
     { name: 'Profile', href: '/dashboard', icon: User },
