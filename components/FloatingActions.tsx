@@ -63,7 +63,7 @@ export function FloatingActions({ onSpinClick }: FloatingActionsProps) {
   if (spinConfig?.enabled !== true) return null
 
   return (
-    <div className="fixed bottom-36 md:bottom-44 right-4 md:right-6 z-40 flex flex-col items-end gap-2 text-primary-foreground">
+    <div className="fixed bottom-48 md:bottom-52 right-4 md:right-6 z-[110] flex flex-col items-end gap-2 text-primary-foreground">
       <AnimatePresence>
         {isExpanded && (
           <motion.button

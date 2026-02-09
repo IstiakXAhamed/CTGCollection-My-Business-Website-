@@ -20,16 +20,11 @@ export default function BottomNav() {
   const navItems = [
     { name: 'Home', href: '/', icon: Home },
     { name: 'Shop', href: '/shop', icon: ShoppingBag },
-    { name: 'AI Chat', href: '#', icon: MessageSquareText, isAI: true },
+    { name: 'Contact', href: '/contact', icon: MessageSquareText },
     { name: 'Cart', href: '/cart', icon: ShoppingCart, count: cartCount },
     { name: 'Profile', href: '/dashboard', icon: User },
   ]
 
-  const handleAIClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    // Trigger existing AI Chat Assistant
-    window.dispatchEvent(new CustomEvent('open-ai-chat'))
-  }
 
   return (
     <motion.div 
@@ -47,12 +42,7 @@ export default function BottomNav() {
             <Link 
               key={item.href} 
               href={item.href}
-              onClick={(e) => {
-                haptics.rigid();
-                if (item.isAI) {
-                  handleAIClick(e);
-                }
-              }}
+              onClick={() => haptics.rigid()}
               className="relative flex flex-col items-center justify-center p-2 group"
             >
               <AnimatePresence>
@@ -96,14 +86,6 @@ export default function BottomNav() {
                 {item.name}
               </span>
 
-              {item.isAI && (
-                <div className="absolute -top-1 -right-1">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                  </span>
-                </div>
-              )}
             </Link>
           )
         })}

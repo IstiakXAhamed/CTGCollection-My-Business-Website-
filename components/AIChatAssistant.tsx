@@ -361,7 +361,7 @@ export function AIChatAssistant() {
   }
 
   return (
-    <div className="fixed bottom-20 md:bottom-24 right-4 md:right-6 z-[45] flex flex-col items-end font-sans">
+    <div className="fixed bottom-32 md:bottom-36 right-4 md:right-6 z-[110] flex flex-col items-end font-sans">
       <AnimatePresence>
         {isOpen && !isMinimized && (
           <motion.div
