@@ -28,4 +28,4 @@ export async function GET() {
   }
 }
 
-export const revalidate = 3600 // Cache public settings for 1 hour
+export const dynamic = 'force-dynamic'

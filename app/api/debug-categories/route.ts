@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     // Fetch all categories and the count of products in each

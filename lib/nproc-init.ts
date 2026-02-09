@@ -4,14 +4,20 @@
  * It forces the Node.js process into a single-threaded mode to satisfy CloudLinux NPROC limits.
  */
 if (typeof process !== 'undefined' && process.env) {
-  // Simpler, more robust build check
+  // Absolute exclusion for BUILD and WORKER threads
+  // Static page generation (Workers) must have their own thread management
   const isBuild = process.env.NEXT_PHASE === 'phase-production-build' || 
-                  process.env.NODE_PHASE === 'test' ||
-                  process.env.CI === 'true';
+                  process.env.CI === 'true' ||
+                  process.env.NODE_ENV === 'test';
+                  
+  const isWorker = process.env.NEXT_IS_EXPORT_WORKER === 'true' || 
+                   process.env.NEXT_RUNTIME === 'edge' ||
+                   process.env.__NEXT_PRIVATE_PREBUNDLED_REACT === 'true' ||
+                   (process.env.UV_THREADPOOL_SIZE && process.env.UV_THREADPOOL_SIZE !== '1'); // Don't override if already set
 
-  if (!isBuild && !process.env.NEXT_RUNTIME) {
+  if (!isBuild && !isWorker) {
     // Lock Libuv threadpool to 1 before any native code is loaded
-    // This is for PRODUCTION RUNTIME only.
+    // PRODUCTION RUNTIME ONLY - NEVER BUILD
     process.env.UV_THREADPOOL_SIZE = '1';
     
     // Force Prisma to use the library engine (in-process)

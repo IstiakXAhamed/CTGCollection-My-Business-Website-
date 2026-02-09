@@ -19,10 +19,10 @@ const nextConfig = {
   experimental: {
     // Optimize package imports for smaller bundles
     optimizePackageImports: ['lucide-react', 'framer-motion', '@radix-ui/react-icons'],
-    // Force Next.js to use a single CPU core during build to stay within NPROC limits
+    // Limit Next.js to 1 CPU core to survive NPROC limits
     cpus: 1,
-    // Use worker threads instead of processes (lighter on resources)
-    workerThreads: true,
+    // Disable worker threads to reduce concurrent context-switching during build
+    workerThreads: false,
   },
   // Increase timeout for static page generation to survive shared hosting limits
   staticPageGenerationTimeout: 300,

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export const revalidate = 300 // Cache featured products for 5 minutes
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
