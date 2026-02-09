@@ -1,13 +1,22 @@
+import './nproc-init'
 import { PrismaClient } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
+  isInitializing: boolean
 }
 
 // Ensure Prisma is a true singleton to prevent spawning 100+ processes on cPanel
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+export const prisma = (() => {
+  if (globalForPrisma.prisma) return globalForPrisma.prisma
+  
+  if (globalForPrisma.isInitializing) {
+     return globalForPrisma.prisma as unknown as PrismaClient
+  }
+
+  globalForPrisma.isInitializing = true
+  
+  const client = new PrismaClient({
     datasources: {
       db: {
         // connection_limit=1 is crucial for shared hosting stability
@@ -17,6 +26,11 @@ export const prisma =
     },
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
   })
+
+  if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = client
+  globalForPrisma.isInitializing = false
+  return client
+})()
 
 // Graceful shutdown to prevent "Ghost" processes on cPanel/Passenger
 const disconnect = async () => {
@@ -40,5 +54,4 @@ process.on('beforeExit', disconnect)
 process.on('uncaughtException', disconnect)
 process.on('unhandledRejection', disconnect)
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
-globalForPrisma.prisma = prisma
+// Signal handling remains same...

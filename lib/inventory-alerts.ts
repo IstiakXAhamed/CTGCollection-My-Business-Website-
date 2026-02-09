@@ -1,17 +1,7 @@
 // Inventory and Stock Alert Services
 
 import { prisma } from './prisma'
-import nodemailer from 'nodemailer'
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-})
+import { getTransporter } from './email'
 
 const LOW_STOCK_THRESHOLD = 5
 
@@ -121,7 +111,7 @@ async function sendLowStockEmail(products: any[]) {
     </html>
   `
 
-  await transporter.sendMail({
+  await getTransporter().sendMail({
     from: `"CTG Collection Alerts" <${process.env.SMTP_USER}>`,
     to: process.env.ADMIN_EMAIL || 'ctgcollection2@gmail.com',
     subject: `⚠️ Low Stock Alert - ${products.length} products need restocking`,
@@ -191,7 +181,7 @@ export async function sendStockAvailableEmail(email: string, productName: string
     </html>
   `
 
-  await transporter.sendMail({
+  await getTransporter().sendMail({
     from: `"CTG Collection" <${process.env.SMTP_USER}>`,
     to: email,
     subject: `🎉 ${productName} is back in stock!`,

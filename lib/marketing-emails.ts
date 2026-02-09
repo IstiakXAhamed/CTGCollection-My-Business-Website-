@@ -3,17 +3,7 @@
 
 import { prisma } from './prisma'
 import { sendOrderConfirmation } from './email'
-import nodemailer from 'nodemailer'
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-})
+import { getTransporter } from './email'
 
 // Check and send birthday discounts (run daily via cron)
 export async function sendBirthdayDiscounts() {
@@ -135,7 +125,7 @@ async function sendBirthdayEmail(to: string, name: string, couponCode: string) {
     </html>
   `
 
-  await transporter.sendMail({
+  await getTransporter().sendMail({
     from: `"CTG Collection 🎂" <${process.env.SMTP_USER}>`,
     to,
     subject: `🎂 Happy Birthday ${name}! Here's 15% OFF just for you!`,
@@ -254,7 +244,7 @@ async function sendAbandonedCartEmail(to: string, order: any) {
     </html>
   `
 
-  await transporter.sendMail({
+  await getTransporter().sendMail({
     from: `"CTG Collection" <${process.env.SMTP_USER}>`,
     to,
     subject: `🛒 Your cart is waiting! Complete your order`,

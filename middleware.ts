@@ -1,3 +1,4 @@
+import '@/lib/nproc-init'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Rate limiting configuration

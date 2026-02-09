@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSiteSettings } from '@/lib/settings'
 import { prisma } from '@/lib/prisma'
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0  // Never cache
+export const revalidate = 60 // Cache settings for 60 seconds (ISR)
 
 // GET - Fetch site settings (public)
 export async function GET() {

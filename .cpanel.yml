@@ -7,3 +7,4 @@ deployment:
     - /usr/bin/pkill -u silkmart -9 -f node || true
     - /bin/cp -rf deploy/. $DEPLOY_PATH
     - /usr/bin/touch $DEPLOY_PATH/tmp/restart.txt
+    - /bin/cp -f cpanel-entry.js $DEPLOY_PATH/

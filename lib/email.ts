@@ -1,15 +1,26 @@
+import './nproc-init'
 import nodemailer from 'nodemailer'
 
-// Email configuration - update these in .env
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-})
+let transporterInstance: any = null
+
+export function getTransporter() {
+  if (transporterInstance) return transporterInstance
+  
+  transporterInstance = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: false,
+    pool: true, // Use pooling to prevent per-request connections
+    maxConnections: 1, // Strict single connection for cPanel
+    maxMessages: 100,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
+    }
+  })
+  
+  return transporterInstance
+}
 
 interface OrderEmailData {
   to: string
@@ -129,7 +140,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
   `
 
   try {
-    await transporter.sendMail({
+    await getTransporter().sendMail({
       from: `"CTG Collection" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
       to: data.to,
       subject: `Order Confirmed - ${data.orderNumber}`,
@@ -178,7 +189,7 @@ export async function sendShippingNotification(to: string, orderNumber: string, 
   `
 
   try {
-    await transporter.sendMail({
+    await getTransporter().sendMail({
       from: `"CTG Collection" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
       to,
       subject: `Your Order Has Shipped - ${orderNumber}`,
@@ -287,7 +298,7 @@ export async function sendReceiptEmail(data: ReceiptEmailData) {
   console.log('Total attachments:', attachments.length)
 
   try {
-    await transporter.sendMail({
+    await getTransporter().sendMail({
       from: `"CTG Collection" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
       to: data.to,
       subject: `Your Receipt - Order ${data.orderNumber}`,
@@ -319,7 +330,7 @@ export async function sendEmailWithAttachments(data: GenericEmailData) {
   try {
     const recipients = Array.isArray(data.to) ? data.to.join(', ') : data.to
     
-    await transporter.sendMail({
+    await getTransporter().sendMail({
       from: `"CTG Collection" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
       to: recipients,
       subject: data.subject,
@@ -481,7 +492,7 @@ export async function sendOrderConfirmationWithPDF(data: OrderConfirmationWithPD
   }
 
   try {
-    await transporter.sendMail({
+    await getTransporter().sendMail({
       from: `"CTG Collection" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
       to: data.to,
       subject: `Order Confirmed - ${data.orderNumber} 📎 Receipt Attached`,
@@ -602,7 +613,7 @@ export async function sendOrderStatusUpdate(to: string, data: {
   `
 
   try {
-    const info = await transporter.sendMail({
+    const info = await getTransporter().sendMail({
       from: `"CTG Collection" <${process.env.SMTP_USER}>`,
       to,
       subject: statusInfo.subject,
@@ -686,7 +697,7 @@ export async function sendTierUpdateEmail(to: string, data: {
   `
 
   try {
-    const info = await transporter.sendMail({
+    const info = await getTransporter().sendMail({
       from: `"CTG Collection" <${process.env.SMTP_USER}>`,
       to,
       subject: `Welcome to ${data.tierName} Membership!`,
@@ -752,7 +763,7 @@ export async function sendLoyaltyUpdateEmail(to: string, data: {
   `
 
   try {
-    const info = await transporter.sendMail({
+    const info = await getTransporter().sendMail({
       from: `"CTG Collection" <${process.env.SMTP_USER}>`,
       to,
       subject: `You got ${data.points} points! - ${data.type}`,
@@ -837,7 +848,7 @@ export async function sendRoleChangeEmail(to: string, data: {
   `
 
   try {
-    const info = await transporter.sendMail({
+    const info = await getTransporter().sendMail({
       from: `"CTG Collection" <${process.env.SMTP_USER}>`,
       to,
       subject: isPromotion ? `Congratulations! You've been promoted to ${newRoleLabel}` : `Your account role has been updated`,
@@ -893,7 +904,7 @@ export async function sendAccountDeactivatedEmail(to: string, customerName: stri
   `
 
   try {
-    const info = await transporter.sendMail({
+    const info = await getTransporter().sendMail({
       from: `"CTG Collection" <${process.env.SMTP_USER}>`,
       to,
       subject: 'Your CTG Collection Account Has Been Deactivated',
@@ -946,7 +957,7 @@ export async function sendAccountReactivatedEmail(to: string, customerName: stri
   `
 
   try {
-    const info = await transporter.sendMail({
+    const info = await getTransporter().sendMail({
       from: `"CTG Collection" <${process.env.SMTP_USER}>`,
       to,
       subject: 'Welcome Back! Your CTG Collection Account is Reactivated',
@@ -998,7 +1009,7 @@ export async function sendAccountDeletedEmail(to: string, customerName: string) 
   `
 
   try {
-    const info = await transporter.sendMail({
+    const info = await getTransporter().sendMail({
       from: `"CTG Collection" <${process.env.SMTP_USER}>`,
       to,
       subject: 'Your CTG Collection Account Has Been Removed',
@@ -1022,7 +1033,7 @@ interface SendEmailOptions {
 
 async function sendEmail(options: SendEmailOptions) {
   try {
-    await transporter.sendMail({
+    await getTransporter().sendMail({
       from: `"CTG Collection" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
       ...options
     })
