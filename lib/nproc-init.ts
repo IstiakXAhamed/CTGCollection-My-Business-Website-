@@ -15,7 +15,7 @@ if (typeof process !== 'undefined' && process.env) {
                    process.env.__NEXT_PRIVATE_PREBUNDLED_REACT === 'true' ||
                    (process.env.UV_THREADPOOL_SIZE && process.env.UV_THREADPOOL_SIZE !== '1'); // Don't override if already set
 
-  if (!isBuild && !isWorker) {
+  if (!isBuild && !isWorker && process.env.NODE_ENV === 'production') {
     // Lock Libuv threadpool to 1 before any native code is loaded
     // PRODUCTION RUNTIME ONLY - NEVER BUILD
     process.env.UV_THREADPOOL_SIZE = '1';
