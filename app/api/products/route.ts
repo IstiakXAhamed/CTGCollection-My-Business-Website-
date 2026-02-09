@@ -71,10 +71,8 @@ export async function GET(request: NextRequest) {
       orderBy.createdAt = order
     }
 
-    // Fetch products with count - with extra safety for cPanel environment
-    console.log('Fetching products with where:', JSON.stringify(where))
-    
-    const [products, total] = await Promise.all([
+    // Fetch products, total count, AND settings in parallel for speed
+    const [products, total, settings] = await Promise.all([
       db.product.findMany({
         where,
         include: {
@@ -91,22 +89,15 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit
       }),
-      db.product.count({ where })
+      db.product.count({ where }),
+      db.siteSettings.findFirst()
     ]).catch(err => {
       console.error('Database query failed:', err)
-      return [[], 0]
+      return [[], 0, null]
     })
     
     console.log(`Found ${products.length} products (total: ${total})`)
-
-    // Fetch settings for multi-vendor check safely
-    let isMultiVendor = true
-    try {
-      const settings = await db.siteSettings.findFirst()
-      if (settings) isMultiVendor = settings.multiVendorEnabled
-    } catch (e) {
-      console.error('Settings fetch failed, defaulting to multi-vendor true')
-    }
+    const isMultiVendor = settings ? settings.multiVendorEnabled : true
 
     // Parse images JSON safely and handle Multi-Vendor logic
     const productsWithImages = (products || []).map((p: any) => {

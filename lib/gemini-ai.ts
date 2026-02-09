@@ -59,6 +59,10 @@ export async function callGeminiAI(prompt: string, options?: {
       /* console.log(`[Gemini] Attempting with ${model.name}...`) */
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model.id}:generateContent`
       
+      // Implement 20s timeout to prevent process hanging
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 20000)
+
       const response = await fetch(`${url}?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -68,8 +72,11 @@ export async function callGeminiAI(prompt: string, options?: {
             temperature: options?.temperature ?? 0.7,
             maxOutputTokens: options?.maxTokens ?? 2048,
           }
-        })
+        }),
+        signal: controller.signal
       })
+
+      clearTimeout(timeoutId)
 
       if (response.ok) {
         // Success! Return immediately

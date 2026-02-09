@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600 // Cache recommendations for 10 minutes
 
 export async function GET(req: NextRequest) {
   try {
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
             }
         }
     } catch (err) {
-        console.error("Order history analysis failed:", err)
+        /* console.error("Order history analysis failed:", err) */
     }
 
     // 2. If no history, ask AI or use Category logic (Fallback)

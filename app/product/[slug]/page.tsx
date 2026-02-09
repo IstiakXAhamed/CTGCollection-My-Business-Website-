@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import ProductDetailClient from '@/components/product/ProductDetailClient'
 import { notFound } from 'next/navigation'
 
+export const revalidate = 3600 // Cache product pages for 1 hour
+
 type Props = {
   params: { slug: string }
   searchParams: { [key: string]: string | string[] | undefined }

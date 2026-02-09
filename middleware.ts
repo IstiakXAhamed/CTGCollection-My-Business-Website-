@@ -91,8 +91,8 @@ export function middleware(request: NextRequest) {
     return response
   }
   
-  // General API rate limiting
-  if (pathname.startsWith('/api/')) {
+  // General API rate limiting (Skip for GET to save processes for public viewers)
+  if (pathname.startsWith('/api/') && request.method !== 'GET') {
     const key = getRateLimitKey(ip, 'api')
     const { limited, remaining, resetIn } = isRateLimited(key, MAX_REQUESTS_PER_WINDOW.api)
     

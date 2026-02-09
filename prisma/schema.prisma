@@ -197,6 +197,9 @@ model CartItem {
   
   cart          Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
   product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([cartId])
+  @@index([productId])
 }
 
 model Order {
@@ -252,6 +255,9 @@ model OrderItem {
   
   order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product       Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
 }
 
 model Payment {
@@ -304,6 +310,10 @@ model Review {
   
   product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([userId])
+  @@index([isApproved])
 }
 
 model Wishlist {
@@ -346,6 +356,10 @@ model ChatMessage {
   createdAt     DateTime    @default(now())
   
   session       ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([senderType])
+  @@index([isRead])
 }
 
 // Chat Restriction - Admin can restrict users from chatting
@@ -369,6 +383,11 @@ model Notification {
   isRead        Boolean  @default(false)
   link          String?
   createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([isRead])
+  @@index([createdAt])
 }
 
 // Flash Sales System

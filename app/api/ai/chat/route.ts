@@ -2,6 +2,25 @@ import { NextRequest, NextResponse } from 'next/server'
 import { generateChatResponse } from '@/lib/gemini-ai'
 import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
+import { getSiteSettings } from '@/lib/settings'
+
+// IN-MEMORY CACHE (V5 optimization)
+const CHAT_CONTEXT_CACHE = new Map<string, { data: any; expires: number }>()
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+async function getCachedContext() {
+  const now = Date.now()
+  const cached = CHAT_CONTEXT_CACHE.get('global_context')
+  if (cached && now < cached.expires) return cached.data
+  return null
+}
+
+function setCachedContext(data: any) {
+  CHAT_CONTEXT_CACHE.set('global_context', {
+    data,
+    expires: Date.now() + CACHE_TTL
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,47 +41,72 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
 
-    // Fetch site settings for contact info
-    let settings = null
-    try {
-      const settingsRes = await fetch(`${request.nextUrl.origin}/api/settings`)
-      if (settingsRes.ok) {
-        const data = await settingsRes.json()
-        settings = data.settings
-      }
-    } catch (e) {
-      console.log('Failed to fetch settings for AI chat', e)
+    // ==========================================
+    // 2. ENHANCED CONTEXT GATHERING (V5 - Parallelized)
+    // ==========================================
+ 
+    // Check Cache First
+    const cachedGlobal = await getCachedContext()
+    
+    // Define parallel tasks
+    const tasks: any[] = []
+    
+    // A. Settings (Direct DB call - WAY FASTER and saves a process)
+    const fetchSettings = async () => {
+      return await getSiteSettings()
     }
     
-    // ==========================================
-    // 2. ENHANCED CONTEXT GATHERING (V5)
-    // ==========================================
-
-    // A. Fetch Trending & Best Seller Products
-    try {
-      const trendingProducts = await prisma.product.findMany({
-        where: { isActive: true, isFeatured: true },
-        take: 5,
-        select: { name: true, slug: true, basePrice: true, salePrice: true }
-      })
-      contextData.trending = trendingProducts.map(p => `- ${p.name} [SHOW:${p.slug}]`).join('\n')
-    } catch (e) { console.error("Trending fetch error", e) }
-
-    // B. Fetch Past Orders (For Re-Order Feature)
-    if (user) {
+    // B. Trending / Categories (Cached)
+    const fetchGlobalContext = async () => {
+      if (cachedGlobal) return cachedGlobal
+      
       try {
-        const pastOrders = await prisma.order.findMany({
-          where: { userId: user.id },
-          take: 3,
-          orderBy: { createdAt: 'desc' },
-          include: { items: { include: { product: { select: { name: true, slug: true } } } } }
-        })
-        if (pastOrders.length > 0) {
-          contextData.pastOrders = pastOrders.map(o => 
-            `Order #${o.orderNumber} (Status: ${o.status}): ${o.items.map(i => i.product.name).join(', ')}`
-          ).join('\n')
+        const [trendingProducts, categories] = await Promise.all([
+          prisma.product.findMany({
+            where: { isActive: true, isFeatured: true },
+            take: 5,
+            select: { name: true, slug: true, basePrice: true, salePrice: true }
+          }),
+          prisma.category.findMany({
+            where: { isActive: true, parentId: null },
+            select: { name: true, slug: true },
+            take: 12
+          })
+        ])
+        
+        const data = {
+          trending: trendingProducts.map(p => `- ${p.name} [SHOW:${p.slug}]`).join('\n'),
+          categories: categories.map((c: any) => `- ${c.name} [CATEGORY:${c.slug}]`).join('\n')
         }
-      } catch (e) { console.error("Past order fetch error", e) }
+        setCachedContext(data)
+        return data
+      } catch (e) {
+        console.error("Global context fetch error", e)
+        return { trending: '', categories: '' }
+      }
+    }
+ 
+    // Execute Parallel Context Fetching
+    const [fetchedSettings, globalData, pastOrders] = await Promise.all([
+      fetchSettings(),
+      fetchGlobalContext(),
+      user ? prisma.order.findMany({
+        where: { userId: user.id },
+        take: 3,
+        orderBy: { createdAt: 'desc' },
+        include: { items: { include: { product: { select: { name: true, slug: true } } } } }
+      }) : Promise.resolve([])
+    ])
+ 
+    // Assign gathered data
+    let settings = fetchedSettings
+    contextData.trending = globalData.trending
+    contextData.categories = globalData.categories
+    
+    if (user && pastOrders.length > 0) {
+      contextData.pastOrders = (pastOrders as any[]).map(o => 
+        `Order #${o.orderNumber} (Status: ${o.status}): ${o.items.map((i: any) => i.product.name).join(', ')}`
+      ).join('\n')
     }
 
     // C. Universal Product Search & Best Offers
@@ -136,17 +180,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // D. Fetch Categories 
-    try {
-      const categories = await prisma.category.findMany({
-        where: { isActive: true, parentId: null },
-        select: { name: true, slug: true },
-        take: 12
-      });
-      contextData.categories = categories.map((c: any) => `- ${c.name} [CATEGORY:${c.slug}]`).join('\n');
-    } catch (e) {
-      console.log("Category fetch error", e);
-    }
 
     // E. Store Policies
     contextData.storePolicies = `

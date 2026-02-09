@@ -19,6 +19,9 @@ const nextConfig = {
   experimental: {
     // Optimize package imports for smaller bundles
     optimizePackageImports: ['lucide-react', 'framer-motion', '@radix-ui/react-icons'],
+    // Limit worker threads to prevent process limit exhaustion
+    workerThreads: false,
+    cpus: 1
   },
 
   // Image optimization
@@ -48,10 +51,11 @@ const nextConfig = {
     // Device sizes for responsive images
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
-    // Enable image optimization for faster loading
-    unoptimized: false,
+    // Disable built-in image optimization to save server processes/memory
+    // Cloudinary already handles this via URL parameters.
+    unoptimized: true,
     // Optimize images with lower quality for faster loading
-    minimumCacheTTL: 86400, // 24 hours
+    minimumCacheTTL: 31536000, // 1 year
   },
   
   // Custom headers for security and caching
