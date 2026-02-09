@@ -118,10 +118,10 @@ export default function AdvancedProductForm({ initialData, categories }: Advance
         }
       }
       setImages(prev => [...prev, ...newImages])
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Upload Failed',
-        description: 'Could not upload images',
+        description: error.message || 'Could not upload images',
         variant: 'destructive'
       })
     } finally {
