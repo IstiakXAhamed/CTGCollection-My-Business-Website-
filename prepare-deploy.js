@@ -57,7 +57,7 @@ if (fs.existsSync(prismaDir)) {
 
 // 6. Copy essential files
 console.log('📄 Copying configuration files...');
-const essentialFiles = ['package.json', '.env', 'next.config.js', 'cpanel-entry.js', 'Passengerfile.json', 'restart-app.sh'];
+const essentialFiles = ['package.json', '.env', 'next.config.js', 'app.js', 'cpanel-entry.js', 'Passengerfile.json', 'restart-app.sh'];
 essentialFiles.forEach(file => {
     const src = path.join(__dirname, file);
     if (fs.existsSync(src)) {

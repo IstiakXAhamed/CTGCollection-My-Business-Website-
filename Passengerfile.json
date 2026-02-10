@@ -3,5 +3,6 @@
   "min_instances": 1,
   "start_timeout": 90,
   "environment": "production",
-  "nodejs": true
+  "nodejs": true,
+  "app_start_command": "node app.js"
 }
