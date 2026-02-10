@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
-import nodemailer from 'nodemailer'
+import { getTransporter } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,16 +82,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No recipients found' }, { status: 400 })
     }
 
-    // Create transporter
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
-    })
+    // Use shared transport singleton (no per-request threads)
+    const transporter = getTransporter()
 
     // Email HTML template
     const html = `

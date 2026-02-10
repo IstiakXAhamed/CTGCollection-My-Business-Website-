@@ -9,8 +9,8 @@ const nextConfig = {
   // Optimize page loading
   poweredByHeader: false,
   
-  // Compress responses
-  compress: true,
+  // Compression handled by Apache/Passenger — disable Node zlib to save threads
+  compress: false,
 
   // Disable static optimization to prevent build crashes on limited resources
   // This forces all pages to render at runtime instead of build time

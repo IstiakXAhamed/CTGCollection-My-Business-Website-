@@ -10,9 +10,8 @@ export function getTransporter() {
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: false,
-    pool: true, // Use pooling to prevent per-request connections
-    maxConnections: 1, // Strict single connection for cPanel
-    maxMessages: 100,
+    pool: false, // Disabled: pool keeps persistent threads on cPanel
+    // Each email opens→sends→closes. ~100ms slower per email but zero persistent threads.
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS

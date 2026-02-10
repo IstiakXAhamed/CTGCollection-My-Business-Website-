@@ -3,18 +3,11 @@ import { PrismaClient } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
-  isInitializing: boolean
 }
 
-// Ensure Prisma is a true singleton to prevent spawning 100+ processes on cPanel
+// True singleton — cached in ALL environments (including production)
 export const prisma = (() => {
   if (globalForPrisma.prisma) return globalForPrisma.prisma
-  
-  if (globalForPrisma.isInitializing) {
-     return globalForPrisma.prisma as unknown as PrismaClient
-  }
-
-  globalForPrisma.isInitializing = true
   
   const client = new PrismaClient({
     datasources: {
@@ -27,12 +20,13 @@ export const prisma = (() => {
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
   })
 
-  if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = client
-  globalForPrisma.isInitializing = false
+  // Cache in ALL environments — this was the critical bug
+  globalForPrisma.prisma = client
   return client
 })()
 
-// Graceful shutdown to prevent "Ghost" processes on cPanel/Passenger
+// Graceful shutdown — ONLY on controlled signals from Passenger
+// DO NOT handle uncaughtException/unhandledRejection (causes respawn loops)
 const disconnect = async () => {
   try {
     if (globalForPrisma.prisma) {
@@ -46,12 +40,6 @@ const disconnect = async () => {
   }
 }
 
-// Aggressive cleanup for cPanel/Passenger
+// Only SIGTERM (Passenger stop) and SIGINT (Ctrl+C)
 process.on('SIGTERM', disconnect)
 process.on('SIGINT', disconnect)
-process.on('beforeExit', disconnect)
-// If the app gets "killed" by CloudLinux, we want to try and die fast
-process.on('uncaughtException', disconnect)
-process.on('unhandledRejection', disconnect)
-
-// Signal handling remains same...
