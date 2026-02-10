@@ -2,13 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSiteSettings } from '@/lib/settings'
 import { prisma } from '@/lib/prisma'
 
-export const revalidate = 60 // Cache settings for 60 seconds (ISR)
+export const dynamic = 'force-dynamic' // Settings must always be fresh for PUT mutations
 
 // GET - Fetch site settings (public)
 export async function GET() {
-  const settings = await getSiteSettings()
-  return NextResponse.json({ settings })
+  try {
+    const settings = await getSiteSettings()
+    return NextResponse.json({ settings })
+  } catch (error: any) {
+    console.error('[Settings API] GET error:', error?.message)
+    return NextResponse.json({ settings: null, error: 'Failed to fetch settings' }, { status: 500 })
+  }
 }
+
 // PUT - Update site settings (admin only)
 export async function PUT(req: NextRequest) {
   try {
@@ -44,7 +50,7 @@ export async function PUT(req: NextRequest) {
       data.spinWheelConfig = body.spinWheelConfig
     }
 
-    // Filter and sanitize body
+    // Filter and sanitize body — STRICTLY whitelist only
     Object.keys(body).forEach(key => {
       if (!whitelist.includes(key)) return
       
@@ -68,20 +74,16 @@ export async function PUT(req: NextRequest) {
       ].includes(key)) {
         data[key] = Boolean(value)
       } else {
-        data[key] = value
+        data[key] = String(value)
       }
     })
 
-    const attemptUpdate = async (updateData: any) => {
-      return await (prisma as any).siteSettings.upsert({
-        where: { id: 'main' },
-        update: updateData,
-        create: {
-          id: 'main',
-          ...updateData
-        }
-      })
+    // Don't attempt empty update
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
     }
+
+    console.log('[Settings API] Filtered data keys:', Object.keys(data))
 
     let result
     let skippedFields: string[] = []
@@ -89,36 +91,66 @@ export async function PUT(req: NextRequest) {
     let success = false
     let lastError: any = null
 
-    // Loop to handle potential multiple schema mismatches (missing columns)
-    for (let attempt = 0; attempt < 5; attempt++) {
+    // Retry loop: gracefully handles schema mismatches by removing unknown fields
+    for (let attempt = 0; attempt < 10; attempt++) {
       try {
-        result = await attemptUpdate(currentData)
+        result = await (prisma as any).siteSettings.upsert({
+          where: { id: 'main' },
+          update: currentData,
+          create: {
+            id: 'main',
+            ...currentData
+          }
+        })
         success = true
         break
       } catch (error: any) {
         lastError = error
-        console.warn(`[Settings API] Attempt ${attempt + 1} failed:`, error.message)
+        const msg = error?.message || ''
+        console.warn(`[Settings API] Attempt ${attempt + 1} failed:`, msg)
         
-        if (error.message.includes('Unknown argument')) {
-          const match = error.message.match(/Unknown argument `([^`]+)`/)
+        // Handle "Unknown argument" — field exists in whitelist but not in DB schema
+        if (msg.includes('Unknown argument')) {
+          const match = msg.match(/Unknown argument `([^`]+)`/)
           const problematicField = match ? match[1] : null
           
           if (problematicField && currentData[problematicField] !== undefined) {
-            console.warn(`[Settings API] Removing problematic field: ${problematicField}`)
+            console.warn(`[Settings API] Removing unknown field: ${problematicField}`)
             skippedFields.push(problematicField)
             const { [problematicField]: _, ...nextData } = currentData
             currentData = nextData
-            continue // Try again with the field removed
+            if (Object.keys(currentData).length === 0) break
+            continue
           }
         }
         
-        // If it's not an 'Unknown argument' or we couldn't identify the field, stop
+        // Handle "Invalid value" — type mismatch
+        if (msg.includes('Invalid value') || msg.includes('Expected')) {
+          const fieldMatch = msg.match(/Argument `([^`]+)`/)
+          const problematicField = fieldMatch ? fieldMatch[1] : null
+          
+          if (problematicField && currentData[problematicField] !== undefined) {
+            console.warn(`[Settings API] Removing type-mismatched field: ${problematicField}`)
+            skippedFields.push(problematicField)
+            const { [problematicField]: _, ...nextData } = currentData
+            currentData = nextData
+            if (Object.keys(currentData).length === 0) break
+            continue
+          }
+        }
+        
+        // Unknown error — stop retrying
         break
       }
     }
 
     if (!success) {
-      throw lastError || new Error('Failed to update settings after multiple attempts')
+      console.error('[Settings API] All attempts failed:', lastError?.message)
+      return NextResponse.json({ 
+        error: 'Failed to update settings', 
+        details: lastError?.message || 'Database error',
+        skippedFields
+      }, { status: 500 })
     }
 
     return NextResponse.json({ 
@@ -127,10 +159,10 @@ export async function PUT(req: NextRequest) {
       skippedFields: skippedFields.length > 0 ? skippedFields : undefined
     })
   } catch (error: any) {
-    console.error('Settings update CRITICAL error:', error)
+    console.error('[Settings API] CRITICAL error:', error?.message, error?.stack)
     return NextResponse.json({ 
       error: 'Failed to update settings', 
-      details: error?.message || 'Unknown database error' 
+      details: error?.message || 'Unknown server error' 
     }, { status: 500 })
   }
 }

@@ -109,12 +109,18 @@ export default function AdminSettingsPage() {
     try {
       const payload = updates ? { ...settings, ...updates } : settings
 
+      // 30s timeout to prevent infinite hang on slow server
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 30000)
+
       const res = await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: controller.signal
       })
+      clearTimeout(timeout)
       
       if (res.ok) {
         const data = await res.json()
@@ -135,18 +141,25 @@ export default function AdminSettingsPage() {
           })
         }
       } else {
-        const errData = await res.json()
+        let errMsg = `Server returned ${res.status}`
+        try {
+          const errData = await res.json()
+          errMsg = `${errData.error || 'Failed'}${errData.details ? `: ${errData.details}` : ''}`
+        } catch {}
         toast({
           title: "Save Failed",
-          description: `${errData.error || "Failed to update settings"}${errData.details ? `: ${errData.details}` : ""}`,
+          description: errMsg,
           variant: "destructive"
         })
       }
-    } catch (error) {
-      console.error('Failed to save settings:', error)
+    } catch (error: any) {
+      console.error('Settings save error:', error)
+      const isTimeout = error?.name === 'AbortError'
       toast({
-        title: "Network Error",
-        description: "Could not connect to the server. Check your internet.",
+        title: isTimeout ? "Request Timeout" : "Save Error",
+        description: isTimeout 
+          ? "Server took too long to respond. Try again." 
+          : `Error: ${error?.message || 'Unknown error'}. Check browser console for details.`,
         variant: "destructive"
       })
     } finally {
