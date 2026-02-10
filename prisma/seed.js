@@ -6,7 +6,29 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seed (Pure JS)...');
 
-  // Clear existing data
+  // ⛑️ SAFETY CHECK: Refuse to seed if real data exists
+  const existingProducts = await prisma.product.count();
+  const existingUsers = await prisma.user.count();
+  
+  if (existingProducts > 0 || existingUsers > 0) {
+    console.log('');
+    console.log('⚠️  DATABASE ALREADY HAS DATA!');
+    console.log(`   Found: ${existingProducts} products, ${existingUsers} users`);
+    console.log('   Seeding would DELETE all existing data.');
+    console.log('');
+    console.log('   To force re-seed (DESTROYS ALL DATA), run:');
+    console.log('   FORCE_SEED=true npx prisma db seed');
+    console.log('');
+    
+    if (process.env.FORCE_SEED !== 'true') {
+      console.log('❌ Seed ABORTED to protect your data.');
+      process.exit(0);
+    }
+    
+    console.log('⚠️  FORCE_SEED=true detected. Proceeding with destructive seed...');
+  }
+
+  // Clear existing data (only runs on empty DB or with FORCE_SEED=true)
   await prisma.wishlist.deleteMany();
   await prisma.review.deleteMany();
   await prisma.coupon.deleteMany();

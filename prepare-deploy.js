@@ -67,9 +67,4 @@ essentialFiles.forEach(file => {
 });
 
 console.log('\n✅ Deployment folder ready: ./deploy');
-console.log('👉 Next steps:');
-console.log('   1. Upload the deploy folder to your server');
-console.log('   2. Run: npm install --production');
-console.log('   3. Run: npx prisma generate');
-console.log('   4. Run: npx prisma db seed');
-console.log('   5. Run: npm start');
+
