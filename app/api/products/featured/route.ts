@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { withCache, CacheTTL } from '@/lib/cache'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,17 +9,26 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const limit = parseInt(searchParams.get('limit') || '8')
 
-    const featuredProducts = await prisma.product.findMany({
-      where: {
-        isFeatured: true,
-        isActive: true
-      },
-      include: {
-        category: { select: { name: true, slug: true } }
-      },
-      orderBy: { createdAt: 'desc' },
-      take: limit
-    })
+    // Cache key includes limit to handle different page sizes
+    const cacheKey = `products:featured:${limit}`
+    
+    const featuredProducts = await withCache(
+      cacheKey,
+      CacheTTL.PRODUCTS_LIST,
+      async () => {
+        return await prisma.product.findMany({
+          where: {
+            isFeatured: true,
+            isActive: true
+          },
+          include: {
+            category: { select: { name: true, slug: true } }
+          },
+          orderBy: { createdAt: 'desc' },
+          take: limit
+        })
+      }
+    )
 
     const productsWithImages = featuredProducts.map(p => {
       let images: string[] = []
