@@ -1,74 +1,52 @@
 /**
- * CTG Collection - NPROC Hardening Entry Point (cPanel/Passenger)
+ * CTG Collection - cPanel/Passenger Entry Point
  * 
- * This file MUST be set as the 'Application Startup File' in cPanel Node.js Selector.
- * It locks environment variables BEFORE Next.js loads, then starts the server.
+ * CRITICAL: This file is the Application Startup File in cPanel Node.js Selector.
+ * It starts Next.js as an in-process HTTP server — NO child processes, NO spawning.
+ * 
+ * Passenger will manage this as a single worker. Do NOT fight Passenger's process model.
  */
 
-// 1. HARD LOCK: Environment variables (must be set before ANY require)
+// 1. HARD LOCK: Must be set BEFORE any require() 
 process.env.UV_THREADPOOL_SIZE = '1';
 process.env.PRISMA_CLIENT_ENGINE_TYPE = 'library';
 process.env.NEXT_TELEMETRY_DISABLED = '1';
 process.env.NODE_ENV = 'production';
 
-console.log('🛡️  NPROC Shield Active: UV_THREADPOOL_SIZE=1, Prisma=library engine');
+// 2. Suppress V8 extras
+const v8 = require('v8');
+v8.setFlagsFromString('--no-idle-notification');
+v8.setFlagsFromString('--max-old-space-size=256');
 
-// 2. INSTANCE LOCK: Prevent duplicate instances via lockfile
-const fs = require('fs');
-const path = require('path');
-const lockFile = path.join(__dirname, '.server.lock');
+console.log(`[PID ${process.pid}] NPROC Shield: UV_THREADPOOL=1, Prisma=library`);
 
-// Check for stale lock
-if (fs.existsSync(lockFile)) {
-  try {
-    const lockPid = parseInt(fs.readFileSync(lockFile, 'utf8').trim());
-    // Check if that PID is actually running
-    try {
-      process.kill(lockPid, 0); // Signal 0 = existence check, doesn't kill
-      console.error(`❌ Another instance is running (PID ${lockPid}). Exiting.`);
-      process.exit(1);
-    } catch (e) {
-      // PID doesn't exist — stale lock, safe to continue
-      console.log('⚠️  Stale lock file found, cleaning up...');
-    }
-  } catch (e) {
-    // Can't read lock file — delete and continue
-  }
-}
+// 3. Start Next.js IN-PROCESS (zero child processes)
+const next = require('next');
+const http = require('http');
 
-// Write our PID
-fs.writeFileSync(lockFile, String(process.pid));
-console.log(`🔒 Instance lock acquired (PID ${process.pid})`);
+const PORT = parseInt(process.env.PORT || '3000', 10);
+const app = next({ dev: false, dir: __dirname });
+const handle = app.getRequestHandler();
 
-// Clean up lock on exit
-function cleanLock() {
-  try { fs.unlinkSync(lockFile); } catch(e) {}
-}
-process.on('exit', cleanLock);
-process.on('SIGTERM', () => { cleanLock(); process.exit(0); });
-process.on('SIGINT', () => { cleanLock(); process.exit(0); });
+app.prepare().then(() => {
+  const server = http.createServer((req, res) => {
+    handle(req, res);
+  });
 
-// 3. START NEXT.JS (Standard mode — no standalone)
-console.log('🚀 Starting Next.js production server...');
+  // Keep-alive timeout — prevent dangling connections from holding threads
+  server.keepAliveTimeout = 5000;
+  server.headersTimeout = 6000;
 
-// Use Next.js CLI start which handles everything correctly
-const { execSync } = require('child_process');
-const PORT = process.env.PORT || 3000;
+  server.listen(PORT, () => {
+    console.log(`[PID ${process.pid}] Next.js ready on port ${PORT}`);
+  });
+}).catch((err) => {
+  console.error('[FATAL] Next.js failed to start:', err);
+  process.exit(1);
+});
 
-// Start next directly — this is what `npm start` does
-try {
-  require('next/dist/bin/next');
-} catch (e) {
-  // Fallback: use the next CLI directly
-  console.log('Starting via next start CLI...');
-  const nextBin = path.join(__dirname, 'node_modules', '.bin', 'next');
-  if (fs.existsSync(nextBin)) {
-    require('child_process').spawn(nextBin, ['start', '-p', String(PORT)], {
-      stdio: 'inherit',
-      env: process.env
-    });
-  } else {
-    console.error('❌ Cannot find next binary. Run npm install first.');
-    process.exit(1);
-  }
-}
+// 4. Graceful shutdown (only SIGTERM from Passenger)
+process.on('SIGTERM', () => {
+  console.log(`[PID ${process.pid}] SIGTERM received, shutting down...`);
+  process.exit(0);
+});
