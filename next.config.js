@@ -12,8 +12,8 @@ const nextConfig = {
   // Compress responses
   compress: true,
 
-  // Output standalone for Vercel deployment
-  output: 'standalone',
+  // Disable static optimization to prevent build crashes on limited resources
+  // This forces all pages to render at runtime instead of build time
 
   experimental: {
     // Optimize package imports for smaller bundles
