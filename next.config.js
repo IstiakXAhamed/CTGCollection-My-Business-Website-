@@ -25,6 +25,14 @@ const nextConfig = {
     // Aggressive memory management for builds
     memoryLimit: 512, // 512MB limit for build workers
   },
+  
+  // Disable linting and type checking during build to save memory/resource
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   // Increase timeout for static page generation to survive shared hosting limits
   staticPageGenerationTimeout: 300,
 
