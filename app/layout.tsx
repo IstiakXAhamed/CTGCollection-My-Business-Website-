@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-export const dynamic = 'force-dynamic'
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -13,6 +12,10 @@ import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import AnnouncementPopup from '@/components/AnnouncementPopup'
 import Analytics from '@/components/Analytics'
 import dynamic from 'next/dynamic'
+
+// Force dynamic rendering to reduce build memory usage on shared hosting
+export const dynamicParams = true
+export const revalidate = 0
 import BottomNav from "@/components/BottomNav";
 import AppSplashScreen from "@/components/AppSplashScreen";
 import PageTransitionProvider from "@/components/PageTransitionProvider";

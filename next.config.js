@@ -22,8 +22,6 @@ const nextConfig = {
     cpus: 1,
     // Disable worker threads to reduce concurrent context-switching during build
     workerThreads: false,
-    // Aggressive memory management for builds
-    memoryLimit: 512, // 512MB limit for build workers
   },
   
   // Disable linting and type checking during build to save memory/resource
