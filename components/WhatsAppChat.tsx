@@ -123,7 +123,7 @@ export function WhatsAppChat({
                   <MessageCircle className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold">CTG Collection</h3>
+                  <h3 className="font-bold">Silk Mart</h3>
                   <p className="text-sm text-green-100">Usually replies in minutes</p>
                 </div>
               </div>

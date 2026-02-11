@@ -298,7 +298,7 @@ export function generatePremiumReceiptHTML(order: OrderWithDetails, logoBase64?:
           : `<div class="logo-box">C</div>`
         }
         <div>
-          <div class="brand-name">CTG Collection</div>
+          <div class="brand-name">Silk Mart</div>
           <div class="brand-tagline">Premium Fashion & Lifestyle</div>
         </div>
       </div>
@@ -383,7 +383,7 @@ export function generatePremiumReceiptHTML(order: OrderWithDetails, logoBase64?:
     </div>
     
     <div class="footer">
-      <div class="footer-brand">CTG Collection</div>
+      <div class="footer-brand">Silk Mart</div>
       <p>Thank you for shopping with us!</p>
       <p style="margin-top: 12px;">📧 ctgcollection2@gmail.com</p>
     </div>

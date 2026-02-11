@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
-import { saveReceiptToFile } from '@/lib/receipt'
+// PDF-only receipt system — no HTML file saving
 import { sendShippingNotification, sendOrderStatusUpdate, sendLoyaltyUpdateEmail } from '@/lib/email'
 import { notifyOrderShipped, notifyOrderDelivered, notifyOrderCancelled } from '@/lib/notifications'
 import { calculateTierForUser } from '@/lib/tier-calculator'
@@ -106,17 +106,8 @@ export async function PUT(
     let emailSent = false
     let receiptUrl = null
 
-    // Handle payment confirmation - generate receipt and send email NON-BLOCKING
+    // Handle payment confirmation - generate PDF receipt and send email NON-BLOCKING
     if (paymentStatus === 'paid' && existingOrder.paymentStatus !== 'paid') {
-      // Generate receipt URL synchronously (fast, just saves HTML)
-      receiptUrl = await saveReceiptToFile(order.id)
-      
-      if (receiptUrl) {
-        await (prisma.order.update as any)({
-          where: { id: order.id },
-          data: { receiptUrl }
-        })
-      }
 
       // Send email in background — NEVER block the response
       const recipientEmail = order.user?.email || existingOrder.guestEmail

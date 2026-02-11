@@ -117,7 +117,7 @@ async function sendBirthdayEmail(to: string, name: string, couponCode: string) {
           
           <p style="margin-top: 30px; color: #666;">
             Wishing you a wonderful birthday filled with joy and happiness!<br>
-            - The CTG Collection Team 💝
+            - The Silk Mart Team 💝
           </p>
         </div>
       </div>
@@ -126,7 +126,7 @@ async function sendBirthdayEmail(to: string, name: string, couponCode: string) {
   `
 
   await getTransporter().sendMail({
-    from: `"CTG Collection 🎂" <${process.env.SMTP_USER}>`,
+    from: `"Silk Mart 🎂" <${process.env.SMTP_USER}>`,
     to,
     subject: `🎂 Happy Birthday ${name}! Here's 15% OFF just for you!`,
     html
@@ -245,7 +245,7 @@ async function sendAbandonedCartEmail(to: string, order: any) {
   `
 
   await getTransporter().sendMail({
-    from: `"CTG Collection" <${process.env.SMTP_USER}>`,
+    from: `"Silk Mart" <${process.env.SMTP_USER}>`,
     to,
     subject: `🛒 Your cart is waiting! Complete your order`,
     html

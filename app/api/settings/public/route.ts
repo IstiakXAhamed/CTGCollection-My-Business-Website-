@@ -10,20 +10,31 @@ export async function GET() {
       select: {
         multiVendorEnabled: true,
         storeName: true,
-        spinWheelConfig: true
+        spinWheelConfig: true,
+        pwaEnabled: true,
+        pwaShowInstallLink: true,
+        pwaPromptDelay: true
       }
     })
 
     return NextResponse.json({
       multiVendorEnabled: settings?.multiVendorEnabled ?? false,
       siteName: settings?.storeName || 'Silk Mart',
-      spinWheelConfig: settings?.spinWheelConfig || null
+      storeName: settings?.storeName || 'Silk Mart',
+      spinWheelConfig: settings?.spinWheelConfig || null,
+      pwaEnabled: settings?.pwaEnabled ?? true,
+      pwaShowInstallLink: settings?.pwaShowInstallLink ?? true,
+      pwaPromptDelay: settings?.pwaPromptDelay ?? 30
     })
   } catch (error) {
     return NextResponse.json({ 
       multiVendorEnabled: false,
       siteName: 'Silk Mart',
-      spinWheelConfig: null
+      storeName: 'Silk Mart',
+      spinWheelConfig: null,
+      pwaEnabled: true,
+      pwaShowInstallLink: true,
+      pwaPromptDelay: 30
     })
   }
 }

@@ -88,8 +88,8 @@ export async function verifyCode(
 // Send verification email
 export async function sendVerificationEmail(email: string, code: string, type: 'email_verify' | 'login_2fa'): Promise<boolean> {
   const subject = type === 'email_verify' 
-    ? 'Verify Your Email - CTG Collection'
-    : 'Login Verification Code - CTG Collection'
+    ? 'Verify Your Email - Silk Mart'
+    : 'Login Verification Code - Silk Mart'
 
   const html = `
     <!DOCTYPE html>
@@ -110,7 +110,7 @@ export async function sendVerificationEmail(email: string, code: string, type: '
     <body>
       <div class="container">
         <div class="logo">
-          <h1>🛒 CTG Collection</h1>
+          <h1>🛒 Silk Mart</h1>
         </div>
         
         <p class="message">
@@ -132,7 +132,7 @@ export async function sendVerificationEmail(email: string, code: string, type: '
         </div>
         
         <div class="footer">
-          <p>CTG Collection - Premium E-Commerce Store</p>
+          <p>Silk Mart - Premium E-Commerce Store</p>
           <p>This is an automated message, please do not reply.</p>
         </div>
       </div>

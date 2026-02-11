@@ -83,7 +83,7 @@ export function DeliveryTracking({ orderId, orderNumber }: DeliveryTrackingProps
         status: 'Shipped',
         description: 'Package handed to courier',
         date: 'Dec 15, 2024 - 9:00 AM',
-        location: 'CTG Collection Center',
+        location: 'Silk Mart Center',
         completed: true,
         current: false
       },

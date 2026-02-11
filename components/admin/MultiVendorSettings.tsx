@@ -12,7 +12,7 @@ export function MultiVendorSettings() {
   const [saving, setSaving] = useState(false)
   const [settings, setSettings] = useState<any>({
     multiVendorEnabled: false,
-    storeName: 'CTG Collection'
+    storeName: 'Silk Mart'
   })
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export function MultiVendorSettings() {
       const data = await res.json()
       setSettings({
         multiVendorEnabled: data.multiVendorEnabled ?? false,
-        storeName: data.storeName || 'CTG Collection'
+        storeName: data.storeName || 'Silk Mart'
       })
     } catch (error) {
       console.error('Failed to fetch settings:', error)

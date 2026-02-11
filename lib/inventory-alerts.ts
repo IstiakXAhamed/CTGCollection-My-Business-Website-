@@ -112,7 +112,7 @@ async function sendLowStockEmail(products: any[]) {
   `
 
   await getTransporter().sendMail({
-    from: `"CTG Collection Alerts" <${process.env.SMTP_USER}>`,
+    from: `"Silk Mart Alerts" <${process.env.SMTP_USER}>`,
     to: process.env.ADMIN_EMAIL || 'ctgcollection2@gmail.com',
     subject: `⚠️ Low Stock Alert - ${products.length} products need restocking`,
     html
@@ -182,7 +182,7 @@ export async function sendStockAvailableEmail(email: string, productName: string
   `
 
   await getTransporter().sendMail({
-    from: `"CTG Collection" <${process.env.SMTP_USER}>`,
+    from: `"Silk Mart" <${process.env.SMTP_USER}>`,
     to: email,
     subject: `🎉 ${productName} is back in stock!`,
     html

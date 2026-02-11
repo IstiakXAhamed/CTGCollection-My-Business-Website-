@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
-import { generateReceiptHTML, getOrderForReceipt, saveReceiptToFile } from '@/lib/receipt'
+import { generateReceiptHTML, getOrderForReceipt } from '@/lib/receipt'
 import { sendOrderConfirmationWithPDF } from '@/lib/email'
 import { generateReceiptPDF } from '@/lib/pdf-generator'
 
@@ -67,21 +67,17 @@ export async function GET(
       }
     }
 
-    // Default: generate and save receipt file, return URL
-    const receiptUrl = await saveReceiptToFile(order.id)
+    // Default: generate PDF receipt directly
+    const pdfBuffer = await generateReceiptPDF(order.id)
 
-    if (!receiptUrl) {
-      return NextResponse.json({ error: 'Failed to generate receipt' }, { status: 500 })
+    if (!pdfBuffer) {
+      return NextResponse.json({ error: 'Failed to generate receipt PDF' }, { status: 500 })
     }
 
-    return NextResponse.json({ 
-      receiptUrl,
-      order: {
-        id: order.id,
-        orderNumber: order.orderNumber,
-        status: order.status,
-        paymentStatus: order.paymentStatus,
-        total: order.total
+    return new NextResponse(new Uint8Array(pdfBuffer), {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `inline; filename="receipt-${order.orderNumber}.pdf"`,
       }
     })
   } catch (error: any) {

@@ -19,7 +19,7 @@ export function WishlistShare({ wishlistId, wishlistName = 'My Wishlist', itemCo
     ? `${window.location.origin}/wishlist/shared/${wishlistId}`
     : ''
 
-  const shareText = `Check out my wishlist on CTG Collection! ${itemCount} items I love 💕`
+  const shareText = `Check out my wishlist on Silk Mart! ${itemCount} items I love 💕`
 
   const copyLink = async () => {
     try {

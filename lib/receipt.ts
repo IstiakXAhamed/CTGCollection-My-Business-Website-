@@ -312,7 +312,7 @@ ${printStyles}
     <div>${o.paymentMethod==='cod'?'Cash on Delivery':'Online Payment'} • ${o.paymentStatus==='paid'?'Paid':'Pending'}</div>
     ${o.verificationCode?`<div class="verify-code">${o.verificationCode}</div>`:''}
   </div>
-  <div class="footer">CTG Collection • support@silkmart.com</div>
+  <div class="footer">Silk Mart • support@silkmart.com</div>
 </div>
 ${printBtn('#111')}
 </body></html>`
@@ -450,7 +450,7 @@ ${printStyles}
       ${o.verificationCode?`<div><strong>Verify:</strong> <span class="verify-code">${o.verificationCode}</span></div>`:''}
     </div>
   </div>
-  <div class="footer">CTG Collection • Thank you for your business!</div>
+  <div class="footer">Silk Mart • Thank you for your business!</div>
 </div>
 ${printBtn('#1e40af')}
 </body></html>`
@@ -894,7 +894,7 @@ td{padding:12px 10px;border-bottom:1px solid #f3f4f6}
 .footer{text-align:center;padding:24px;color:#9ca3af;font-size:12px}
 ${printStyles}</style></head><body><div class="receipt">
 <div class="header"><div class="brand">${logo?`<img src="${logo}" style="height:32px;margin-right:10px;vertical-align:middle">`:''}
-<h1 style="display:inline;vertical-align:middle">CTG Collection</h1><p>Premium Fashion</p></div>
+<h1 style="display:inline;vertical-align:middle">Silk Mart</h1><p>Premium Fashion</p></div>
 <div class="invoice-num">${o.orderNumber}</div></div>
 <div class="body"><div style="color:#6b7280;font-size:12px;margin-bottom:16px">${formatDate(o.createdAt)}</div>
 <div class="row"><div class="box"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>
@@ -1089,7 +1089,7 @@ td{padding:12px 10px;border-bottom:1px solid #f1f5f9}
 .footer{text-align:center;padding:24px;color:#94a3b8;font-size:12px}
 ${printStyles}</style></head><body><div class="receipt">
 <div class="header"><div class="brand">${logo?`<img src="${logo}" style="height:32px;margin-right:10px;vertical-align:middle">`:''}
-<h1 style="display:inline;vertical-align:middle">CTG Collection</h1><p>Premium Fashion</p></div>
+<h1 style="display:inline;vertical-align:middle">Silk Mart</h1><p>Premium Fashion</p></div>
 <div class="invoice-box">${formatDate(o.createdAt)}<strong>${o.orderNumber}</strong></div></div>
 <div class="body"><div class="info-row">
 <div class="info-box"><h4>CUSTOMER</h4><p><strong>${o.address.name}</strong><br>${o.address.phone}</p></div>

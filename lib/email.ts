@@ -81,7 +81,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
       <div class="container">
         <div class="header">
           <h1>Order Confirmed</h1>
-          <p>Thank you for shopping with CTG Collection</p>
+          <p>Thank you for shopping with Silk Mart</p>
         </div>
         
         <div class="content">
@@ -143,7 +143,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
         
         <div class="footer">
           <p>Questions? Contact us at ctgcollection2@gmail.com</p>
-          <p>© ${new Date().getFullYear()} CTG Collection. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} Silk Mart. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -152,7 +152,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
 
   try {
     await getTransporter().sendMail({
-      from: `"CTG Collection" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
+      from: `"Silk Mart" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
       to: data.to,
       subject: `Order Confirmed - ${data.orderNumber}`,
       html
@@ -201,7 +201,7 @@ export async function sendShippingNotification(to: string, orderNumber: string, 
 
   try {
     await getTransporter().sendMail({
-      from: `"CTG Collection" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
+      from: `"Silk Mart" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
       to,
       subject: `Your Order Has Shipped - ${orderNumber}`,
       html
@@ -258,7 +258,7 @@ export async function sendReceiptEmail(data: ReceiptEmailData) {
         </div>
         <div style="text-align: center; padding: 20px; color: #666; font-size: 14px;">
           <p>Questions? Contact us at ctgcollection2@gmail.com</p>
-          <p>© ${new Date().getFullYear()} CTG Collection. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} Silk Mart. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -310,7 +310,7 @@ export async function sendReceiptEmail(data: ReceiptEmailData) {
 
   try {
     await getTransporter().sendMail({
-      from: `"CTG Collection" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
+      from: `"Silk Mart" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
       to: data.to,
       subject: `Your Receipt - Order ${data.orderNumber}`,
       html,
@@ -342,7 +342,7 @@ export async function sendEmailWithAttachments(data: GenericEmailData) {
     const recipients = Array.isArray(data.to) ? data.to.join(', ') : data.to
     
     await getTransporter().sendMail({
-      from: `"CTG Collection" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
+      from: `"Silk Mart" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
       to: recipients,
       subject: data.subject,
       html: data.html,
@@ -410,7 +410,7 @@ export async function sendOrderConfirmationWithPDF(data: OrderConfirmationWithPD
       <div class="container">
         <div class="header">
           <h1>Order Confirmed</h1>
-          <p>Thank you for shopping with CTG Collection</p>
+          <p>Thank you for shopping with Silk Mart</p>
         </div>
         
         <div class="content">
@@ -476,7 +476,7 @@ export async function sendOrderConfirmationWithPDF(data: OrderConfirmationWithPD
         
         <div class="footer">
           <p>Questions? Contact us at ctgcollection2@gmail.com</p>
-          <p>© ${new Date().getFullYear()} CTG Collection. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} Silk Mart. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -504,7 +504,7 @@ export async function sendOrderConfirmationWithPDF(data: OrderConfirmationWithPD
 
   try {
     await getTransporter().sendMail({
-      from: `"CTG Collection" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
+      from: `"Silk Mart" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
       to: data.to,
       subject: `Order Confirmed - ${data.orderNumber} 📎 Receipt Attached`,
       html,
@@ -616,7 +616,7 @@ export async function sendOrderStatusUpdate(to: string, data: {
           </div>
         </div>
         <div class="footer">
-          <p>&copy; ${new Date().getFullYear()} CTG Collection. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Silk Mart. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -625,7 +625,7 @@ export async function sendOrderStatusUpdate(to: string, data: {
 
   try {
     const info = await getTransporter().sendMail({
-      from: `"CTG Collection" <${process.env.SMTP_USER}>`,
+      from: `"Silk Mart" <${process.env.SMTP_USER}>`,
       to,
       subject: statusInfo.subject,
       html
@@ -700,7 +700,7 @@ export async function sendTierUpdateEmail(to: string, data: {
           </div>
         </div>
         <div class="footer">
-          <p>&copy; ${new Date().getFullYear()} CTG Collection. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Silk Mart. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -709,7 +709,7 @@ export async function sendTierUpdateEmail(to: string, data: {
 
   try {
     const info = await getTransporter().sendMail({
-      from: `"CTG Collection" <${process.env.SMTP_USER}>`,
+      from: `"Silk Mart" <${process.env.SMTP_USER}>`,
       to,
       subject: `Welcome to ${data.tierName} Membership!`,
       html
@@ -766,7 +766,7 @@ export async function sendLoyaltyUpdateEmail(to: string, data: {
           </div>
         </div>
         <div class="footer">
-          <p>&copy; ${new Date().getFullYear()} CTG Collection. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Silk Mart. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -775,7 +775,7 @@ export async function sendLoyaltyUpdateEmail(to: string, data: {
 
   try {
     const info = await getTransporter().sendMail({
-      from: `"CTG Collection" <${process.env.SMTP_USER}>`,
+      from: `"Silk Mart" <${process.env.SMTP_USER}>`,
       to,
       subject: `You got ${data.points} points! - ${data.type}`,
       html
@@ -830,7 +830,7 @@ export async function sendRoleChangeEmail(to: string, data: {
         <div class="content">
           <p>Dear ${data.customerName},</p>
           ${isPromotion 
-            ? `<p>We are thrilled to inform you that you have been <strong>promoted</strong> to a new role on CTG Collection!</p>`
+            ? `<p>We are thrilled to inform you that you have been <strong>promoted</strong> to a new role on Silk Mart!</p>`
             : `<p>Your account role has been updated.</p>`
           }
           
@@ -850,8 +850,8 @@ export async function sendRoleChangeEmail(to: string, data: {
           </div>
         </div>
         <div class="footer">
-          <p>Thank you for being part of CTG Collection!</p>
-          <p>&copy; ${new Date().getFullYear()} CTG Collection. All rights reserved.</p>
+          <p>Thank you for being part of Silk Mart!</p>
+          <p>&copy; ${new Date().getFullYear()} Silk Mart. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -860,7 +860,7 @@ export async function sendRoleChangeEmail(to: string, data: {
 
   try {
     const info = await getTransporter().sendMail({
-      from: `"CTG Collection" <${process.env.SMTP_USER}>`,
+      from: `"Silk Mart" <${process.env.SMTP_USER}>`,
       to,
       subject: isPromotion ? `Congratulations! You've been promoted to ${newRoleLabel}` : `Your account role has been updated`,
       html
@@ -895,7 +895,7 @@ export async function sendAccountDeactivatedEmail(to: string, customerName: stri
         </div>
         <div class="content">
           <p>Dear ${customerName},</p>
-          <p>We regret to inform you that your account on CTG Collection has been temporarily deactivated.</p>
+          <p>We regret to inform you that your account on Silk Mart has been temporarily deactivated.</p>
           <p>This may have occurred due to:</p>
           <ul>
             <li>A review of account activity</li>
@@ -907,7 +907,7 @@ export async function sendAccountDeactivatedEmail(to: string, customerName: stri
         </div>
         <div class="footer">
           <p>Need help? Contact us at support@ctgcollection.com</p>
-          <p>&copy; ${new Date().getFullYear()} CTG Collection. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Silk Mart. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -916,9 +916,9 @@ export async function sendAccountDeactivatedEmail(to: string, customerName: stri
 
   try {
     const info = await getTransporter().sendMail({
-      from: `"CTG Collection" <${process.env.SMTP_USER}>`,
+      from: `"Silk Mart" <${process.env.SMTP_USER}>`,
       to,
-      subject: 'Your CTG Collection Account Has Been Deactivated',
+      subject: 'Your Silk Mart Account Has Been Deactivated',
       html
     })
     console.log('Deactivation email sent:', info.messageId)
@@ -953,14 +953,14 @@ export async function sendAccountReactivatedEmail(to: string, customerName: stri
         </div>
         <div class="content">
           <p>Dear ${customerName},</p>
-          <p>Great news! Your account on CTG Collection has been reactivated. You can now log in and access all features.</p>
+          <p>Great news! Your account on Silk Mart has been reactivated. You can now log in and access all features.</p>
           <p>We're happy to have you back!</p>
           <div style="text-align: center;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/login" class="button">Log In Now</a>
           </div>
         </div>
         <div class="footer">
-          <p>&copy; ${new Date().getFullYear()} CTG Collection. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Silk Mart. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -969,9 +969,9 @@ export async function sendAccountReactivatedEmail(to: string, customerName: stri
 
   try {
     const info = await getTransporter().sendMail({
-      from: `"CTG Collection" <${process.env.SMTP_USER}>`,
+      from: `"Silk Mart" <${process.env.SMTP_USER}>`,
       to,
-      subject: 'Welcome Back! Your CTG Collection Account is Reactivated',
+      subject: 'Welcome Back! Your Silk Mart Account is Reactivated',
       html
     })
     console.log('Reactivation email sent:', info.messageId)
@@ -1004,7 +1004,7 @@ export async function sendAccountDeletedEmail(to: string, customerName: string) 
         </div>
         <div class="content">
           <p>Dear ${customerName},</p>
-          <p>We're writing to confirm that your account on CTG Collection has been removed from our system.</p>
+          <p>We're writing to confirm that your account on Silk Mart has been removed from our system.</p>
           <p>All your personal data has been deleted in accordance with our privacy policy.</p>
           <p>If you did not request this action or believe this was done in error, please contact our support team immediately.</p>
           <p>We're sorry to see you go. If you ever wish to return, you're always welcome to create a new account.</p>
@@ -1012,7 +1012,7 @@ export async function sendAccountDeletedEmail(to: string, customerName: string) 
         </div>
         <div class="footer">
           <p>Questions? Contact us at support@ctgcollection.com</p>
-          <p>&copy; ${new Date().getFullYear()} CTG Collection. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Silk Mart. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -1021,9 +1021,9 @@ export async function sendAccountDeletedEmail(to: string, customerName: string) 
 
   try {
     const info = await getTransporter().sendMail({
-      from: `"CTG Collection" <${process.env.SMTP_USER}>`,
+      from: `"Silk Mart" <${process.env.SMTP_USER}>`,
       to,
-      subject: 'Your CTG Collection Account Has Been Removed',
+      subject: 'Your Silk Mart Account Has Been Removed',
       html
     })
     console.log('Account deleted email sent:', info.messageId)
@@ -1045,7 +1045,7 @@ interface SendEmailOptions {
 async function sendEmail(options: SendEmailOptions) {
   try {
     await getTransporter().sendMail({
-      from: `"CTG Collection" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
+      from: `"Silk Mart" <${process.env.SMTP_USER || 'noreply@ctgcollection.com'}>`,
       ...options
     })
     return true

@@ -304,7 +304,7 @@ async function sendReferralRewardEmail(to: string, name: string, amount: number)
   `
 
   await getTransporter().sendMail({
-    from: `"CTG Collection" <${process.env.SMTP_USER}>`,
+    from: `"Silk Mart" <${process.env.SMTP_USER}>`,
     to,
     subject: `🎉 You earned ৳${amount} referral reward!`,
     html

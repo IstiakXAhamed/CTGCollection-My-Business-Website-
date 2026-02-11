@@ -189,7 +189,7 @@ export function LiveChat() {
       // Add welcome message
       setMessages([{
         id: 'welcome',
-        message: 'Hello! 👋 Welcome to CTG Collection. How can we help you today?',
+        message: 'Hello! 👋 Welcome to Silk Mart. How can we help you today?',
         senderType: 'support',
         senderName: 'Support',
         createdAt: new Date().toISOString()

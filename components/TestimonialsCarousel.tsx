@@ -212,7 +212,7 @@ const demoTestimonials: Testimonial[] = [
   {
     id: '3',
     name: 'Fatima Akhter',
-    content: 'I love CTG Collection! The variety of products is amazing and the quality never disappoints. Highly recommend to everyone!',
+    content: 'I love Silk Mart! The variety of products is amazing and the quality never disappoints. Highly recommend to everyone!',
     rating: 5,
     location: 'Sylhet, Bangladesh'
   }

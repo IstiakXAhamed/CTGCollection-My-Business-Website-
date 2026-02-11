@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Smartphone, X, Download, Share, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -12,19 +12,34 @@ interface BeforeInstallPromptEvent extends Event {
 
 export function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
+  const deferredPromptRef = useRef<BeforeInstallPromptEvent | null>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
   const [settings, setSettings] = useState<{ pwaEnabled: boolean, pwaPromptDelay: number, storeName?: string } | null>(null)
 
+  // Keep ref in sync with state
   useEffect(() => {
-    // Fetch settings
-    fetch('/api/settings')
+    deferredPromptRef.current = deferredPrompt
+  }, [deferredPrompt])
+
+  useEffect(() => {
+    // Register service worker — REQUIRED for beforeinstallprompt to fire
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(err => {
+        console.log('SW registration failed:', err)
+      })
+    }
+
+    // Fetch settings from PUBLIC endpoint (no auth needed)
+    fetch('/api/settings/public')
       .then(res => res.json())
       .then(data => {
-        if (data.settings) {
-          setSettings(data.settings)
-        }
+        setSettings({
+          pwaEnabled: data.pwaEnabled ?? true,
+          pwaPromptDelay: data.pwaPromptDelay ?? 30,
+          storeName: data.storeName || data.siteName || 'Silk Mart'
+        })
       })
       .catch(err => console.error('Error fetching settings for PWA:', err))
 
@@ -48,27 +63,31 @@ export function PWAInstallPrompt() {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 
-    // Listen for manual install requests - ALWAYS active
+    // Listen for manual install requests — uses ref to avoid stale closure
     const handleManualRequest = () => {
       console.log('PWA Install Requested Manually')
-      if (deferredPrompt) {
-        handleInstall() // Trigger native prompt directly
+      if (deferredPromptRef.current) {
+        // Trigger native prompt directly
+        deferredPromptRef.current.prompt().then(() => {
+          return deferredPromptRef.current?.userChoice
+        }).then((choice: any) => {
+          if (choice?.outcome === 'accepted') {
+            setIsInstalled(true)
+          }
+          setIsVisible(false)
+          setDeferredPrompt(null)
+        }).catch((err: any) => console.error('Install error:', err))
       } else {
         setIsVisible(true) // Fallback to instructions (e.g., iOS)
       }
     }
     window.addEventListener('pwa-install-requested', handleManualRequest)
 
-    // Automatic trigger logic
-    if (!dismissed && !isInstalled) {
-      // Handled by the secondary effect with delay
-    }
-
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
       window.removeEventListener('pwa-install-requested', handleManualRequest)
     }
-  }, [isInstalled])
+  }, [])
 
   // Secondary effect to handle visibility once settings are loaded
   useEffect(() => {

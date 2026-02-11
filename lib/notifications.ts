@@ -121,7 +121,7 @@ export async function notifyWelcome(userId: string, userName: string) {
   await createUserNotification(
     userId,
     'welcome',
-    '🎉 Welcome to CTG Collection!',
+    '🎉 Welcome to Silk Mart!',
     `Hi ${userName}, thank you for joining us! Explore our amazing products.`,
     `/shop`
   )

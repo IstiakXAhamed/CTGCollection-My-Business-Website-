@@ -9,8 +9,10 @@ import { useSiteSettings } from '@/hooks/useSiteSettings'
 export function PWAInstallBanner() {
   const { settings, loading } = useSiteSettings()
   const [isStandalone, setIsStandalone] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
+    setIsClient(true)
     if (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) {
       setIsStandalone(true)
     }
@@ -20,11 +22,8 @@ export function PWAInstallBanner() {
     window.dispatchEvent(new CustomEvent('pwa-install-requested'))
   }
 
-  // STRICT MOBILE ONLY CHECK
-  const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
-
-  // Render nothing if site settings haven't loaded, or if already installed, or if disabled in admin, or if not on mobile
-  if (loading || isStandalone || !settings?.pwaShowInstallLink || !isMobile) return null
+  // Don't render during SSR, or if already installed, or if disabled in admin
+  if (!isClient || loading || isStandalone || !settings?.pwaShowInstallLink) return null
 
   return (
     <section className="py-12 bg-white">
