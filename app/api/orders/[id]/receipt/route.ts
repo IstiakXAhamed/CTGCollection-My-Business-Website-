@@ -106,6 +106,15 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Check SMTP configuration FIRST — fail fast
+    const { isEmailConfigured } = await import('@/lib/email')
+    if (!isEmailConfigured()) {
+      return NextResponse.json({ 
+        error: 'Email not configured. Set SMTP_HOST, SMTP_USER, and SMTP_PASS in cPanel environment variables.',
+        needsConfig: true 
+      }, { status: 503 })
+    }
+
     console.log('=== SEND ORDER CONFIRMATION WITH PDF ===')
     console.log('Order ID:', params.id)
 
@@ -130,34 +139,44 @@ export async function POST(
       return NextResponse.json({ error: 'No email address for this order' }, { status: 400 })
     }
 
-    // Generate PDF receipt
-    console.log('Generating PDF receipt...')
-    const pdfBuffer = await generateReceiptPDF(order.id)
-    console.log('PDF generated:', !!pdfBuffer, 'Size:', pdfBuffer?.length || 0, 'bytes')
+    // Wrap everything in a 20s timeout to prevent infinite hang
+    const emailResult = await Promise.race([
+      (async () => {
+        // Generate PDF receipt
+        console.log('Generating PDF receipt...')
+        const pdfBuffer = await generateReceiptPDF(order.id)
+        console.log('PDF generated:', !!pdfBuffer, 'Size:', pdfBuffer?.length || 0, 'bytes')
 
-    // Send combined email with PDF attachment
-    console.log('Sending order confirmation with PDF attachment...')
-    const emailSent = await sendOrderConfirmationWithPDF({
-      to: recipientEmail,
-      orderNumber: order.orderNumber,
-      customerName: order.address.name,
-      items: order.items.map((item: any) => ({
-        name: item.product.name,
-        quantity: item.quantity,
-        price: item.price
-      })),
-      subtotal: order.subtotal,
-      shipping: order.shippingCost,
-      discount: order.discount || 0,
-      total: order.total,
-      address: `${order.address.address}, ${order.address.city}, ${order.address.district}`,
-      paymentMethod: order.paymentMethod,
-      pdfBuffer: pdfBuffer || undefined
-    })
+        // Send combined email with PDF attachment
+        console.log('Sending order confirmation with PDF attachment...')
+        const emailSent = await sendOrderConfirmationWithPDF({
+          to: recipientEmail,
+          orderNumber: order.orderNumber,
+          customerName: order.address.name,
+          items: order.items.map((item: any) => ({
+            name: item.product.name,
+            quantity: item.quantity,
+            price: item.price
+          })),
+          subtotal: order.subtotal,
+          shipping: order.shippingCost,
+          discount: order.discount || 0,
+          total: order.total,
+          address: `${order.address.address}, ${order.address.city}, ${order.address.district}`,
+          paymentMethod: order.paymentMethod,
+          pdfBuffer: pdfBuffer || undefined
+        })
+        
+        return { emailSent, hasPDF: !!pdfBuffer }
+      })(),
+      new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Email sending timed out after 20 seconds')), 20000)
+      )
+    ])
     
-    console.log('Email sent result:', emailSent)
+    console.log('Email sent result:', emailResult.emailSent)
 
-    if (emailSent) {
+    if (emailResult.emailSent) {
       // Update order with receipt sent timestamp
       await (prisma.order.update as any)({
         where: { id: order.id },
@@ -169,13 +188,18 @@ export async function POST(
 
     return NextResponse.json({ 
       success: true,
-      message: emailSent 
+      message: emailResult.emailSent 
         ? '✅ Order confirmation with PDF receipt sent successfully!' 
         : 'Email sent (PDF may have failed to attach)',
-      hasPDF: !!pdfBuffer
+      hasPDF: emailResult.hasPDF
     })
   } catch (error: any) {
     console.error('Error sending receipt:', error)
-    return NextResponse.json({ error: error.message || 'Failed to send receipt' }, { status: 500 })
+    const isTimeout = error?.message?.includes('timed out')
+    return NextResponse.json({ 
+      error: isTimeout 
+        ? 'Email sending timed out. Check SMTP settings in cPanel.' 
+        : (error.message || 'Failed to send receipt')
+    }, { status: isTimeout ? 504 : 500 })
   }
 }

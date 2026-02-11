@@ -106,9 +106,9 @@ export async function PUT(
     let emailSent = false
     let receiptUrl = null
 
-    // Handle payment confirmation - generate receipt and send email with attachment
+    // Handle payment confirmation - generate receipt and send email NON-BLOCKING
     if (paymentStatus === 'paid' && existingOrder.paymentStatus !== 'paid') {
-      // Generate receipt
+      // Generate receipt URL synchronously (fast, just saves HTML)
       receiptUrl = await saveReceiptToFile(order.id)
       
       if (receiptUrl) {
@@ -118,55 +118,53 @@ export async function PUT(
         })
       }
 
-      // Send confirmation email with PDF receipt using SELECTED template
+      // Send email in background — NEVER block the response
       const recipientEmail = order.user?.email || existingOrder.guestEmail
-      console.log('=== RECEIPT EMAIL DEBUG ===')
-      console.log('Recipient email:', recipientEmail)
-      console.log('Receipt URL:', receiptUrl)
-      console.log('Send email flag:', sendEmail)
-      
       if (recipientEmail && sendEmail !== false) {
-        try {
-          // Import PDF generator and email sender
-          const { generateTemplatedPDF } = await import('@/lib/pdf-cloud')
-          const { sendOrderConfirmationWithPDF } = await import('@/lib/email')
-          
-          console.log('Generating PDF for email attachment...')
-          const pdfBuffer = await generateTemplatedPDF(order.id)
-          console.log('PDF generated:', !!pdfBuffer, 'Size:', pdfBuffer?.length || 0, 'bytes')
-          
-          // Send order confirmation with PDF attachment
-          emailSent = await sendOrderConfirmationWithPDF({
-            to: recipientEmail,
-            orderNumber: order.orderNumber,
-            customerName: order.address.name,
-            items: order.items.map((item: any) => ({
-              name: item.product.name,
-              quantity: item.quantity,
-              price: item.price
-            })),
-            subtotal: order.subtotal,
-            shipping: order.shippingCost,
-            discount: order.discount || 0,
-            total: order.total,
-            address: `${order.address.address}, ${order.address.city}, ${order.address.district}`,
-            paymentMethod: order.paymentMethod,
-            pdfBuffer: pdfBuffer || undefined
-          })
-          
-          console.log('Email sent result:', emailSent)
-
-          if (emailSent) {
-            await (prisma.order.update as any)({
-              where: { id: order.id },
-              data: { receiptSentAt: new Date() }
+        // Fire-and-forget: don't await this
+        (async () => {
+          try {
+            const { isEmailConfigured } = await import('@/lib/email')
+            if (!isEmailConfigured()) {
+              console.warn('SMTP not configured — skipping email for order', order.id)
+              return
+            }
+            const { generateTemplatedPDF } = await import('@/lib/pdf-cloud')
+            const { sendOrderConfirmationWithPDF } = await import('@/lib/email')
+            
+            console.log('Background: Generating PDF for order', order.id)
+            const pdfBuffer = await generateTemplatedPDF(order.id)
+            
+            const sent = await sendOrderConfirmationWithPDF({
+              to: recipientEmail,
+              orderNumber: order.orderNumber,
+              customerName: order.address.name,
+              items: order.items.map((item: any) => ({
+                name: item.product.name,
+                quantity: item.quantity,
+                price: item.price
+              })),
+              subtotal: order.subtotal,
+              shipping: order.shippingCost,
+              discount: order.discount || 0,
+              total: order.total,
+              address: `${order.address.address}, ${order.address.city}, ${order.address.district}`,
+              paymentMethod: order.paymentMethod,
+              pdfBuffer: pdfBuffer || undefined
             })
+            
+            if (sent) {
+              await (prisma.order.update as any)({
+                where: { id: order.id },
+                data: { receiptSentAt: new Date() }
+              })
+              console.log('Background: Email sent for order', order.id)
+            }
+          } catch (e) {
+            console.error('Background email failed for order', order.id, ':', e)
           }
-        } catch (e) {
-          console.error('Failed to send receipt email:', e)
-        }
-      } else {
-        console.log('Skipping email - no recipient or sendEmail is false')
+        })()
+        emailSent = true // Optimistic — processing in background
       }
     }
 

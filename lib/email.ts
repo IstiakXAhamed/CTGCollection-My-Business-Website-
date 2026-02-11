@@ -3,20 +3,32 @@ import nodemailer from 'nodemailer'
 
 let transporterInstance: any = null
 
+// Check if SMTP credentials are configured — prevents hanging on unconfigured servers
+export function isEmailConfigured(): boolean {
+  return !!(process.env.SMTP_USER && process.env.SMTP_PASS)
+}
+
 export function getTransporter() {
   if (transporterInstance) return transporterInstance
   
+  const port = parseInt(process.env.SMTP_PORT || '465')
+  
   transporterInstance = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false,
+    host: process.env.SMTP_HOST || 'mail.silkmartbd.com',
+    port,
+    secure: port === 465, // SSL for port 465, STARTTLS for 587
     pool: false, // Disabled: pool keeps persistent threads on cPanel
-    // Each email opens→sends→closes. ~100ms slower per email but zero persistent threads.
+    connectionTimeout: 10000, // 10s — fail fast instead of hanging forever
+    greetingTimeout: 10000,
+    socketTimeout: 15000,   // 15s max for entire send operation
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS
+    },
+    tls: {
+      rejectUnauthorized: false // cPanel self-signed certs
     }
-  })
+  } as any)
   
   return transporterInstance
 }

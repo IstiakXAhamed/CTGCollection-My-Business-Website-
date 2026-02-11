@@ -18,7 +18,13 @@ export async function GET() {
 // PUT - Update site settings (admin only)
 export async function PUT(req: NextRequest) {
   try {
-    const body = await req.json()
+    let body: any
+    try {
+      body = await req.json()
+    } catch (parseError) {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
+    
     console.log('[Settings API] PUT received keys:', Object.keys(body))
 
     const whitelist = [
