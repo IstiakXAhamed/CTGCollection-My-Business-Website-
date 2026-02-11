@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { MessageCircle, X, Send } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAppStandalone } from '@/hooks/useAppStandalone'
 
 interface WhatsAppChatProps {
   phoneNumber?: string
@@ -20,6 +21,7 @@ export function WhatsAppChat({
   const [isOpen, setIsOpen] = useState(false)
   const [message, setMessage] = useState(defaultMessage)
   const [isVisible, setIsVisible] = useState(true)
+  const isStandalone = useAppStandalone()
 
   // Check if user is staff (admin/seller)
   useEffect(() => {
@@ -52,7 +54,8 @@ export function WhatsAppChat({
     return () => window.removeEventListener('open-live-chat', handleOpenChat)
   }, [])
 
-  if (!isVisible) return null
+  // Hide in standalone PWA mode (cleaner app experience)
+  if (!isVisible || isStandalone) return null
 
   const handleSend = () => {
     try {

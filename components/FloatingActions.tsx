@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Gift, X, Sparkles } from 'lucide-react'
+import { useAppStandalone } from '@/hooks/useAppStandalone'
 
 interface FloatingActionsProps {
   onSpinClick?: () => void
@@ -12,6 +13,7 @@ export function FloatingActions({ onSpinClick }: FloatingActionsProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [hasSpinAvailable, setHasSpinAvailable] = useState(false)
   const [spinConfig, setSpinConfig] = useState<any>(null)
+  const isStandalone = useAppStandalone()
 
   // Check if spin is available
   useEffect(() => {
@@ -59,8 +61,8 @@ export function FloatingActions({ onSpinClick }: FloatingActionsProps) {
     setIsExpanded(false)
   }
 
-  // If feature disabled, or not explicitly enabled, don't render anything
-  if (spinConfig?.enabled !== true) return null
+  // If feature disabled, not explicitly enabled, or in standalone PWA mode, don't render
+  if (spinConfig?.enabled !== true || isStandalone) return null
 
   return (
     <div className="fixed bottom-48 md:bottom-52 right-4 md:right-6 z-[110] flex flex-col items-end gap-2 text-primary-foreground">

@@ -20,6 +20,7 @@ import BottomNav from "@/components/BottomNav";
 import AppSplashScreen from "@/components/AppSplashScreen";
 import PageTransitionProvider from "@/components/PageTransitionProvider";
 import PullToRefresh from "@/components/PullToRefresh";
+import MobileAppShell from "@/components/MobileAppShell";
 
 // Lazy load heavy client components
 const SpinWheel = dynamic(() => import('@/components/SpinWheel').then(mod => mod.SpinWheel), { ssr: false })
@@ -27,6 +28,7 @@ const AIChatAssistant = dynamic(() => import('@/components/AIChatAssistant').the
 const WhatsAppChat = dynamic(() => import('@/components/WhatsAppChat').then(mod => mod.WhatsAppChat), { ssr: false })
 const LiveChat = dynamic(() => import('@/components/LiveChat').then(mod => mod.LiveChat), { ssr: false }) // Hidden by default
 const FloatingActions = dynamic(() => import('@/components/FloatingActions'), { ssr: false })
+const MobileQuickActions = dynamic(() => import('@/components/MobileQuickActions'), { ssr: false })
 
 const inter = Inter({ subsets: ["latin"], display: 'swap' });
 
@@ -175,15 +177,20 @@ export default function RootLayout({
         <Providers>
           <AppSplashScreen />
           <PullToRefresh />
-          <Navbar />
-          {/* Unified Promo Banner - After Navbar */}
-          <UnifiedPromoBanner />
-          <PageTransitionProvider>
-            <main className="min-h-screen">
-              {children}
-            </main>
-          </PageTransitionProvider>
-          <Footer />
+          {/* MobileAppShell wraps content - provides native app header in standalone PWA mode */}
+          <MobileAppShell>
+            <Navbar />
+            {/* Unified Promo Banner - After Navbar */}
+            <UnifiedPromoBanner />
+            {/* Mobile Quick Actions - Sticky bar below header in PWA mode */}
+            <MobileQuickActions />
+            <PageTransitionProvider>
+              <main className="min-h-screen">
+                {children}
+              </main>
+            </PageTransitionProvider>
+            <Footer />
+          </MobileAppShell>
 
           <AIChatAssistant />
           <SpinWheel />

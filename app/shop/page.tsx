@@ -11,14 +11,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Breadcrumb } from '@/components/Breadcrumb'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { formatPrice } from '@/lib/utils'
 import type { Product, Category } from '@/types'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { FilterSidebar } from '@/components/shop/FilterSidebar'
+import { useAppStandalone } from '@/hooks/useAppStandalone'
+import { MobileProductCard, ProductQuickView } from '@/components/mobile'
+import { useCartStore } from '@/store/cart'
 
 function ShopContent() {
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const isStandalone = useAppStandalone()
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -28,6 +33,7 @@ function ShopContent() {
   const [showFilters, setShowFilters] = useState(false)
   const [sortBy, setSortBy] = useState('newest')
   const [gridCols, setGridCols] = useState(3)
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
 
   // Read URL params
   const featuredParam = searchParams.get('featured')
@@ -115,6 +121,27 @@ function ShopContent() {
     setSelectedCategories([])
     setPriceRange({ min: '', max: '' })
     setSearchQuery('')
+  }
+
+  // Quick view add-to-cart handler (standalone mode only)
+  const addToCart = useCartStore((state) => state.addItem)
+  const handleQuickViewAddToCart = () => {
+    if (!quickViewProduct) return
+    const imgUrl = (() => {
+      try {
+        const imgs = typeof quickViewProduct.images === 'string'
+          ? JSON.parse(quickViewProduct.images)
+          : quickViewProduct.images
+        return Array.isArray(imgs) ? imgs[0] : imgs
+      } catch { return '/placeholder.png' }
+    })()
+    addToCart({
+      productId: quickViewProduct.id,
+      name: quickViewProduct.name,
+      price: quickViewProduct.salePrice || quickViewProduct.basePrice,
+      image: imgUrl,
+      quantity: 1,
+    })
   }
 
   const filteredProducts = products.filter(product => {
@@ -286,6 +313,20 @@ function ShopContent() {
 
             <div className="grid gap-4 sm:gap-6 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {sortedProducts.map((product, idx) => {
+                // In standalone PWA mode, use premium MobileProductCard with swipe gestures
+                if (isStandalone) {
+                  return (
+                    <MobileProductCard
+                      key={product.id}
+                      product={product}
+                      index={idx}
+                      onQuickView={(p) => setQuickViewProduct(p as Product)}
+                      className="mb-2"
+                    />
+                  )
+                }
+
+                // Desktop: standard card layout
                 // Handle images - API returns parsed array but handle string fallback
                 let images: string[] = []
                 if (Array.isArray(product.images)) {
@@ -379,6 +420,21 @@ function ShopContent() {
           </div>
         </div>
       </div>
+
+      {/* Quick View Modal (standalone PWA mode) */}
+      {isStandalone && (
+        <ProductQuickView
+          product={quickViewProduct}
+          isOpen={!!quickViewProduct}
+          onClose={() => setQuickViewProduct(null)}
+          onAddToCart={handleQuickViewAddToCart}
+          onViewDetails={() => {
+            if (quickViewProduct) {
+              router.push(`/product/${quickViewProduct.slug}`)
+            }
+          }}
+        />
+      )}
     </div>
   )
 }

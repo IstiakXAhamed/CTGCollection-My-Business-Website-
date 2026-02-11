@@ -89,7 +89,7 @@ export function AIChatAssist({ customerMessage, context, onSelectResponse }: AIC
     toast({ title: 'Copied!', description: 'Response copied to clipboard' })
   }
 
-  const useResponse = (text: string) => {
+  const applyResponse = (text: string) => {
     onSelectResponse?.(text)
     toast({ title: 'Applied!', description: 'Response added to message' })
   }
@@ -135,7 +135,7 @@ export function AIChatAssist({ customerMessage, context, onSelectResponse }: AIC
               {copied ? <CheckCircle className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
               Copy
             </Button>
-            <Button size="sm" onClick={() => useResponse(response)} className="gap-1">
+            <Button size="sm" onClick={() => applyResponse(response)} className="gap-1">
               <Send className="w-3 h-3" />
               Use
             </Button>
@@ -151,7 +151,7 @@ export function AIChatAssist({ customerMessage, context, onSelectResponse }: AIC
             {suggestions.map((suggestion, i) => (
               <button
                 key={i}
-                onClick={() => useResponse(suggestion)}
+                onClick={() => applyResponse(suggestion)}
                 className="w-full text-left p-2 text-sm bg-white rounded border hover:bg-blue-50 hover:border-blue-300 transition-colors"
               >
                 {suggestion}

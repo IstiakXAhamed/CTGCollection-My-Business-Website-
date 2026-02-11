@@ -609,3 +609,212 @@ html {
   }
 }
 
+/* =====================================
+   MOBILE APP (PWA) EXCLUSIVE STYLES
+   ===================================== */
+
+/* Safe area padding for iOS notch and home indicator */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 8px);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.px-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Height considering safe areas */
+.h-screen-safe {
+  height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+}
+
+.min-h-screen-safe {
+  min-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+}
+
+/* Standalone PWA mode detection */
+@media (display-mode: standalone) {
+  /* Remove browser chrome artifacts */
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+  
+  /* Prevent text selection on UI elements */
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Smooth scrolling with momentum */
+  .scroll-touch {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Full screen mobile card */
+  .mobile-card {
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Bottom padding for nav */
+  .pb-bottom-nav {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Touch-optimized elements */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Haptic feedback visual indicator */
+.haptic-press {
+  transition: transform 0.1s ease-out;
+}
+
+.haptic-press:active {
+  transform: scale(0.97);
+}
+
+/* Mobile modal/sheet styles */
+.mobile-sheet {
+  border-radius: 1.5rem 1.5rem 0 0;
+  max-height: 90vh;
+  max-height: 90dvh;
+}
+
+/* Pull to refresh indicator */
+.pull-indicator {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Swipe action container */
+.swipe-container {
+  touch-action: pan-y;
+  overflow-x: hidden;
+}
+
+/* iOS-style blur backgrounds */
+.blur-ios {
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* Android-style elevation */
+.elevation-1 { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+.elevation-2 { box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23); }
+.elevation-3 { box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23); }
+.elevation-4 { box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22); }
+.elevation-5 { box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22); }
+
+/* Prevent overscroll bounce on iOS */
+.no-overscroll {
+  overscroll-behavior: none;
+}
+
+/* App header styles */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Floating action button */
+.fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px -5px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.fab:active {
+  transform: scale(0.92);
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* Native-like list item */
+.list-item-native {
+  min-height: 56px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: background-color 0.15s ease;
+}
+
+.list-item-native:active {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Skeleton loading for mobile */
+.skeleton-mobile {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted-foreground) / 0.08) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-wave 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-wave {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Smooth page transitions */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.page-transition-exit {
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* Notch-aware header */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .notch-aware-header {
+    padding-top: calc(12px + env(safe-area-inset-top));
+  }
+}
+
+/* Gesture indicator bar */
+.gesture-bar {
+  width: 36px;
+  height: 5px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  margin: 8px auto;
+}
+
+.dark .gesture-bar {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+

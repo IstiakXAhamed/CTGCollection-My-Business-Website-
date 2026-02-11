@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import { useCartStore } from '@/store/cart'
 import { haptics } from '@/lib/haptics'
 import { useAppStandalone } from '@/hooks/useAppStandalone'
+import { usePathname } from 'next/navigation'
 
 interface Message {
   id: string
@@ -201,15 +202,19 @@ export function AIChatAssistant() {
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const isStandalone = useAppStandalone()
+  const pathname = usePathname()
   const cart = useCartStore()
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'assistant',
-      content: 'Hello! I\'m so happy to see you. How can I help you find something wonderful today? ❤️',
+      content: 'Hello! I\'m so happy to see you. How can I help you find something wonderful today?',
       timestamp: Date.now()
     }
   ])
+
+  // Hide on admin pages
+  const isAdminPage = pathname?.startsWith('/admin')
 
   const isLoaded = useRef(false)
 
@@ -391,7 +396,16 @@ export function AIChatAssistant() {
   }
 
   return (
-    <div className="fixed bottom-22 md:bottom-28 right-4 md:right-6 z-[110] flex flex-col items-end font-sans">
+    <>
+      {/* Don't render on admin pages */}
+      {isAdminPage ? null : (
+        <div className={cn(
+          "fixed z-[100] flex flex-col items-end font-sans",
+          // Position above bottom nav in standalone mode, or standard position in browser
+          isStandalone 
+            ? "bottom-28 right-4" // Above bottom nav (which is ~96px including safe area)
+            : "bottom-6 right-4 md:bottom-8 md:right-6"
+        )}>
       <AnimatePresence>
         {isOpen && !isMinimized && (
           <motion.div
@@ -618,6 +632,8 @@ export function AIChatAssistant() {
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
-    </div>
+        </div>
+      )}
+    </>
   )
 }

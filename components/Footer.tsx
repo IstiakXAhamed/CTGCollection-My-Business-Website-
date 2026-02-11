@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Logo } from '@/components/Logo'
 import { Facebook, Instagram, Twitter, Youtube, MapPin, Phone, Mail, CreditCard, Truck, ShieldCheck, Headphones, Linkedin, Download } from 'lucide-react'
+import { useAppStandalone } from '@/hooks/useAppStandalone'
 
 const footerLinks = {
   shop: [
@@ -37,6 +38,7 @@ const features = [
 export function Footer() {
   const [settings, setSettings] = useState<any>(null)
   const currentYear = new Date().getFullYear()
+  const isStandalone = useAppStandalone()
 
   useEffect(() => {
     fetchSettings()
@@ -69,6 +71,11 @@ export function Footer() {
     { icon: Instagram, href: '#', label: 'Instagram' },
     { icon: Twitter, href: '#', label: 'Twitter' },
   ]
+
+  // Hide Footer completely in standalone PWA mode (BottomNav provides navigation)
+  if (isStandalone) {
+    return null
+  }
 
   return (
     <footer className="bg-gray-900 text-white">

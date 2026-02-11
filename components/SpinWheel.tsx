@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Gift, X, Copy, Check, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAppStandalone } from '@/hooks/useAppStandalone'
 
 interface Prize {
   id: string
@@ -47,6 +48,7 @@ export function SpinWheel({
   const [config, setConfig] = useState<any>(null)
   const [prizes, setPrizes] = useState<Prize[]>(initialPrizes)
   const wheelRef = useRef<HTMLDivElement>(null)
+  const isStandalone = useAppStandalone()
 
   // Check if user has already spun (localStorage)
   const checkAlreadySpun = useCallback((cooldownMinutes = 0) => {
@@ -281,6 +283,9 @@ export function SpinWheel({
       </div>
     )
   }
+
+  // Don't show in standalone PWA mode (cleaner app experience)
+  if (isStandalone) return null
 
   if (trigger === 'button') {
     return (

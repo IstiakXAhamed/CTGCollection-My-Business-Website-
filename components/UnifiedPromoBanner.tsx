@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Gift, Sparkles, Clock, Copy, Check, X, ChevronLeft, ChevronRight, Tag, Percent, Zap, Star, Heart, Flame } from 'lucide-react'
+import { useAppStandalone } from '@/hooks/useAppStandalone'
 
 export interface PromoBanner {
   id: string
@@ -104,8 +105,10 @@ export default function UnifiedPromoBanner() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [countdown, setCountdown] = useState<Record<string, { days: number; hours: number; minutes: number; seconds: number }>>({})
   const [isPaused, setIsPaused] = useState(false)
+  const isStandalone = useAppStandalone()
 
-  // Load banners from localStorage or use defaults
+  // Hide banner in standalone PWA mode (cleaner app experience)
+  // We use MobileQuickActions for promotions instead
   useEffect(() => {
     const loadBanners = () => {
       const saved = localStorage.getItem('ctg_promo_banners')
@@ -219,7 +222,8 @@ export default function UnifiedPromoBanner() {
     return <IconComponent className="w-4 h-4 sm:w-6 sm:h-6" />
   }
 
-  if (!isVisible || banners.length === 0) return null
+  // Hide in standalone PWA mode or when dismissed
+  if (isStandalone || !isVisible || banners.length === 0) return null
 
   const currentBanner = banners[currentIndex]
   const currentCountdown = countdown[currentBanner.id]

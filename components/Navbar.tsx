@@ -93,6 +93,11 @@ export default function Navbar() {
   const isFeaturedActive = pathname === '/shop' && searchParams.get('featured') === 'true'
   const isSaleActive = pathname === '/shop' && searchParams.get('sale') === 'true'
 
+  // Hide Navbar completely in standalone PWA mode (MobileAppShell provides the header)
+  if (isStandalone) {
+    return null
+  }
+
   return (
     <nav className="sticky top-0 z-50 w-full max-w-[100vw] border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Fixed width container - same on all pages */}

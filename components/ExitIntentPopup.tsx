@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Gift, ArrowRight, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { useAppStandalone } from '@/hooks/useAppStandalone'
 
 interface ExitIntentPopupProps {
   enabled?: boolean
@@ -18,6 +19,7 @@ export function ExitIntentPopup({
   discountPercent = 10
 }: ExitIntentPopupProps) {
   const [isVisible, setIsVisible] = useState(false)
+  const isStandalone = useAppStandalone()
 
   const checkAlreadyShown = useCallback(() => {
     try {
@@ -31,7 +33,8 @@ export function ExitIntentPopup({
   }, [])
 
   useEffect(() => {
-    if (!enabled || checkAlreadyShown()) return
+    // Don't enable in standalone PWA mode
+    if (!enabled || checkAlreadyShown() || isStandalone) return
 
     let isActive = false
     const activateTimeout = setTimeout(() => {

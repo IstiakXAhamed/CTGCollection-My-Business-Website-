@@ -30,10 +30,8 @@ export async function GET(req: NextRequest) {
 
         if (ordersWithProduct.length > 0) {
             const frequencyMap = new Map<string, number>()
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ordersWithProduct.forEach((order: any) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                order.items.forEach((item: any) => {
+            ordersWithProduct.forEach((order) => {
+                order.items.forEach((item) => {
                     if (item.productId !== excludeId) {
                         frequencyMap.set(item.productId, (frequencyMap.get(item.productId) || 0) + 1)
                     }

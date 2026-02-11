@@ -14,6 +14,8 @@ import { TestimonialsCarousel } from '@/components/TestimonialsCarousel'
 import { SpinWheel } from '@/components/SpinWheel'
 import { useSiteSettings } from '@/hooks/useSiteSettings'
 import { PWAInstallBanner } from '@/components/PWAInstallBanner'
+import { useAppStandalone } from '@/hooks/useAppStandalone'
+import { MobileHomePage } from '@/components/mobile'
 
 interface Product {
   id: string
@@ -33,6 +35,7 @@ export default function HomePage() {
   const [subscribing, setSubscribing] = useState(false)
   const [multiVendorEnabled, setMultiVendorEnabled] = useState(false)
   const { settings } = useSiteSettings()
+  const isStandalone = useAppStandalone()
 
   useEffect(() => {
     fetchFeaturedProducts()
@@ -41,6 +44,11 @@ export default function HomePage() {
       .then(data => setMultiVendorEnabled(data.multiVendorEnabled))
       .catch(err => console.error('Settings fetch error:', err))
   }, [])
+
+  // Render elite mobile experience for installed PWA users
+  if (isStandalone) {
+    return <MobileHomePage />
+  }
 
   const fetchFeaturedProducts = async () => {
     try {
