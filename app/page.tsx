@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { motion } from 'framer-motion'
+import dynamic from 'next/dynamic'
 import { Badge } from '@/components/ui/badge'
 import { ShoppingBag, Truck, Shield, HeadphonesIcon, Star, Users, Package, TrendingUp, ArrowRight, Sparkles, Heart, Eye, Store, BadgeCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -10,12 +11,24 @@ import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
-import { TestimonialsCarousel } from '@/components/TestimonialsCarousel'
-import { SpinWheel } from '@/components/SpinWheel'
 import { useSiteSettings } from '@/hooks/useSiteSettings'
 import { PWAInstallBanner } from '@/components/PWAInstallBanner'
 import { useAppStandalone } from '@/hooks/useAppStandalone'
-import { MobileHomePage } from '@/components/mobile'
+
+// Lazy load heavy components for better performance
+const TestimonialsCarousel = dynamic(() => import('@/components/TestimonialsCarousel').then(mod => mod.TestimonialsCarousel), {
+  ssr: false,
+  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-xl" />
+})
+
+const SpinWheel = dynamic(() => import('@/components/SpinWheel').then(mod => mod.SpinWheel), {
+  ssr: false,
+  loading: () => <div className="h-96 bg-gray-100 animate-pulse rounded-xl" />
+})
+
+const MobileHomePage = dynamic(() => import('@/components/mobile/MobileHomePage').then(mod => mod.MobileHomePage), {
+  ssr: false
+})
 
 interface Product {
   id: string

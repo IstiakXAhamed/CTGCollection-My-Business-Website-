@@ -4,25 +4,24 @@
   "description": "Premium fashion, electronics, and lifestyle products with fast delivery in Bangladesh. Shop at Silk Mart for authentic quality.",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
+  "scope": "/",
+  "lang": "en-BD",
+  "categories": ["shopping", "lifestyle"],
   "icons": [
     {
       "src": "/logo.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/logo.png",
-      "sizes": "180x180",
-      "type": "image/png"
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
@@ -30,7 +29,7 @@
       "name": "My Orders",
       "short_name": "Orders",
       "description": "View your recent orders",
-      "url": "/profile?tab=orders",
+      "url": "/dashboard/orders",
       "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
     },
     {
@@ -39,22 +38,45 @@
       "description": "View your shopping cart",
       "url": "/cart",
       "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Shop Now",
+      "short_name": "Shop",
+      "description": "Browse all products",
+      "url": "/shop",
+      "icons": [{ "src": "/logo.png", "sizes": "192x192" }]
     }
   ],
   "screenshots": [
     {
       "src": "/logo.png",
-      "sizes": "512x512",
+      "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Silk Mart Premium Store"
     },
     {
       "src": "/logo.png",
-      "sizes": "512x512",
+      "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Silk Mart Mobile Experience"
     }
-  ]
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "share_target": {
+    "action": "/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
