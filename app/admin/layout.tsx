@@ -33,7 +33,8 @@ import {
   Wallet,
   Sparkles,
   TrendingUp,
-  Bot
+  Bot,
+  Eye
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AdminNotificationBell from '@/components/AdminNotificationBell'
@@ -269,9 +270,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               </div>
             )}
             <AdminNotificationBell />
-            <Button variant="outline" size="sm" asChild className="hidden sm:flex">
-              <Link href="/" target="_blank">View Store</Link>
-            </Button>
+            <div className="hidden sm:flex items-center gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/" target="_blank">
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Store
+                </Link>
+              </Button>
+            </div>
             <Button
               variant="ghost"
               size="sm"
