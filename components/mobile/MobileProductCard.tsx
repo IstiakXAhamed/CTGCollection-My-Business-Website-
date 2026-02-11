@@ -41,8 +41,6 @@ export function MobileProductCard({
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [showWishlistAnim, setShowWishlistAnim] = useState(false)
   const [showCartAnim, setShowCartAnim] = useState(false)
-  const [isLongPressed, setIsLongPressed] = useState(false)
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null)
   const lastTap = useRef<number>(0)
   
   const addToCart = useCartStore((state) => state.addItem)
@@ -115,21 +113,6 @@ export function MobileProductCard({
     setTimeout(() => setShowCartAnim(false), 1000)
   }
 
-  // Long press for quick view
-  const handleLongPressStart = () => {
-    longPressTimer.current = setTimeout(() => {
-      haptics.rigid()
-      setIsLongPressed(true)
-      onQuickView?.(product)
-    }, 500)
-  }
-
-  const handleLongPressEnd = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current)
-    }
-  }
-
   // Handle swipe end
   const handleDragEnd = (_: any, info: PanInfo) => {
     const threshold = 100
@@ -188,11 +171,6 @@ export function MobileProductCard({
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.7}
         onDragEnd={handleDragEnd}
-        onTouchStart={handleLongPressStart}
-        onTouchEnd={handleLongPressEnd}
-        onMouseDown={handleLongPressStart}
-        onMouseUp={handleLongPressEnd}
-        onMouseLeave={handleLongPressEnd}
         onClick={handleTap}
         whileTap={{ scale: 0.98 }}
         className="relative bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 cursor-grab active:cursor-grabbing"

@@ -1,17 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { User, Mail, Phone, Edit2, Save, X, Crown } from 'lucide-react'
+import { User, Mail, Phone, Edit2, Save, X, Crown, Settings, Shield, Store, BarChart3, Package, Users } from 'lucide-react'
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({ name: '', phone: '' })
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
+
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'superadmin'
+  const isSeller = profile?.role === 'seller' || profile?.role === 'superadmin'
 
   useEffect(() => {
     fetchProfile()
@@ -195,7 +202,69 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Admin/Seller Panel Access */}
+      {(isAdmin || isSeller) && (
+        <Card className="border-gray-100 dark:border-gray-800 shadow-sm">
+          <CardHeader className="p-4 sm:p-5 border-b border-gray-50 dark:border-gray-800/50">
+            <h3 className="text-sm sm:text-base font-bold flex items-center gap-2">
+              <Shield className="w-4 h-4 text-purple-600" />
+              {isAdmin ? 'Admin Panel' : 'Seller Panel'}
+            </h3>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {/* Superadmin gets everything */}
+              {profile?.role === 'superadmin' && (
+                <>
+                  <AdminLink href="/admin" icon={BarChart3} label="Dashboard" />
+                  <AdminLink href="/admin/products" icon={Package} label="Products" />
+                  <AdminLink href="/admin/orders" icon={Users} label="Orders" />
+                  <AdminLink href="/admin/users" icon={Users} label="Users" />
+                  <AdminLink href="/admin/settings" icon={Settings} label="Settings" />
+                </>
+              )}
+
+              {/* Admin gets most features */}
+              {isAdmin && profile?.role !== 'superadmin' && (
+                <>
+                  <AdminLink href="/admin" icon={BarChart3} label="Dashboard" />
+                  <AdminLink href="/admin/products" icon={Package} label="Products" />
+                  <AdminLink href="/admin/orders" icon={Users} label="Orders" />
+                  <AdminLink href="/admin/settings" icon={Settings} label="Settings" />
+                </>
+              )}
+
+              {/* Seller gets seller features */}
+              {isSeller && profile?.role !== 'superadmin' && profile?.role !== 'admin' && (
+                <>
+                  <AdminLink href="/seller" icon={BarChart3} label="Dashboard" />
+                  <AdminLink href="/seller/products" icon={Package} label="My Products" />
+                  <AdminLink href="/seller/orders" icon={Package} label="Orders" />
+                  <AdminLink href="/seller/shop" icon={Store} label="My Shop" />
+                </>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
+  )
+}
+
+// Admin link component
+function AdminLink({ href, icon: Icon, label }: { href: string; icon: any; label: string }) {
+  return (
+    <Link href={href}>
+      <motion.div
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      >
+        <Icon className="w-6 h-6 text-blue-600" />
+        <span className="text-xs font-medium text-gray-700 dark:text-gray-300 text-center">{label}</span>
+      </motion.div>
+    </Link>
   )
 }
 

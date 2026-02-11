@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Eye, Package, RefreshCw, ChevronDown, CheckCircle, Clock, CreditCard, FileText, Mail, Loader2, Download, Send, Share2 } from 'lucide-react'
+import { Search, Eye, Package, RefreshCw, ChevronDown, CheckCircle, Clock, CreditCard, FileText, Mail, Loader2, Download, Send, Share2, ShoppingCart } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
@@ -193,8 +193,58 @@ export default function AdminOrdersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+          </div>
+          <div className="flex gap-2">
+            <div className="h-10 w-24 bg-gray-200 rounded animate-pulse" />
+            <div className="h-10 w-24 bg-gray-200 rounded animate-pulse" />
+          </div>
+        </div>
+        <Card>
+          <CardHeader className="p-4">
+            <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
+                  <div className="w-12 h-12 bg-gray-200 rounded animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-3 w-32 bg-gray-200 rounded animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Orders</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">Manage customer orders</p>
+          </div>
+        </div>
+
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center">
+              <Package className="w-16 h-16 mx-auto text-muted-foreground/30" />
+              <h3 className="mt-4 text-lg font-semibold">No orders yet</h3>
+              <p className="text-muted-foreground mt-2">Orders will appear here once customers start purchasing</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }

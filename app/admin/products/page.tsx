@@ -17,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Plus, Search, Edit2, Trash2, Loader2 } from 'lucide-react'
+import { Plus, Search, Edit2, Trash2, Loader2, Package } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 
@@ -182,7 +182,74 @@ export default function AdminProductsPage() {
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  if (loading) return <div className="text-center py-12">Loading products...</div>
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+          </div>
+          <div className="h-10 w-32 bg-gray-200 rounded animate-pulse" />
+        </div>
+        <Card>
+          <CardHeader className="p-4">
+            <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
+                  <div className="w-16 h-16 bg-gray-200 rounded animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (filteredProducts.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Products</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">{products.length} total</p>
+          </div>
+          <Link href="/admin/products/new">
+            <Button size="sm">
+              <Plus className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Add Product</span>
+            </Button>
+          </Link>
+        </div>
+
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center">
+              <Package className="w-16 h-16 mx-auto text-muted-foreground/30" />
+              <h3 className="mt-4 text-lg font-semibold">No products found</h3>
+              <p className="text-muted-foreground mt-2">
+                {searchQuery ? `No products matching "${searchQuery}"` : 'Get started by adding your first product'}
+              </p>
+              <Link href="/admin/products/new">
+                <Button className="mt-4">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Product
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6">

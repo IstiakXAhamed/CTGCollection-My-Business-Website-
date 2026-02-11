@@ -68,6 +68,7 @@ export const useSilkGuard = (userRole?: string) => {
   const [isMobile, setIsMobile] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
   const [credentialId, setCredentialId] = useState<string | null>(null)
+  const [hasVerified, setHasVerified] = useState(false) // Track if user has already verified in this session
 
   const isInternal = userRole === 'admin' || userRole === 'superadmin' || userRole === 'seller'
 
@@ -84,23 +85,27 @@ export const useSilkGuard = (userRole?: string) => {
         const savedBio = localStorage.getItem('silk_guard_biometric') === 'true'
         const savedPass = localStorage.getItem('silk_guard_passcode')
         const savedCredential = localStorage.getItem('silk_guard_credential_id')
-        
+
         // Detect mobile device (screen size or touch capability)
-        const mobileCheck = window.matchMedia("(max-width: 768px)").matches || 
+        const mobileCheck = window.matchMedia("(max-width: 768px)").matches ||
                             ('ontouchstart' in window) ||
                             (navigator.maxTouchPoints > 0)
         setIsMobile(mobileCheck)
-        
+
         setIsEnabled(savedEnabled)
         setBiometricsActive(savedBio && supported) // Only active if supported
         setPasscode(savedPass)
         setCredentialId(savedCredential)
-        
-        // Auto-lock if enabled AND on mobile
-        if (savedEnabled && mobileCheck) {
+
+        // Auto-lock if enabled AND on mobile AND hasn't verified yet in this session
+        // Only lock on first load, not on every navigation
+        if (savedEnabled && mobileCheck && !sessionStorage.getItem('silk_guard_verified')) {
           setIsLocked(true)
+        } else {
+          // Mark as verified to prevent re-locking
+          sessionStorage.setItem('silk_guard_verified', 'true')
         }
-        
+
         setIsHydrated(true)
       }
 
@@ -111,6 +116,11 @@ export const useSilkGuard = (userRole?: string) => {
   const unlock = useCallback(() => {
     haptics.success()
     setIsLocked(false)
+    setHasVerified(true)
+    // Mark as verified in session storage
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem('silk_guard_verified', 'true')
+    }
   }, [])
 
   const lock = useCallback(() => {
@@ -289,11 +299,13 @@ export const useSilkGuard = (userRole?: string) => {
     setPasscode(null)
     setCredentialId(null)
     setIsLocked(false)
-    
+    setHasVerified(false)
+
     localStorage.removeItem('silk_guard_enabled')
     localStorage.removeItem('silk_guard_biometric')
     localStorage.removeItem('silk_guard_passcode')
     localStorage.removeItem('silk_guard_credential_id')
+    sessionStorage.removeItem('silk_guard_verified')
   }, [])
 
   return {

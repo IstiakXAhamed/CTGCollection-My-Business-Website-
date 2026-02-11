@@ -11,7 +11,6 @@ import {
   Truck, ShieldCheck, Headphones, CreditCard
 } from 'lucide-react'
 import { MobileProductCard } from './MobileProductCard'
-import { StoriesCarousel } from './StoriesCarousel'
 import { ProductQuickView } from './MobileBottomSheet'
 import { ProductGridSkeleton, StoriesSkeleton, BannerSkeleton, SectionHeaderSkeleton } from './MobileSkeletons'
 import { haptics } from '@/lib/haptics'
@@ -530,9 +529,6 @@ export function MobileHomePage() {
           What are you looking for today?
         </p>
       </motion.div>
-
-      {/* Stories */}
-      <StoriesCarousel stories={stories} />
 
       {/* Hero Banners */}
       <div className="py-3">

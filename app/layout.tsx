@@ -18,7 +18,6 @@ export const dynamicParams = true
 export const revalidate = 0
 import BottomNav from "@/components/BottomNav";
 import AppSplashScreen from "@/components/AppSplashScreen";
-import PageTransitionProvider from "@/components/PageTransitionProvider";
 import PullToRefresh from "@/components/PullToRefresh";
 import MobileAppShell from "@/components/MobileAppShell";
 
@@ -184,11 +183,9 @@ export default function RootLayout({
             <UnifiedPromoBanner />
             {/* Mobile Quick Actions - Sticky bar below header in PWA mode */}
             <MobileQuickActions />
-            <PageTransitionProvider>
-              <main className="min-h-screen">
-                {children}
-              </main>
-            </PageTransitionProvider>
+            <main className="min-h-screen">
+              {children}
+            </main>
             <Footer />
           </MobileAppShell>
 
