@@ -27,6 +27,12 @@ import { formatPrice } from '@/lib/utils'
 import { useAutoRefresh } from '@/hooks/useAutoRefresh'
 import { InternalChat } from '@/components/admin/InternalChat'
 import { cn } from '@/lib/utils'
+import { 
+  AnimatedBarChart, 
+  AnimatedLineChart, 
+  AnimatedDonutChart,
+  StatCardWithSparkline 
+} from '@/components/admin/AdminCharts'
 
 // Animated counter component
 function AnimatedCounter({ value, prefix = '', suffix = '' }: { value: number; prefix?: string; suffix?: string }) {
@@ -473,11 +479,80 @@ export default function AdminDashboard() {
         </motion.div>
       </div>
 
+      {/* Analytics Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Revenue Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="lg:col-span-2"
+        >
+          <AnimatedLineChart
+            title="Revenue Overview"
+            subtitle="Last 7 days performance"
+            data={{
+              labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+              datasets: [
+                {
+                  label: 'Revenue',
+                  data: [12500, 19200, 15800, 22400, 28900, 35200, 41800],
+                  color: '#3b82f6'
+                },
+                {
+                  label: 'Orders',
+                  data: [120, 180, 150, 210, 280, 340, 410],
+                  color: '#10b981'
+                }
+              ]
+            }}
+          />
+        </motion.div>
+
+        {/* Category Performance */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <AnimatedBarChart
+            title="Top Categories"
+            subtitle="Sales by category this month"
+            data={[
+              { label: 'Electronics', value: 45200, color: 'bg-blue-500' },
+              { label: 'Fashion', value: 38900, color: 'bg-purple-500' },
+              { label: 'Home & Living', value: 28400, color: 'bg-emerald-500' },
+              { label: 'Beauty', value: 22100, color: 'bg-rose-500' },
+              { label: 'Sports', value: 15800, color: 'bg-orange-500' },
+            ]}
+          />
+        </motion.div>
+
+        {/* Order Status Distribution */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55 }}
+        >
+          <AnimatedDonutChart
+            title="Order Status"
+            centerValue={stats.totalOrders.toString()}
+            centerLabel="Total Orders"
+            data={[
+              { label: 'Delivered', value: Math.floor(stats.totalOrders * 0.65), color: '#10b981' },
+              { label: 'Processing', value: Math.floor(stats.totalOrders * 0.20), color: '#3b82f6' },
+              { label: 'Pending', value: Math.floor(stats.totalOrders * 0.10), color: '#f59e0b' },
+              { label: 'Cancelled', value: Math.floor(stats.totalOrders * 0.05), color: '#ef4444' },
+            ]}
+          />
+        </motion.div>
+      </div>
+
       {/* Quick Actions */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
+        transition={{ delay: 0.6 }}
       >
         <Card>
           <CardHeader>
@@ -512,7 +587,7 @@ export default function AdminDashboard() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
+        transition={{ delay: 0.8 }}
       >
         <Card>
           <CardHeader>

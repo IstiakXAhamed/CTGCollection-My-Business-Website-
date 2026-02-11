@@ -215,6 +215,7 @@ export function MobileCart({
       haptics.success()
     } else {
       haptics.error()
+      // Toast would go here - using alert for now
       alert('Invalid promo code')
     }
   }
