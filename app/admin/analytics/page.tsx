@@ -55,8 +55,47 @@ export default function SalesAnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-9 w-48 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-64 bg-gray-200 rounded animate-pulse" />
+          </div>
+          <div className="flex gap-2">
+            <div className="h-10 w-24 bg-gray-200 rounded animate-pulse" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-3">
+                  <div className="h-4 w-24 bg-gray-200 rounded" />
+                  <div className="h-8 w-32 bg-gray-200 rounded" />
+                  <div className="h-3 w-16 bg-gray-200 rounded" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardHeader className="p-6">
+            <div className="h-6 w-48 bg-gray-200 rounded animate-pulse" />
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center gap-4 p-4 border rounded-lg">
+                  <div className="w-12 h-12 bg-gray-200 rounded animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -84,10 +123,11 @@ export default function SalesAnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold mb-2">📊 Sales Analytics</h1>
-          <p className="text-muted-foreground">Track your store performance</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Sales Analytics</h1>
+          <p className="text-muted-foreground mt-1">Track your store performance and growth</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
@@ -112,57 +152,84 @@ export default function SalesAnalyticsPage() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Revenue Card */}
+        <Card className="overflow-hidden">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <DollarSign className="w-8 h-8 opacity-80" />
-              <span className="text-blue-100 text-sm bg-white/20 px-2 py-1 rounded">
-                {analytics.revenue.change >= 0 ? '+' : ''}{analytics.revenue.change}%
-              </span>
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                <p className="text-2xl sm:text-3xl font-bold">{formatPrice(analytics.revenue.total)}</p>
+                <div className={`flex items-center gap-1 text-sm ${analytics.revenue.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {analytics.revenue.change >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                  {analytics.revenue.change >= 0 ? '+' : ''}{analytics.revenue.change}% {analytics.revenue.period}
+                </div>
+              </div>
+              <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-900/30">
+                <DollarSign className="w-6 h-6 text-blue-600" />
+              </div>
             </div>
-            <h3 className="text-3xl font-bold">{formatPrice(analytics.revenue.total)}</h3>
-            <p className="text-blue-100 mt-1">Total Revenue</p>
           </CardContent>
+          <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-600" />
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+        {/* Orders Card */}
+        <Card className="overflow-hidden">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <ShoppingCart className="w-8 h-8 opacity-80" />
-              <span className="text-purple-100 text-sm bg-white/20 px-2 py-1 rounded">
-                {analytics.orders.pending} pending
-              </span>
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Total Orders</p>
+                <p className="text-2xl sm:text-3xl font-bold">{analytics.orders.total}</p>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs">
+                    {analytics.orders.pending} pending
+                  </span>
+                </div>
+              </div>
+              <div className="p-3 rounded-xl bg-purple-100 dark:bg-purple-900/30">
+                <ShoppingCart className="w-6 h-6 text-purple-600" />
+              </div>
             </div>
-            <h3 className="text-3xl font-bold">{analytics.orders.total}</h3>
-            <p className="text-purple-100 mt-1">Total Orders</p>
           </CardContent>
+          <div className="h-1 bg-gradient-to-r from-purple-500 to-purple-600" />
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
+        {/* Customers Card */}
+        <Card className="overflow-hidden">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <Users className="w-8 h-8 opacity-80" />
-              <span className="text-green-100 text-sm bg-white/20 px-2 py-1 rounded">
-                +{analytics.customers.new} new
-              </span>
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Total Customers</p>
+                <p className="text-2xl sm:text-3xl font-bold">{analytics.customers.total}</p>
+                <div className="flex items-center gap-1 text-sm text-green-600">
+                  +{analytics.customers.new} new this period
+                </div>
+              </div>
+              <div className="p-3 rounded-xl bg-green-100 dark:bg-green-900/30">
+                <Users className="w-6 h-6 text-green-600" />
+              </div>
             </div>
-            <h3 className="text-3xl font-bold">{analytics.customers.total}</h3>
-            <p className="text-green-100 mt-1">Customers</p>
           </CardContent>
+          <div className="h-1 bg-gradient-to-r from-green-500 to-green-600" />
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+        {/* Products Card */}
+        <Card className="overflow-hidden">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <Package className="w-8 h-8 opacity-80" />
-              <span className="text-orange-100 text-sm bg-white/20 px-2 py-1 rounded">
-                {analytics.products.lowStock} low stock
-              </span>
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Total Products</p>
+                <p className="text-2xl sm:text-3xl font-bold">{analytics.products.total}</p>
+                <div className="flex items-center gap-1 text-sm text-orange-600">
+                  {analytics.products.lowStock} low stock
+                </div>
+              </div>
+              <div className="p-3 rounded-xl bg-orange-100 dark:bg-orange-900/30">
+                <Package className="w-6 h-6 text-orange-600" />
+              </div>
             </div>
-            <h3 className="text-3xl font-bold">{analytics.products.total}</h3>
-            <p className="text-orange-100 mt-1">Products</p>
           </CardContent>
+          <div className="h-1 bg-gradient-to-r from-orange-500 to-orange-600" />
         </Card>
       </div>
 
