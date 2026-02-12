@@ -52,11 +52,21 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/me', { method: 'POST', credentials: 'include' })
-      localStorage.removeItem('auth-storage')
-      router.push('/')
     } catch (error) {
-      console.error('Logout failed:', error)
+      console.error('Logout API error:', error)
     }
+    
+    // Clear all auth-related localStorage
+    localStorage.removeItem('auth-storage')
+    localStorage.removeItem('silk_guard_enabled')
+    localStorage.removeItem('silk_guard_biometric')
+    localStorage.removeItem('silk_guard_passcode')
+    localStorage.removeItem('silk_guard_credential_id')
+    localStorage.removeItem('wishlist-storage')
+    sessionStorage.removeItem('silk_guard_verified')
+    
+    // Full page redirect to login
+    window.location.href = '/login'
   }
 
   if (loading) {

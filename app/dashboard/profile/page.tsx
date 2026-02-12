@@ -74,27 +74,27 @@ export default function ProfilePage() {
       <Card className="overflow-hidden border-none shadow-md bg-gradient-to-r from-blue-600/5 to-purple-600/5 dark:from-blue-900/10 dark:to-purple-900/10">
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left sm:items-start">
-            <div className="relative group flex-shrink-0">
+            <div className="relative group flex-shrink-0 order-1 sm:order-1">
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg transform transition group-hover:scale-105">
                 <span className="text-2xl sm:text-3xl font-bold">{profile?.name?.charAt(0).toUpperCase() || 'U'}</span>
               </div>
               <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-green-500 border-2 border-white rounded-full" />
             </div>
             
-            <div className="flex-1 min-w-0 space-y-2 w-full">
-              <div className="flex flex-col sm:flex-row items-center gap-2">
-                <h2 className="text-lg sm:text-2xl font-bold truncate">{profile?.name}</h2>
+            <div className="flex-1 min-w-0 space-y-2 w-full order-3 sm:order-2">
+              <div className="flex flex-col items-center sm:flex-row sm:items-center gap-2">
+                <h2 className="text-lg sm:text-2xl font-bold truncate max-w-[200px] sm:max-w-none">{profile?.name}</h2>
                 <div className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-wider flex-shrink-0">
                   {profile?.role || 'Customer'}
                 </div>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1.5 justify-center sm:justify-start">
+              <p className="text-xs sm:text-sm text-muted-foreground flex items-center justify-center sm:justify-start gap-1">
                 <Mail className="w-3 h-3 flex-shrink-0" /> 
-                <span className="truncate">{profile?.email}</span>
+                <span className="truncate max-w-[250px] sm:max-w-none">{profile?.email}</span>
               </p>
             </div>
 
-            <div className="flex-shrink-0 mt-2 sm:mt-0">
+            <div className="flex-shrink-0 order-2 sm:order-3 mt-2 sm:mt-0">
                {!isEditing ? (
                 <Button onClick={() => setIsEditing(true)} variant="outline" size="sm" className="h-8 sm:h-9 text-xs sm:text-sm font-medium border-blue-200 hover:bg-blue-50 dark:border-blue-800 w-full sm:w-auto">
                   <Edit2 className="w-3.5 h-3.5 mr-1.5" /> Edit Profile
