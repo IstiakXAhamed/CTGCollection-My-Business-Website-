@@ -156,9 +156,9 @@ export function MobileAppShell({ children }: MobileAppShellProps) {
         {/* Status Bar Spacer for iOS */}
         <div className="h-safe pt-safe" />
         
-        <div className="flex items-center justify-between h-14 px-4">
+        <div className="flex items-center justify-between h-14 px-4 relative">
           {/* Left Section */}
-          <div className="flex items-center gap-3 min-w-[80px]">
+          <div className="w-[80px] flex-shrink-0 z-10">
             {showBack ? (
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -176,18 +176,20 @@ export function MobileAppShell({ children }: MobileAppShellProps) {
             )}
           </div>
 
-          {/* Center - Title */}
-          <motion.h1
-            key={pageTitle}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-lg font-bold text-gray-900 dark:text-white absolute left-1/2 -translate-x-1/2"
-          >
-            {pageTitle}
-          </motion.h1>
+          {/* Center - Title with overflow protection */}
+          <div className="flex-1 mx-2 min-w-0 px-2 flex justify-center z-10">
+            <motion.h1
+              key={pageTitle}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate max-w-[140px] sm:max-w-[200px]"
+            >
+              {pageTitle}
+            </motion.h1>
+          </div>
 
           {/* Right Section */}
-          <div className="flex items-center gap-1 min-w-[80px] justify-end">
+          <div className="w-[80px] flex-shrink-0 flex justify-end gap-1 z-10">
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => { setShowSearch(true); haptics.light() }}
@@ -207,7 +209,7 @@ export function MobileAppShell({ children }: MobileAppShellProps) {
                     key={cartCount}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full px-1"
+                    className="absolute mt-[-4px] mr-[-4px] min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full px-1"
                   >
                     {cartCount > 99 ? '99+' : cartCount}
                   </motion.span>
