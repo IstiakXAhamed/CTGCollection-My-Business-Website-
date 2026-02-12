@@ -34,7 +34,8 @@ import {
   Sparkles,
   TrendingUp,
   Bot,
-  Eye
+  Eye,
+  Bell
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AdminNotificationBell from '@/components/AdminNotificationBell'
@@ -114,6 +115,7 @@ const getMenuItems = (role: string, permissions: string[] = []) => {
     
     ...(hasPerm('manage_communications') ? [
       { icon: Mail, label: 'Messages', href: '/admin/messages' },
+      { icon: Bell, label: 'Notifications', href: '/admin/notifications' },
     ] : []),
     
     // Site Settings: Super Admin OR 'manage_settings'

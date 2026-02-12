@@ -6,6 +6,7 @@ import { Home, ShoppingBag, Search, ShoppingCart, User, Heart, Sparkles, Bell, C
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStandalone } from '@/hooks/useAppStandalone'
 import { useCartStore } from '@/store/cart'
+import { useWishlistStore } from '@/store/wishlist'
 import { haptics } from '@/lib/haptics'
 import { useState, useEffect } from 'react'
 
@@ -14,6 +15,7 @@ export default function BottomNav() {
   const isStandalone = useAppStandalone()
   const cartItems = useCartStore((state) => state.items)
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0)
+  const wishlistCount = useWishlistStore((state) => state.getItemCount())
   const [lastTap, setLastTap] = useState<string | null>(null)
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
@@ -63,10 +65,11 @@ export default function BottomNav() {
       activeColor: 'from-orange-500 to-red-500',
       isCenter: true
     },
-    { 
-      name: 'Wishlist', 
-      href: '/dashboard/wishlist', 
+    {
+      name: 'Wishlist',
+      href: '/wishlist',
       icon: Heart,
+      count: wishlistCount,
       activeColor: 'from-pink-500 to-rose-500'
     },
     { 
@@ -182,22 +185,34 @@ export default function BottomNav() {
                     </AnimatePresence>
 
                     {/* Icon Container */}
-                    <motion.div 
+                    <motion.div
                       className="relative"
                       whileTap={{ scale: 0.85 }}
                     >
-                      <Icon 
+                      <Icon
                         className={`w-6 h-6 transition-all duration-300 ${
-                          isActive 
-                            ? `text-transparent bg-gradient-to-br ${item.activeColor} bg-clip-text` 
+                          isActive
+                            ? `text-transparent bg-gradient-to-br ${item.activeColor} bg-clip-text`
                             : 'text-gray-400 dark:text-gray-500'
                         }`}
-                        style={isActive ? { 
+                        style={isActive ? {
                           stroke: 'url(#gradient-' + item.name + ')',
                           fill: 'none'
                         } : undefined}
                       />
-                      
+
+                      {/* Count Badge */}
+                      {item.count !== undefined && item.count > 0 && (
+                        <motion.div
+                          key={item.count}
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="absolute -top-1 -right-2 min-w-[18px] h-[18px] bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full px-1 shadow-lg"
+                        >
+                          {item.count > 99 ? '99+' : item.count}
+                        </motion.div>
+                      )}
+
                       {/* Active Dot Indicator */}
                       <AnimatePresence>
                         {isActive && (

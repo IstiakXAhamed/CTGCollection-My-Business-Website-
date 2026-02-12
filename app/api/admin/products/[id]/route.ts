@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
+import { notifyPriceDrop } from '@/lib/push-notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -83,6 +84,12 @@ export async function PUT(
       return NextResponse.json({ error: 'Not authorized to modify this product' }, { status: 403 })
     }
 
+    // Get existing product to detect price drop
+    const existingProduct = await prisma.product.findUnique({
+      where: { id: params.id },
+      select: { basePrice: true, salePrice: true, name: true, slug: true },
+    })
+
     const body = await request.json()
     const {
       name,
@@ -137,6 +144,23 @@ export async function PUT(
         seller: { select: { id: true, name: true, email: true } }
       }
     })
+
+    // Detect price drop and send push notifications
+    if (existingProduct) {
+      const oldEffectivePrice = existingProduct.salePrice ?? existingProduct.basePrice
+      const newSalePrice = (salePrice !== undefined && salePrice !== null && salePrice !== '') ? parseFloat(salePrice) : null
+      const newEffectivePrice = newSalePrice ?? parseFloat(basePrice)
+
+      if (newEffectivePrice < oldEffectivePrice) {
+        notifyPriceDrop(
+          params.id,
+          product.name,
+          product.slug,
+          oldEffectivePrice,
+          newEffectivePrice
+        ).catch(e => console.log('Price drop notification error (non-blocking):', e))
+      }
+    }
 
     return NextResponse.json(product)
   } catch (error: any) {

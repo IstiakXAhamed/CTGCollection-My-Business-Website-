@@ -5,6 +5,7 @@ import { verifyAuth } from '@/lib/auth'
 import { sendShippingNotification, sendOrderStatusUpdate, sendLoyaltyUpdateEmail } from '@/lib/email'
 import { notifyOrderShipped, notifyOrderDelivered, notifyOrderCancelled } from '@/lib/notifications'
 import { calculateTierForUser } from '@/lib/tier-calculator'
+import { pushOrderNotifications } from '@/lib/push-notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -109,6 +110,13 @@ export async function PUT(
     // Handle payment confirmation - generate PDF receipt and send email NON-BLOCKING
     if (paymentStatus === 'paid' && existingOrder.paymentStatus !== 'paid') {
 
+      // Push notification: Order Confirmed
+      if (existingOrder.userId) {
+        pushOrderNotifications.confirmed(params.id, existingOrder.userId).catch(e =>
+          console.log('Push notification error (non-blocking):', e)
+        )
+      }
+
       // Send email in background — NEVER block the response
       const recipientEmail = order.user?.email || existingOrder.guestEmail
       if (recipientEmail && sendEmail !== false) {
@@ -161,6 +169,12 @@ export async function PUT(
 
     // Handle shipping notification - DISABLED to reduce email volume
     if (status === 'shipped' && existingOrder.status !== 'shipped') {
+      // Push notification: Order Shipped
+      if (existingOrder.userId) {
+        pushOrderNotifications.shipped(params.id, existingOrder.userId).catch(e =>
+          console.log('Push notification error (non-blocking):', e)
+        )
+      }
       // const recipientEmail = order.user?.email || existingOrder.guestEmail
       // MUTED: Shipping emails disabled to prevent Google ban
       // if (recipientEmail && sendEmail !== false) {
@@ -182,6 +196,12 @@ export async function PUT(
 
     // Handle delivered notification
     if (status === 'delivered' && existingOrder.status !== 'delivered') {
+      // Push notification: Order Delivered
+      if (existingOrder.userId) {
+        pushOrderNotifications.delivered(params.id, existingOrder.userId).catch(e =>
+          console.log('Push notification error (non-blocking):', e)
+        )
+      }
       if (existingOrder.userId) {
         try {
           await notifyOrderDelivered(existingOrder.userId, order.id)
