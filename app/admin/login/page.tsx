@@ -27,7 +27,7 @@ async function isWebAuthnSupported(): Promise<boolean> {
   return !!(window.PublicKeyCredential && typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function')
 }
 
-async function getWebAuthnCredential(): Promise<boolean> {
+async function getWebAuthnCredential(): Promise<{ success: boolean; error?: string }> {
   try {
     const challenge = new Uint8Array(32)
     crypto.getRandomValues(challenge)
@@ -40,10 +40,20 @@ async function getWebAuthnCredential(): Promise<boolean> {
       }
     })
 
-    return !!credential
-  } catch (error) {
+    return { success: !!credential }
+  } catch (error: any) {
     console.error('WebAuthn error:', error)
-    return false
+    // Handle specific errors
+    if (error.name === 'NotAllowedError') {
+      return { success: false, error: 'Authentication cancelled or timed out' }
+    }
+    if (error.name === 'InvalidStateError') {
+      return { success: false, error: 'No credentials registered. Please set up fingerprint in your device settings first.' }
+    }
+    if (error.name === 'NotSupportedError') {
+      return { success: false, error: 'Biometric not supported on this device' }
+    }
+    return { success: false, error: 'Authentication failed' }
   }
 }
 
@@ -108,9 +118,9 @@ export default function AdminLoginPage() {
     setError('')
 
     try {
-      const verified = await getWebAuthnCredential()
+      const result = await getWebAuthnCredential()
 
-      if (verified) {
+      if (result.success) {
         haptics.success()
         const res = await fetch('/api/auth/login', {
           method: 'POST',
@@ -129,7 +139,7 @@ export default function AdminLoginPage() {
         }
       } else {
         haptics.heavy()
-        setError('Biometric verification failed or cancelled')
+        setError(result.error || 'Biometric verification failed')
       }
     } catch (err) {
       console.error('Biometric error:', err)

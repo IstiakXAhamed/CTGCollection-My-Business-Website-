@@ -35,7 +35,9 @@ import {
   TrendingUp,
   Bot,
   Eye,
-  Bell
+  Bell,
+  User,
+  Fingerprint
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AdminNotificationBell from '@/components/AdminNotificationBell'
@@ -59,6 +61,7 @@ const getMenuItems = (role: string, permissions: string[] = []) => {
   const hasSellerOrderPerms = hasPerm('seller_view_orders') || hasPerm('seller_update_orders')
 
   return [
+    { icon: User, label: '← Back to Profile', href: '/dashboard/profile' },
     { icon: LayoutDashboard, label: 'Dashboard', href: '/admin' },
     
     // E-commerce Core - Admin permissions OR Seller product permissions
@@ -122,6 +125,7 @@ const getMenuItems = (role: string, permissions: string[] = []) => {
     ...(hasPerm('manage_settings') ? [
       { icon: Settings, label: 'Site Settings', href: '/admin/site-settings' },
       { icon: Settings, label: 'App Settings', href: '/admin/settings' },
+      { icon: Fingerprint, label: 'Biometric Setup', href: '/admin/security/biometric-setup' },
     ] : []),
     
     { icon: Search, label: 'Receipt Lookup', href: '/admin/receipt-lookup' },
@@ -184,11 +188,21 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/me', { method: 'POST', credentials: 'include' })
-      localStorage.removeItem('auth-storage')
-      router.push('/admin/login')
     } catch (error) {
-      console.error('Logout failed:', error)
+      console.error('Logout API error:', error)
     }
+    
+    // Clear all auth-related localStorage
+    localStorage.removeItem('auth-storage')
+    localStorage.removeItem('silk_guard_enabled')
+    localStorage.removeItem('silk_guard_biometric')
+    localStorage.removeItem('silk_guard_passcode')
+    localStorage.removeItem('silk_guard_credential_id')
+    localStorage.removeItem('wishlist-storage')
+    sessionStorage.removeItem('silk_guard_verified')
+    
+    // Redirect to login with full page reload to avoid any state issues
+    window.location.href = '/admin/login'
   }
 
   if (isPublicPage) {
