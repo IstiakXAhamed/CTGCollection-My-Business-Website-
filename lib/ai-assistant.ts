@@ -241,7 +241,7 @@ function getDefaultChatResponse(message: string): string {
     return "Our prices are displayed on each product page. We offer competitive prices with free shipping on orders over ৳2000! 🛍️"
   }
   if (lowerMsg.includes('delivery') || lowerMsg.includes('shipping')) {
-    return "We deliver across Bangladesh! Inside Chittagong: ৳80, Outside Chittagong: ৳130. Delivery takes 2-5 business days. 🚚"
+    return "We deliver across Bangladesh! Inside Chittagong City: ৳60, Outside Chittagong: ৳120. Delivery takes 2-5 business days. 🚚"
   }
   if (lowerMsg.includes('return') || lowerMsg.includes('refund')) {
     return "We have a 7-day return policy for most items. Products must be unused and in original packaging. Contact us to initiate a return! 📦"

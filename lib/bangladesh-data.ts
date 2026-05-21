@@ -48,16 +48,15 @@ export const DISTRICTS_BY_DIVISION: Record<string, string[]> = {
 // All districts as a flat array
 export const ALL_DISTRICTS = Object.values(DISTRICTS_BY_DIVISION).flat().sort()
 
-// Chittagong Division Districts (for shipping calculation)
+// Only Chittagong city (Chattogram district) gets the lower shipping rate
 export const CTG_DISTRICTS = [
-  'Bandarban', 'Brahmanbaria', 'Chandpur', 'Chattogram', 'Comilla', 
-  'Cox\'s Bazar', 'Feni', 'Khagrachhari', 'Lakshmipur', 'Noakhali', 'Rangamati'
+  'Chattogram'  // Only Chittagong city — all other districts are Outside CTG
 ]
 
 // Shipping charges
 export const SHIPPING_RATES = {
-  INSIDE_CTG: 80,    // Inside Chittagong Division
-  OUTSIDE_CTG: 130,  // Outside Chittagong Division
+  INSIDE_CTG: 60,    // Inside Chittagong city only
+  OUTSIDE_CTG: 120,  // Outside Chittagong city (rest of Bangladesh)
   FREE_THRESHOLD: 0  // Set to 0 to disable free shipping, or set amount for free shipping threshold
 }
 

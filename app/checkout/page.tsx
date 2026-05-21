@@ -432,7 +432,7 @@ export default function CheckoutPage() {
                     <div>
                       <p className={`font-medium ${isCTG ? 'text-green-700' : 'text-blue-700'}`}>
                         {formData.district ? (
-                          isCTG ? 'Chittagong Division - ৳80 Shipping' : 'Outside Chittagong - ৳130 Shipping'
+                          isCTG ? 'Chittagong City - ৳60 Shipping' : 'Outside Chittagong - ৳120 Shipping'
                         ) : (
                           'Select district to see shipping cost'
                         )}
